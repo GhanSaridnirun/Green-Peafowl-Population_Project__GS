@@ -47,7 +47,7 @@ rho
 
 
 jags.data=list(ch=ch, ju=ju, br=br, ch.s=ch.s, ju.s=ju.s,
-               br.s=br.s, br.f=br.f, rho=rho, pinit=dunif(1, 100))
+               br.s=br.s, br.f=br.f, rho=rho, pinit=dunif(0, 200))
 
 #jag.m <- jags.model( file = "modelgp.txt", data, n.chains=3, n.adapt=2000 )
 
