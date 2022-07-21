@@ -151,7 +151,7 @@ br[t+4] <- br.s * (br[t+3] + ju[t+3])
 for (t in 1: 20) {
 ch[t] ~ dpois(Nch[t]) 
 ju[t] ~ dpois(Nju[t]) 
-br[t] ~ dpois[Nbr[t])
+br[t] ~ dpois(Nbr[t])
 }
 ")
 
