@@ -46,7 +46,7 @@ rho <- overall.growth.rate
 rho
 
 
-data=list(ch=ch, ju=ju, br=br, ch.s=ch.s, ju.s=ju.s, br.s=br.s, br.f=br.f, rho=rho)
+jags.data=list(ch=ch, ju=ju, br=br, ch.s=ch.s, ju.s=ju.s, br.s=br.s, br.f=br.f, rho=rho)
 
 
 #jag.m <- jags.model( file = "modelgp.txt", data, n.chains=3, n.adapt=2000 )
@@ -62,23 +62,14 @@ model {
 for (ch.s in 1:1) {
  for (ju.s in 1:1) {
   for (br.s in 1:1) {
-    for (br.f in 1:1) {
-     s[ch.s, ju.s, br.s, br.f] ~ dbeta(1, 1)
+    for (br.f in 1:1){
+     for (rho in 1:1) {
+     s[ch.s, ju.s, br.s, br.f, rho] ~ dnorm(1, 1)
+    }
    }
   }
  }
 }
-
-# Productivity
-for (t in 1: 20){
-log.rho[t] ~ dnorm(log.rho, tau.rho)
-rho[t] <- exp(log.rho[t])
-}
-rho ~ dunif(0, 5)
-log.rho <- log(rho)
-sigma.rho ~ dunif(0, 1)
-tau.rho <- pow(sigma.rho, -2)
-
 
 
 #Process model ####### First year
@@ -154,8 +145,16 @@ ju[t+4] <- ch.s * ch[t+3]
 # mean un breeder might refer to failed breeder + immature females
 br[t+4] <- br.s * (br[t+3] + ju[t+3]) 
 }
+
+
+# Observation models
+for (t in 1: 20) {
+ch[t] ~ dpois(Nch[t]) 
+ju[t] ~ dpois(Nju[t]) 
+br[t] ~ dpois[Nbr[t])
 }
 ")
+
 
 #Model for initial state 
 #Use the number from population Nov-19 - Apr 20 and 
@@ -178,7 +177,7 @@ ni <- 100000; nb <- 20000; nc <- 3; nt <- 20; na <- 10000
 
 # Call JAGS (ART 8 min), check convergence and summarize posteriors
 set.seed(101) # Reproducible results without crashing
-out1 <- jags(jags.data, inits, parameters, "modelgp.txt", n.iter=ni, n.burnin=nb
+out1 <- jagsUI::jags(jags.data, inits, parameters, "modelgp.txt", n.iter=ni, n.burnin=nb
              , n.chains=nc, n.thin=nt, n.adapt=na, parallel=TRUE)
 
 traceplot(out1)
