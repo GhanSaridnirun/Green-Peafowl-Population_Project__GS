@@ -46,8 +46,8 @@ rho <- overall.growth.rate
 rho
 
 
-jags.data=list(ch=ch, ju=ju, br=br, ch.s=ch.s, ju.s=ju.s, br.s=br.s, br.f=br.f, rho=rho)
-
+jags.data=list(ch=ch, ju=ju, br=br, ch.s=ch.s, ju.s=ju.s,
+               br.s=br.s, br.f=br.f, rho=rho, pinit=dunif(1, 100))
 
 #jag.m <- jags.model( file = "modelgp.txt", data, n.chains=3, n.adapt=2000 )
 
@@ -70,6 +70,13 @@ for (ch.s in 1:1) {
   }
  }
 }
+
+
+# Population count data (state-space model)
+# Model for the initial population size: uniform priors
+ch[1] ~ dcat(pinit[])
+ju[1] ~ dcat(pinit[])
+br[1] ~ dcat(pinit[])
 
 
 #Process model ####### First year
@@ -149,11 +156,11 @@ br[t+4] <- br.s * (br[t+3] + ju[t+3])
 
 # Observation models
 for (t in 1: 20) {
-ch[t] ~ dpois(Nch[t]) 
-ju[t] ~ dpois(Nju[t]) 
-br[t] ~ dpois(Nbr[t])
+ch[t] ~ dpois(ch[t]) 
+ju[t] ~ dpois(ju[t]) 
+br[t] ~ dpois(br[t])
 }
-")
+}")
 
 
 #Model for initial state 
