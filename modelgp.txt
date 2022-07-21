@@ -1,0 +1,102 @@
+
+model {
+#T = 20 years following GP age
+
+#Priors
+#Survival & Fecundity
+for (ch.s in 1:1) {
+ for (ju.s in 1:1) {
+  for (br.s in 1:1) {
+    for (br.f in 1:1) {
+     s[ch.s, ju.s, br.s, br.f] ~ dbeta(1, 1)
+   }
+  }
+ }
+}
+
+# Productivity
+for (t in 1: 20){
+log.rho[t] ~ dnorm(log.rho, tau.rho)
+rho[t] <- exp(log.rho[t])
+}
+rho ~ dunif(0, 5)
+log.rho <- log(rho)
+sigma.rho ~ dunif(0, 1)
+tau.rho <- pow(sigma.rho, -2)
+
+
+
+#Process model ####### First year
+for (t in 1: 20) {
+# Process model: in non breeding 
+# Total number of chicks
+F[t] ~ dpois(br[t] * rho[t])
+# Allocate chicks to sex (pick only female)
+ch[t] ~ dbin(gamma, F[t]) # or just (F[t]/2)
+ch[t] <- (br.s * br[t]) * br.f
+}
+
+# Process model: in breeding
+for (t in 1: 20) {
+ju[t+1] <- ch.s * ch[t] 
+br[t+1] <- br.s * br[t]
+}
+
+
+##### Protocal for second year and so on...........
+
+###### t+1 ################### 
+### Population got more breeder from previous year (ju,t+1)
+### Due to (ju,t+1) is fully mature they have same survival with breeder
+
+for (t in 1: 20) {
+# Process model: in non breeding 
+# Total number of chicks
+F[t+1] ~ dpois(br[t+1] * rho[t+1])
+# Allocate chicks to sex (pick only female)
+ch[t+1] ~ dbin(gamma, F[t+1]) # or just (F[t]/2)
+ch[t+1] <- ((br.s * br[t+1]) + (ju.s * ju[t+1])) * br.f
+}
+
+# Process model: in breeding
+for (t in 1: 20) {
+ju[t+2] <- ch.s * ch[t+1]
+br[t+2] <- br.s * (br[t+1] + ju[t+1]) 
+}
+
+
+##### t+2 ###################
+for (t in 1: 20) {
+# Process model: in non breeding 
+# Total number of chicks
+F[t+2] ~ dpois(br[t+2] * rho[t+2])
+# Allocate chicks to sex (pick only female)
+ch[t+2] ~ dbin(gamma, F[t+2]) # or just (F[t]/2)
+ch[t+2] <- (br.s * br[t+2]) * br.f
+}
+
+# Process model: in breeding
+for (t in 1: 20) {
+ju[t+3] <- ch.s * ch[t+2]
+br[t+3] <- br.s * br[t+2]
+}
+
+
+##### t+3 ###################
+for (t in 1: 20) {
+# Process model: in non breeding 
+# Total number of chicks
+F[t+3] ~ dpois(br[t+3] * rho[t+3])
+# Allocate chicks to sex (pick only female)
+ch[t+3] ~ dbin(gamma, F[t+3]) # or just (F[t]/2)
+ch[t+3] <- ((br.s * br[t+3]) + (ju.s * ju[t+3])) * br.f
+}
+
+for (t in 1: 20) {
+# Process model: in breeding
+ju[t+4] <- ch.s * ch[t+3]
+# number of br+ju might needed to /2 due to ratio for breeder:un breeder = 50:50
+# mean un breeder might refer to failed breeder + immature females
+br[t+4] <- br.s * (br[t+3] + ju[t+3]) 
+}
+}
