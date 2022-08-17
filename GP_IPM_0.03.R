@@ -134,16 +134,16 @@ GP.code <- nimbleCode({
     # Observation Model in Non-Breeding
     for(j in 1:12) {
       
-      ChF_NB[j] ~ dpois(NNon[1,ChF_NB_yr[j]])
-      Br_NB[j] ~ dpois(NNon[4,Br_NB_yr[j]])
+      ChF_NB[j] ~ dpois(p[t] * NNon[1,ChF_NB_yr[j]])
+      Br_NB[j] ~ dpois(p[t] * NNon[4,Br_NB_yr[j]])
       
     }
     
     # Observation Model in Breeding
     for(h in 1:14) {
       
-      JuF_BN[h] ~ dpois(NBreed[2,JuF_BN_yr[h]])
-      Br_BN[h] ~ dpois(NBreed[4,Br_BN_yr[h]])
+      JuF_BN[h] ~ dpois(p[t] * NBreed[2,JuF_BN_yr[h]])
+      Br_BN[h] ~ dpois(p[t] * NBreed[4,Br_BN_yr[h]])
       
     }
   } 
@@ -154,16 +154,16 @@ GP.code <- nimbleCode({
 # Initial values
 inits <- function() {
   list(
-    NBreed ~ runif(1, 30, 200),
-    NBreed[1] ~ runif(1, 30, 200),
-    NBreed[2] ~ runif(1, 30, 200),
-    NBreed[3] ~ runif(1, 30, 200),
-    NBreed[4] ~ runif(1, 30, 200),
-    NNon ~ runif(1, 30, 200),
-    NNon[1] ~ runif(1, 30, 200),
-    NNon[2] ~ runif(1, 30, 200),
-    NNon[3] ~ runif(1, 30, 200),
-    NNon[4] ~ runif(1, 30, 200),    
+    NBreed <- runif(1, 30, 200),
+    NBreed[1] <- runif(1, 30, 200),
+    NBreed[2] <- runif(1, 30, 200),
+    NBreed[3] <- runif(1, 30, 200),
+    NBreed[4] <- runif(1, 30, 200),
+    NNon <- runif(1, 30, 200),
+    NNon[1] <- runif(1, 30, 200),
+    NNon[2] <- runif(1, 30, 200),
+    NNon[3] <- runif(1, 30, 200),
+    NNon[4] <- runif(1, 30, 200),    
     s_NB[1] ~ runif(1, 0.30, 0.40),
     s_BN[1] ~ runif(1, 0.40, 0.60),
     s_NB[2] ~ runif(1, 0.50, 0.70),
