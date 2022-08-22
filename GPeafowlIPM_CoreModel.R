@@ -41,21 +41,30 @@ Br_BN <- c(9,23,32,25,12,10,14,9,11,20,13,27,0,0)    #Breeder count in Breeding
 
 ny=20  # Length = Number of year following Green Peafowl age
 
-gp.data <- list(
-  ChF_NB_yr=ChF_NB_yr, 
-  ChF_NB=ChF_NB, 
-  Br_NB_yr=Br_NB_yr, 
-  Br_NB=Br_NB, 
-  JuF_BN_yr=JuF_BN_yr, 
-  JuF_BN=JuF_BN, 
-  Br_BN_yr=Br_BN_yr, 
-  Br_BN=Br_BN
-)
 
-gp.constants <- list(
-  ny=ny
-)
+## Arrange constants
 
+GP.IPMconstants <- list(Tmax = ny, Amax = 4 # A = Age class: 1.Chick/Juvenile,
+                        #S = 2, #Y = 3          2.sub adult 1, 3.sub adult 2
+                        #M = ?            # S = Seasons: 1.Breeding, 2.Non-Breeding
+                                          # Y = Year: 1, 2, 3
+                                          # M = Month not sure for the index for month for now.
+                        )
+
+
+## Arrange data
+
+GP.IPMdata  <- list(Chick = ChF_NB,
+                Juvenile = JuF_BN,
+                Breeder_NonBreeding = Br_NB,
+                Breeder_Breeding = Br_BN
+                #year label Non-Breeding = ChF_NB_yr, Br_NB_yr
+                #year label Breeding = JuF_BN_yr, Br_BN_yr
+                )
+
+
+
+## Nimble code for run the whole model
 
 GP.code <- nimbleCode({
   
