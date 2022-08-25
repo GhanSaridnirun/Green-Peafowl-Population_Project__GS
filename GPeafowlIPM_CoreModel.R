@@ -55,8 +55,8 @@ M1y_NB <- c(9,6,9,13,5,5,12,19,14,10,5,10)           #Male 1 year count in Non-B
 M2y_BN <- c(1,6,4,6,2,6,4,6,1,8,2,14,0,0)            #Male 2 years count in Breeding
 M2y_NB <- c(5,1,8,4,0,2,2,1,0,0,0,1)                 #Male 2 years count in Non-Breeding
 
-M3y_BN <- 
-M3y_NB <- 
+M3y_BN <- c(27,118,164,119,49,57,54,60,76,91,111,83) #Male 3 yeras count in Breeding
+M3y_NB <- c(75,57,143,139,85,34,71,63,83,82,56,37)   #Male 3 years count in Non-Breeding
 
 ny=20  # Length = Number of year following Green Peafowl age
 
@@ -98,18 +98,7 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4 # A = Age class: 1.Chick/Juvenile,
     
     
     # Priors and linear models
-    # Survival
-    
-    s_NB[1] ~ dunif(0.30, 0.40)  # chick (half year)
-    s_BN[1] ~ dunif(0.60, 0.80)  # juvenile (half year)
-    
-    s_yr_sa ~ dunif(0.50, 0.70) # sub adult (whole year)
-    s_NB[2:3] <- sqrt(s_yr_sa) # sub adult (half year, N -> B)
-    s_BN[2:3] <- sqrt(s_yr_sa) # sub adult (half year, B -> N)
-    
-    s_yr_ad ~ dunif(0.60, 0.80)  # breeder (whole year)
-    s_NB[4] <- sqrt(s_yr_ad) # breeder (half year, N -> B)
-    s_BN[4] <- sqrt(s_yr_ad) # breeder (half year, B -> N)
+  
     
     
     # Productivity
