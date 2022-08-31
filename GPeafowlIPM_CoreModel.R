@@ -55,7 +55,7 @@ Br_BN <- c(9,23,32,25,12,10,14,9,11,20,13,27,0,0)    #Breeder count in Breeding
 # M2y_BN <- c(1,6,4,6,2,6,4,6,1,8,2,14,0,0)            #Male 2 years count in Breeding
 # M2y_NB <- c(5,1,8,4,0,2,2,1,0,0,0,1)                 #Male 2 years count in Non-Breeding
 # 
-# M3y_BN <- c(27,118,164,119,49,57,54,60,76,91,111,83) #Male 3 yeras count in Breeding
+# M3y_BN <- c(27,118,164,119,49,57,54,60,76,91,111,83) #Male 3 years count in Breeding
 # M3y_NB <- c(75,57,143,139,85,34,71,63,83,82,56,37)   #Male 3 years count in Non-Breeding
 
 ny=20  # Length = Number of year following Green Peafowl age
@@ -132,32 +132,39 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
     
     
     # Process model: Breeding -> Non-Breeding season transition
+    
     for (t in 1:ny){
       
       # Total number of chicks
+      
       Fec[t] ~ dpois(sum(NBreed[3:4,t]) * rho[t])
       
+      
       # Allocate chicks to a sex
+      
       NNon[1,t+1] ~ dbin(gamma, Fec[t]) # Female chicks 
       
+      
       # Survival
+      
       for(a in 2:3){
         NNon[a,t+1] ~ dbin(s_BN[a-1], NBreed[a-1,t])
       }
       
-      Nnon[4,t+1] <- surv_NBreed3[t+1] + surv_NBreed4[t+1]
+      NNon[4,t+1] <- surv_NBreed3[t+1] + surv_NBreed4[t+1]
       surv_NBreed3[t+1] ~ dbin(s_BN[3], NBreed[3,t])
       surv_NBreed4[t+1] ~ dbin(s_BN[4], NBreed[4,t])
       
       
-      # Process model: Non-Breeding -> Breeding season transition
+    # Process model: Non-Breeding -> Breeding season transition
       
-      for(a in 1:4){
+    for(a in 1:4){
         NBreed[a,t+1] ~ dbin(s_NB[a], NNon[a,t+1])
       }
       
       
-      # # Observation Model in Non-Breeding
+    # Observation Model in Non-Breeding
+      
       for(j in 1:12) {
 
         ChF_NB[j] ~ dpois(p[t] * NNon[1,ChF_NB_yr[j]])
@@ -165,8 +172,9 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
 
       }
 
-      # # Observation Model in Breeding
-      for(h in 1:12) {
+     # Observation Model in Breeding
+      
+      for(h in 1:14) {
 
         JuF_BN[h] ~ dpois(p[t] * NBreed[1,JuF_BN_yr[h]])
         Br_BN[h] ~ dpois(p[t] * NBreed[4,Br_BN_yr[h]])
@@ -177,7 +185,7 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
   )
   
   # Initial values
-  source("TestMatrixGP.R")
+  source("GPeafowlIPM_InitialSim.R")
   
   Inits <- GP_IPM_Init(Tmax = 20)
   Inits
@@ -231,7 +239,6 @@ print(out,2)
 
 library(MCMCvis)
 
-  MCMCsummary(out, params = 'all', round = 2)
 
   MCMCsummary(out, params = 'NBreed', round = 2)
 
