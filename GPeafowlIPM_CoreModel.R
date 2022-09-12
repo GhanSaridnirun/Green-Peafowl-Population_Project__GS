@@ -117,7 +117,7 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
       rho[t] <- exp(log.rho[t])
     }
     
-    mean.rho ~ dunif(0, 5)
+    mean.rho ~ dunif(3, 5)
     sigma.rho ~ dunif(0, 1) 
     
     # Sex ratio of the chicks

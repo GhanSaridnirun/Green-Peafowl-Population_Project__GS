@@ -7,7 +7,6 @@ GP_IPM_Init <- function(Tmax){
   NBreed <- NNon <- matrix(NA, nrow = Amax, ncol = Tmax+1)
   s_NB <- s_BN <- rep(NA, Amax)
   pinit <- rep(NA, Amax)
-  
   Fec <- rep(NA, Tmax)
   p <- logit.p <- rep(NA, Tmax) 
   rho <- log.rho <- rep(NA, Tmax)
@@ -23,7 +22,7 @@ GP_IPM_Init <- function(Tmax){
   
   
   # Detection Probability
-  mean.p <- runif(1, 0.4, 1)
+  mean.p <- runif(1, 0.9, 0.9)
   sigma.p <- runif(1, 0, 1)
   
   
@@ -31,7 +30,7 @@ GP_IPM_Init <- function(Tmax){
   
   # pinit[1:Amax] <- runif(Amax, 30, 200)
   for(a in 1:Amax){
-    pinit[a] <- runif(1, 100, 200)
+    pinit[a] <- runif(1, 0, 200)
     NBreed[a,1] <- rpois(1, pinit[a])
   }
   
@@ -57,8 +56,8 @@ GP_IPM_Init <- function(Tmax){
   for (t in 1:Tmax){
     logit.p[t] <- rnorm(1, mean.p, sigma.p)
     p[t] <- plogis(logit.p[t])
-  }  
-  
+  }
+      
   for (t in 1:Tmax){
     log.rho[t] <- rnorm(1, log(mean.rho), sigma.rho)
     rho[t] <- exp(log.rho[t])
