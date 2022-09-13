@@ -24,23 +24,22 @@ set.seed(mySeed)
 # Count in Non-Breeding Season
 
 ChF_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2)             #Season Label for chicks count
-ChF_NB <- c(16,26,69,80,60,20)
-# ,25,24,48,59,11,12)    #Female Chicks Count
+ChF_NB <- c(16,26,69,80,60,20,25,24,48,59,11,12)    #Female Chicks Count
 
-Br_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2)              #Season Label for breeder count
-Br_NB <- c(35,34,83,78,56,25)
-# ,29,28,47,57,14,8)      #Breeder count in Non-Breeding
+AF_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2)              #Season Label for breeder count
+#Br_NB <- c(35,34,83,78,56,25,29,28,47,57,14,8)      #Breeder {Female with chicks} count in Non-Breeding 
+AF_NB <- c(71,69,134,108,86,33,101,68,71,90,34,13)  #All Female 
 
 
 # Count in Breeding Season
 
 JuF_BN_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2,3,3)          #Season Label for juvenile count
-JuF_BN <- c(9,18,33,33,10,13)
-# ,6,9,13,27,14,25,11,0)   #Female Juvenile count
+JuF_BN <- c(9,18,33,33,10,13,6,9,13,27,14,25,11,0)   #Female Juvenile count
 
-Br_BN_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2,3,3)           #Season Label for breeder count
-Br_BN <- c(9,23,32,25,12,10)
-# ,14,9,11,20,13,27,0,0)    #Breeder count in Breeding
+AF_BN_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2,3,3)           #Season Label for breeder count
+#Br_BN <- c(9,23,32,25,12,10,14,9,11,20,13,27,0,0)    #Breeder {Female with juveniles} count in Breeding
+AF_BN <- c(18,49,79,71,47,44,30,25,38,54,48,97,17,1) #All Female
+
 
 
 # # Single Female count data
@@ -62,20 +61,21 @@ Br_BN <- c(9,23,32,25,12,10)
 # M3y_BN <- c(27,118,164,119,49,57,54,60,76,91,111,83) #Male 3 years count in Breeding
 # M3y_NB <- c(75,57,143,139,85,34,71,63,83,82,56,37)   #Male 3 years count in Non-Breeding
 
-ny=20  # Length = Number of year following Green Peafowl age
-
+ny.data=3 # Number of years for which the data collected
+ny.sim=0 # Number of years to simulate after the data collection
 
 ## Arrange constants
 
-GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
-                        #S = 2, #Y = 3          2.sub adult 1, 3.sub adult 2
-                        #M = ?            # S = Seasons: 1.Breeding, 2.Non-Breeding
-                        # Y = Year: 1, 2, 3
-                        # M = Month              
+GP.IPMconstants <- list(Tmax = ny.data + ny.sim, 
+                        Amax = 4,
+                        ny.sim=ny.sim,
+                        ny.data = ny.data,
                         ChF_NB_yr=ChF_NB_yr,
-                        Br_NB_yr=Br_NB_yr,
+                        AF_NB_yr=AF_NB_yr,
                         JuF_BN_yr=JuF_BN_yr,
-                        Br_BN_yr=Br_BN_yr
+                        AF_BN_yr=AF_BN_yr
+                        
+                        
 )
 
 ## Arrange data
@@ -83,12 +83,16 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
 
   GP.IPMdata <- list( 
               ChF_NB=ChF_NB,  
-              Br_NB=Br_NB,  
+              AF_NB=AF_NB,  
               JuF_BN=JuF_BN,  
-              Br_BN=Br_BN 
+              AF_BN=AF_BN 
               ) 
 
 
+GPIPM <- list(GP.IPMconstants, GP.IPMdata)  
+str(GPIPM)  
+  
+  
 ## Nimble code for run the whole model
 
   GP.IPMcode <- nimbleCode({
@@ -109,10 +113,11 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
     s_NB[4] <- sqrt(s_yr_ad) # breeder (half year, N -> B)
     s_BN[4] <- sqrt(s_yr_ad) # breeder (half year, B -> N)
     
+        
     
     # Productivity
     
-    for (t in 1:ny){
+    for (t in 1:ny.data){
       log.rho[t] ~ dnorm(log(mean.rho), sd = sigma.rho)
       rho[t] <- exp(log.rho[t])
     }
@@ -125,23 +130,27 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
     gamma ~ dbeta(1, 1)  
     
     
-    # Detection Probability
+    #Detection Probability
+
+    # for (t in 1:ny.data){
+    #   logit.p[t] ~ dnorm(lmean.p, sd = sigma.p)
+    #   p[t] <- ilogit(logit.p[t])
+    # }
+    # 
+    # mean.p ~ dbeta(1, 0.9)
+    # lmean.p <- logit(mean.p)
+    # sigma.p ~ dunif(0, 5)
+    # # 
     
-    for (t in 1:ny){
-      logit.p[t] ~ dnorm(lmean.p, sd = sigma.p)
-      p[t] <- ilogit(logit.p[t])
-    }  
-    
-    mean.p ~ dbeta(1, 1)
-    lmean.p <- logit(mean.p)
-    sigma.p ~ dunif(0, 5)
-    
+    for (t in 1:ny.data){
+      p[t] <- 0.9 # TODO update initial vales for p
+    }
     
     # Population count data (state-space model)
     # Model for the initial population size in Breeding season
     
     for(a in 1:4){
-      pinit[a] ~ dunif(100, 200)
+      pinit[a] ~ dunif(0, 200)
       NBreed[a,1] ~ dpois(pinit[a]) 
     }
     
@@ -153,7 +162,7 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
     
     # Process model: Breeding -> Non-Breeding season transition
     
-    for (t in 1:ny){
+    for (t in 1:ny.data){
       
       # Total number of chicks
       
@@ -185,19 +194,19 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
       
     # Observation Model in Non-Breeding
       
-      for(j in 1:6) {
+      for(j in 12) {
 
         ChF_NB[j] ~ dpois(p[t] * NNon[1,ChF_NB_yr[j]])
-        Br_NB[j] ~ dpois(p[t] * NNon[4,Br_NB_yr[j]])
+        AF_NB[j] ~ dpois(p[t] * sum(NNon[2:4,AF_NB_yr[j]]))
 
       }
 
      # Observation Model in Breeding
       
-      for(h in 1:6) {
+      for(h in 14) {
 
         JuF_BN[h] ~ dpois(p[t] * NBreed[1,JuF_BN_yr[h]])
-        Br_BN[h] ~ dpois(p[t] * NBreed[4,Br_BN_yr[h]])
+        AF_BN[h] ~ dpois(p[t] * sum(NBreed[2:4,AF_BN_yr[h]]))
 
       }
     } 
@@ -208,13 +217,13 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
   
   source("GPeafowlIPM_InitialSim.R")
   
-  Inits <- GP_IPM_Init(Tmax = 20)
+  Inits <- GP_IPM_Init(Tmax = ny.data + ny.sim)
   Inits
   
   
   # Parameters monitored
   
-  parameters <- c("s_NB", "s_BN", "mean.rho", "gamma", "mean.p", "sigma.rho", "sigma.p", "rho", "p",
+  parameters <- c("s_NB", "s_BN", "mean.rho", "gamma", "sigma.rho", "rho", "p",
                   "NBreed", "NNon", "Fec")
   
   
@@ -236,8 +245,8 @@ GP.IPMconstants <- list(Tmax = ny, Amax = 4, # A = Age class: 1.Chick/Juvenile,
   # nt <- 30
   # nc <- 4
   
-  ni <- 10000
-  nb <- 200
+  ni <- 1000
+  nb <- 0
   nt <- 30
   nc <- 4
   
@@ -279,18 +288,13 @@ library(MCMCvis)
   MCMCtrace(out, params = 'NBreed',
           pdf = TRUE,
           Rhat = TRUE,
-          n.eff = TRUE,
-          type = 'trace',
-          xlim = c(0,50000),
-          ylim = c(0,1000)
-)
-
-  MCMCtrace(out, params = 'NNon',
-          pdf = FALSE,
-          Rhat = TRUE,
           n.eff = TRUE)
 
 
+  MCMCtrace(out, params = 'NNon',
+            pdf = TRUE,
+            Rhat = TRUE,
+            n.eff = TRUE)
   
   
 
