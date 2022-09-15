@@ -184,27 +184,27 @@ GP.IPMcode <- nimbleCode({
     for(a in 1:4){
       NBreed[a,t+1] ~ dbin(s_NB[a], NNon[a,t+1])
     }
-      
+  }   
     
-    # Observation Model in Non-Breeding
+  # Observation Model in Non-Breeding
+  
+  for(j in 1:12){
     
-      for(j in 12) {
-      
-      ChF_NB[j] ~ dpois(p[ChF_NB_yr[j]] * NNon[1,ChF_NB_yr[j]])
-      AF_NB[j] ~ dpois(p[AF_NB_yr[j]] * sum(NNon[2:4,AF_NB_yr[j]]))
-      
-    }
+    ChF_NB[j] ~ dpois(p[ChF_NB_yr[j]] * NNon[1,ChF_NB_yr[j]])
+    AF_NB[j] ~ dpois(p[AF_NB_yr[j]] * sum(NNon[2:4,AF_NB_yr[j]]))
     
-    # Observation Model in Breeding
-    
-      for(h in 14) {
-      
-      JuF_BN[h] ~ dpois(p[JuF_BN_yr[h]] * NBreed[1,JuF_BN_yr[h]])
-      AF_BN[h] ~ dpois(p[AF_BN_yr[h]] * sum(NBreed[2:4,AF_BN_yr[h]]))
-      
-      }
-    } 
   }
+  
+  # Observation Model in Breeding
+  
+  for(h in 1:14){
+    
+    JuF_BN[h] ~ dpois(p[JuF_BN_yr[h]] * NBreed[1,JuF_BN_yr[h]])
+    AF_BN[h] ~ dpois(p[AF_BN_yr[h]] * sum(NBreed[2:4,AF_BN_yr[h]]))
+    
+  }
+   
+}
 )
 
 # Initial values
