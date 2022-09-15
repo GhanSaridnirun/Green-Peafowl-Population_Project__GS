@@ -289,11 +289,3 @@ library(MCMCvis)
           pdf = FALSE,
           Rhat = TRUE,
           n.eff = TRUE)
-
-
-  
-  
-
-
-
-
