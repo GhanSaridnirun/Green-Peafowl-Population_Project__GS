@@ -22,6 +22,7 @@ set.seed(mySeed)
 # ),ordered = TRUE)
 
 
+
 # Count in Non-Breeding Season
 
 ChF_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2) + 1             #Season Label for chicks count
@@ -30,8 +31,6 @@ ChF_NB <- c(16,26,69,80,60,20,25,24,48,59,11,12)    #Female Chicks Count
 AF_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2) + 1              #Season Label for breeder count
 #Br_NB <- c(35,34,83,78,56,25,29,28,47,57,14,8)      #Breeder {Female with chicks} count in Non-Breeding 
 AF_NB <- c(71,69,134,108,86,33,101,68,71,90,34,13)  #All Female 
-
-
 # Count in Breeding Season
 
 JuF_BN_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2,3,3)          #Season Label for juvenile count
@@ -40,8 +39,6 @@ JuF_BN <- c(9,18,33,33,10,13,6,9,13,27,14,25,11,0)   #Female Juvenile count
 AF_BN_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2,3,3)           #Season Label for breeder count
 #Br_BN <- c(9,23,32,25,12,10,14,9,11,20,13,27,0,0)    #Breeder {Female with juveniles} count in Breeding
 AF_BN <- c(18,49,79,71,47,44,30,25,38,54,48,97,17,1) #All Female
-
-
 
 # # Single Female count data
 # SF_BN <- c(9,26,48,46,35,34,16,16,27,34,35,70,9,1)   #Single Female count in Breeding 
@@ -124,7 +121,6 @@ GP.IPMcode <- nimbleCode({
   # Sex ratio of the chicks
   
   gamma ~ dbeta(1, 1)  
-  
   
   #Detection Probability
   
@@ -288,14 +284,7 @@ library(MCMCvis)
           Rhat = TRUE,
           n.eff = TRUE)
 
-
   MCMCtrace(out, params = 'NNon',
             pdf = TRUE,
             Rhat = TRUE,
             n.eff = TRUE)
-  
-  
-
-
-
-

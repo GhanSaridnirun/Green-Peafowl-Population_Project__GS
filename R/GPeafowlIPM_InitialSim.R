@@ -1,5 +1,7 @@
 
+
 GP_IPM_Init <- function(Tmax, mean.p, constant_p){
+
   Amax <- 4                      # set Tmax and Amax as constants
   
   
@@ -22,6 +24,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
   
   
   # Detection Probability
+
   if(constant_p){
     mean.p <- mean.p
     sigma.p <- 0
@@ -29,12 +32,14 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     mean.p <- runif(1, 0.9*mean.p, 1.1*mean.p)
     sigma.p <- runif(1, 0, 1)
   }
+
   
   # Initial Population Sizes
   
   # pinit[1:Amax] <- runif(Amax, 30, 200)
   for(a in 1:Amax){
-    pinit[a] <- runif(1, 0, 200)
+   pinit[a] <- runif(1, 0, 200)
+
     NBreed[a,1] <- rpois(1, pinit[a])
   }
   
@@ -62,6 +67,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     p[t] <- plogis(logit.p[t])
   }
       
+
   for (t in 1:Tmax){
     log.rho[t] <- rnorm(1, log(mean.rho), sigma.rho)
     rho[t] <- exp(log.rho[t])
