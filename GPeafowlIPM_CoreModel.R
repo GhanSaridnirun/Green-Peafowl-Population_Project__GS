@@ -211,7 +211,7 @@ GP.IPMcode <- nimbleCode({
 
 source("GPeafowlIPM_InitialSim.R")
 
-  Inits <- GP_IPM_Init(Tmax = ny.data + ny.sim)
+Inits <- GP_IPM_Init(Tmax = ny.data + ny.sim, mean.p = 0.9, constant_p = TRUE)
 Inits
 
 
