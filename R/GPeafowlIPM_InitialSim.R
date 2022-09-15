@@ -1,6 +1,6 @@
 
 GP_IPM_Init <- function(Tmax){
-  Amax <- 4
+  Amax <- 4                      # set Tmax and Amax as constants
   
   
   ## Set up vectors and matrices
@@ -134,6 +134,4 @@ GP_IPM_Init <- function(Tmax){
   
   
 }
-
-
 
