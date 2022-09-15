@@ -23,10 +23,10 @@ set.seed(mySeed)
 
 # Count in Non-Breeding Season
 
-ChF_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2)             #Season Label for chicks count
+ChF_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2) + 1             #Season Label for chicks count
 ChF_NB <- c(16,26,69,80,60,20,25,24,48,59,11,12)    #Female Chicks Count
 
-AF_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2)              #Season Label for breeder count
+AF_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2) + 1              #Season Label for breeder count
 #Br_NB <- c(35,34,83,78,56,25,29,28,47,57,14,8)      #Breeder {Female with chicks} count in Non-Breeding 
 AF_NB <- c(71,69,134,108,86,33,101,68,71,90,34,13)  #All Female 
 
@@ -137,7 +137,7 @@ GP.IPMcode <- nimbleCode({
   # sigma.p ~ dunif(0, 5)
   
   for (t in 1:ny.data){
-    p[t] <- 0.9 # TODO update initial vales for p
+    p[t] <- 0.9
   }
   
   # Population count data (state-space model)
@@ -255,7 +255,12 @@ out <- nimbleMCMC(code = GP.IPMcode,
                   niter = ni,
                   thin = nt,
                   nchains = nc)
-  
+
+# Save output
+saveRDS(out, file = "PeafowlIPM_TestRun.rds")
+
+
+# MCMC plots
 print(out,2)
 
 library(MCMCvis)
