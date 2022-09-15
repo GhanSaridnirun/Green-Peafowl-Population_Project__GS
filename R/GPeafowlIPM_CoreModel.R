@@ -206,7 +206,7 @@ GP.IPMcode <- nimbleCode({
 
 # Initial values
 
-source("GPeafowlIPM_InitialSim.R")
+source("R/GPeafowlIPM_InitialSim.R")
 
 Inits <- GP_IPM_Init(Tmax = ny.data + ny.sim, mean.p = 0.9, constant_p = TRUE)
 Inits
@@ -257,34 +257,35 @@ out <- nimbleMCMC(code = GP.IPMcode,
 saveRDS(out, file = "PeafowlIPM_TestRun.rds")
 
 
-# MCMC plots
+# MCMC summaries
 print(out,2)
 
 library(MCMCvis)
 
-  MCMCsummary(out, params = 'NBreed', round = 2)
+MCMCsummary(out, params = 'NBreed', round = 2)
 
-  MCMCsummary(out, params = 'NNon', round = 2)
+MCMCsummary(out, params = 'NNon', round = 2)
 
-  MCMCsummary(out, params = 'Fec', round = 2)
+MCMCsummary(out, params = 'Fec', round = 2)
 
-  MCMCsummary(out, params = 'rho', round = 2)
+MCMCsummary(out, params = 'rho', round = 2)
 
-  MCMCsummary(out, params = 'p', round = 2)
+MCMCsummary(out, params = 'p', round = 2)
 
-  MCMCsummary(out, 
-            params = c('s_NB','s_BN','gamma','mean.rho',
-                       'sigma.rho','mean.p','sigma.p'),
-            round = 2)
+MCMCsummary(out, 
+            params = c('s_NB','s_BN','gamma',
+                       'mean.rho', 'sigma.rho'#,
+                       #'mean.p','sigma.p'
+                       ), round = 2)
 
 # Trace Plot
-  
-  MCMCtrace(out, params = 'NBreed',
-          pdf = TRUE,
+
+MCMCtrace(out, params = 'NBreed',
+          pdf = FALSE,
           Rhat = TRUE,
           n.eff = TRUE)
 
-  MCMCtrace(out, params = 'NNon',
-            pdf = TRUE,
-            Rhat = TRUE,
-            n.eff = TRUE)
+MCMCtrace(out, params = 'NNon',
+          pdf = FALSE,
+          Rhat = TRUE,
+          n.eff = TRUE)
