@@ -219,10 +219,10 @@ parameters <- c("s_NB", "s_BN", "mean.rho", "gamma", "sigma.rho", "rho", "p",
 
 # MCMC settings
 
-ni <- 10
-nb <- 0
-nt <- 1
-nc <- 3
+#ni <- 10
+#nb <- 0
+#nt <- 1
+#nc <- 3
 
 # ni <- 200000     # Run Time around 15 minutes
 # nb <- 50000      # Using initial values
@@ -234,10 +234,10 @@ nc <- 3
 # nt <- 30
 # nc <- 4
 
-#ni <- 1000
-#nb <- 0
-#nt <- 30
-#nc <- 4
+ni <- 10000
+nb <- 5000
+nt <- 1
+nc <- 3
 
 
 
