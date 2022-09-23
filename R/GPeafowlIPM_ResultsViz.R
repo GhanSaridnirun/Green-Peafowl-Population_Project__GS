@@ -1,3 +1,5 @@
+# Visualization
+
 library(coda)
 library(ggplot2)
 library(reshape2)
@@ -6,29 +8,18 @@ library(tidyr)
 library(plyr)
 
 
+## Load posterior data
 
 gpipm <- readRDS('PeafowlIPM_TestRun.rds')
 gpipm
 
-str(gpipm)
+## Re-arrange data
 
 out.mat <- as.matrix(gpipm)
-out.mat
 data <- melt(out.mat)
-data
-
-# vr.params <- c('NBreed[1,1]','NBreed[1,2]','NBreed[1,3]','NBreed[1,4]',
-#                'NNon[1,1]','NNon[1,2]','NNon[1,3]','NNon[1,4]',
-#                'Fec[1]','Fec[2]','Fec[3]','Fec[4]',
-#                'p[1]','p[2]','p[3]','p[4]',
-#                's_NB[1]','s_NB[2]','s_NB[3]','s_NB[4]',
-#                's_BN[1]','s_BN[2]','s_BN[3]','s_BN[4]')
-
-
 colnames(data) <- c('index', 'parameter', 'value')
-data
 
-str(data)
+## Summarise posterior into median and 50% and 90% CI
 
 data.sum <- ddply(data, .(parameter), summarise, median = median(value, na.rm = T),
                   lCI_90 = quantile(value, probs = 0.05, na.rm = T),
@@ -39,12 +30,62 @@ data.sum <- ddply(data, .(parameter), summarise, median = median(value, na.rm = 
 data.sum
 
 
-plot.data <- data.frame(data.sum)
-plot.data
-
-str(plot.data)
+# Other parameter
+# popN <- paste('s_BN[', c(1:16), ']', sep = '')
 
 
-ggplot(plot.data, aes(x = median, y = parameter))  +
-  geom_point() +
-  geom_point(data = plot.data, aes(x = median), colour = 'blue', size = 1)
+## Set data for Breeding
+
+NBr1 <- paste('NBreed[', c(1),',',' ', c(1:4), ']', sep = '') # Juvenile
+NBr2 <- paste('NBreed[', c(2),',',' ', c(1:4), ']', sep = '') # Yearling
+NBr3 <- paste('NBreed[', c(3),',',' ', c(1:4), ']', sep = '') # 2 Years
+NBr4 <- paste('NBreed[', c(4),',',' ', c(1:4), ']', sep = '') # 3 Years
+
+## Subset data 
+
+data.NBR <- subset(data.sum, parameter%in% c(NBr1,NBr2,NBr3,NBr4))
+
+## Add indexT ans age class time
+
+data.NBR$indexT <- c(1:4,1:4,1:4,1:4)
+data.NBR$Year <- c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4)
+data.NBR <- data.NBR[order(data.NBR$Year),]
+
+## Plot - Estimate with 95% CI
+
+plot.NBR <- ggplot(data.NBR, aes(x = Year, y = median, group = indexT, color = indexT)) + 
+  geom_line(size = 1) + geom_point(size = 3) + 
+  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.2) + 
+  facet_wrap(~indexT) 
+plot.NBR
+
+
+## Set data for Non-Breeding
+
+NNo1 <- paste('NNon[', c(1),',',' ', c(1:4), ']', sep = '') # Chick
+NNo2 <- paste('NNon[', c(2),',',' ', c(1:4), ']', sep = '') # Yearling
+NNo3 <- paste('NNon[', c(3),',',' ', c(1:4), ']', sep = '') # 2 Years
+NNo4 <- paste('NNon[', c(4),',',' ', c(1:4), ']', sep = '') # 3 Years
+
+## Subset data 
+
+data.NNO <- subset(data.sum, parameter%in% c(NNo1,NNo2,NNo3,NNo4))
+
+## Add indexT ans age class time
+
+data.NNO$indexT <- c(1:4,1:4,1:4,1:4)
+data.NNO$Year <- c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4)
+data.NNO <- data.NNO[order(data.NNO$Year),]
+
+## Plot - Estimate with 95% CI
+
+plot.NNO <- ggplot(data.NNO, aes(x = Year, y = median, group = indexT, color = indexT)) + 
+  geom_line(size = 1) + geom_point(size = 3) + 
+  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.2) + 
+  facet_wrap(~indexT) 
+plot.NNO
+
+
+
+
+
