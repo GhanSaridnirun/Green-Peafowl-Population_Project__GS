@@ -1,21 +1,20 @@
 
 
 GP_IPM_Init <- function(Tmax, mean.p, constant_p){
-  
+
   Amax <- 4                      # set Tmax and Amax as constants
   
   
   ## Set up vectors and matrices
-  NBreedF <- NNonF <- matrix(NA, nrow = Amax, ncol = Tmax+1)
-  NBreedM <- NNonM <- matrix(NA, nrow = Amax, ncol = Tmax+1)
+  NBreed <- NNon <- matrix(NA, nrow = Amax, ncol = Tmax+1)
   s_NB <- s_BN <- rep(NA, Amax)
   pinit <- rep(NA, Amax)
   Fec <- rep(NA, Tmax)
   p <- logit.p <- rep(NA, Tmax) 
   rho <- log.rho <- rep(NA, Tmax)
   
-  surv_NBreedF3 <- surv_NBreedF4 <- rep(NA, Tmax+1)
-  surv_NBreedM3 <- surv_NBreedM4 <- rep(NA, Tmax+1)
+  surv_NBreed3 <- surv_NBreed4 <- rep(NA, Tmax+1)
+  
   
   ## Sample values for parameters with priors
   # Productivity
@@ -25,7 +24,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
   
   
   # Detection Probability
-  
+
   if(constant_p){
     mean.p <- mean.p
     sigma.p <- 0
@@ -33,27 +32,19 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     mean.p <- runif(1, 0.9*mean.p, 1.1*mean.p)
     sigma.p <- runif(1, 0, 1)
   }
-  
+
   
   # Initial Population Sizes
   
   # pinit[1:Amax] <- runif(Amax, 30, 200)
   for(a in 1:Amax){
-    pinit[a] <- runif(1, 0, 200)
-    
-    NBreedF[a,1] <- rpois(1, pinit[a])  # Female
-    NBreedM[a,1] <- rpois(1, pinit[a])  # Male
+   pinit[a] <- runif(1, 0, 200)
+
+    NBreed[a,1] <- rpois(1, pinit[a])
   }
   
-  # Female
-  
-  NNonF[1:Amax,1] <- 0
-  surv_NBreedF3[1] <- surv_NBreedF4[1] <- 0
-  
-  # Male
-  
-  NNonM[1:Amax,1] <- 0
-  surv_NBreedM3[1] <- surv_NBreedM4[1] <- 0
+  NNon[1:Amax,1] <- 0
+  surv_NBreed3[1] <- surv_NBreed4[1] <- 0
   
   # Survival rates
   s_NB[1] <- runif(1, 0.30, 0.40)
@@ -75,8 +66,8 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     logit.p[t] <- rnorm(1, qlogis(mean.p), sigma.p)
     p[t] <- plogis(logit.p[t])
   }
-  
-  
+      
+
   for (t in 1:Tmax){
     log.rho[t] <- rnorm(1, log(mean.rho), sigma.rho)
     rho[t] <- exp(log.rho[t])
@@ -92,38 +83,27 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     # Process model: Breeding -> Non-Breeding season transition    
     
     # Total number of chicks
-    Fec[t] <- rpois(1, sum(NBreedF[3:4,t]) * rho[t])
+    Fec[t] <- rpois(1, sum(NBreed[3:4,t]) * rho[t])
     
     # Allocate chicks to a sex
-    NNonF[1,t+1] <- rbinom(1, Fec[t], gamma) # Female chicks 
-    NNonM[1,t+1] <- rbinom(1, Fec[t], gamma) # Male chicks 
+    NNon[1,t+1] <- rbinom(1, Fec[t], gamma) # Female chicks 
     
     # Survival
     for(a in 2:3){
-      NNonF[a,t+1] <- rbinom(1, NBreedF[a-1,t], s_BN[a-1])  # Female
-      NNonM[a,t+1] <- rbinom(1, NBreedM[a-1,t], s_BN[a-1])  # Male
+      NNon[a,t+1] <- rbinom(1, NBreed[a-1,t], s_BN[a-1])
     }
     
-    # Female
+    surv_NBreed3[t+1] <- rbinom(1, NBreed[3,t], s_BN[3])
+    surv_NBreed4[t+1] <- rbinom(1, NBreed[4,t], s_BN[4])
     
-    surv_NBreedF3[t+1] <- rbinom(1, NBreedF[3,t], s_BN[3])
-    surv_NBreedF4[t+1] <- rbinom(1, NBreedF[4,t], s_BN[4])
+    NNon[4,t+1] <- surv_NBreed3[t+1] + surv_NBreed4[t+1]
     
-    NNonF[4,t+1] <- surv_NBreedF3[t+1] + surv_NBreedF4[t+1]
-    
-    # Male
-
-    surv_NBreedM3[t+1] <- rbinom(1, NBreedM[3,t], s_BN[3])
-    surv_NBreedM4[t+1] <- rbinom(1, NBreedM[4,t], s_BN[4])
-
-    NNonM[4,t+1] <- surv_NBreedM3[t+1] + surv_NBreedM4[t+1]
     
     
     # Process model: Non-Breeding -> Breeding season transition
     
     for(a in 1:Amax){
-      NBreedF[a,t+1] <- rbinom(1, NNonF[a,t+1], s_NB[a])  #
-      NBreedM[a,t+1] <- rbinom(1, NNonM[a,t+1], s_NB[a])
+      NBreed[a,t+1] <- rbinom(1, NNon[a,t+1], s_NB[a])
     }
     
     
@@ -135,10 +115,8 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
   
   Inits <- list(
     
-    NBreedF = NBreedF,
-    NBreedM = NBreedM,
-    NNonF = NNonF,
-    NNonM = NNonM,
+    NBreed = NBreed,
+    NNon = NNon,
     s_NB = s_NB,
     s_BN = s_BN,
     s_yr_sa = s_yr_sa,
@@ -154,10 +132,8 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     mean.rho = mean.rho,
     sigma.rho = sigma.rho,
     gamma = gamma,
-    surv_NBreedF3 = surv_NBreedF3,
-    surv_NBreedF4 = surv_NBreedF4,
-    surv_NBreedM3 = surv_NBreedM3,
-    surv_NBreedM4 = surv_NBreedM4
+    surv_NBreed3 = surv_NBreed3,
+    surv_NBreed4 = surv_NBreed4
     
   )
   
