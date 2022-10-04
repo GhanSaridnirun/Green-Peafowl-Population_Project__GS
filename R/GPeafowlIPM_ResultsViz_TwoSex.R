@@ -8,9 +8,16 @@ library(tidyr)
 library(plyr)
 
 
+# Set up Age and time 
+
+Amax <- 4
+Tmax <- 20
+
+
+# Set up
 ## Load posterior data
 
-gpipm <- readRDS('PeafowlIPM_TestRun.rds')
+gpipm <- readRDS('R/PeafowlIPM_TwoSex_TestRun.rds')
 gpipm
 
 ## Re-arrange data
@@ -36,55 +43,87 @@ data.sum
 
 ## Set data for Breeding
 
-NBr1 <- paste('NBreed[', c(1),',',' ', c(1:4), ']', sep = '') # Juvenile
-NBr2 <- paste('NBreed[', c(2),',',' ', c(1:4), ']', sep = '') # Yearling
-NBr3 <- paste('NBreed[', c(3),',',' ', c(1:4), ']', sep = '') # 2 Years
-NBr4 <- paste('NBreed[', c(4),',',' ', c(1:4), ']', sep = '') # 3 Years
+NBrF1 <- paste('NBreedF[', c(1),',',' ', c(1:Tmax), ']', sep = '') # Juvenile
+NBrF2 <- paste('NBreedF[', c(2),',',' ', c(1:Tmax), ']', sep = '') # Yearling
+NBrF3 <- paste('NBreedF[', c(3),',',' ', c(1:Tmax), ']', sep = '') # 2 Years
+NBrF4 <- paste('NBreedF[', c(4),',',' ', c(1:Tmax), ']', sep = '') # 3 Years
+
+NBrM1 <- paste('NBreedM[', c(1),',',' ', c(1:Tmax), ']', sep = '') # Juvenile
+NBrM2 <- paste('NBreedM[', c(2),',',' ', c(1:Tmax), ']', sep = '') # Yearling
+NBrM3 <- paste('NBreedM[', c(3),',',' ', c(1:Tmax), ']', sep = '') # 2 Years
+NBrM4 <- paste('NBreedM[', c(4),',',' ', c(1:Tmax), ']', sep = '') # 3 Years
 
 ## Subset data 
 
-data.NBR <- subset(data.sum, parameter%in% c(NBr1,NBr2,NBr3,NBr4))
+data.NBRF <- subset(data.sum, parameter%in% c(NBrF1,NBrF2,NBrF3,NBrF4))
 
+data.NBRM <- subset(data.sum, parameter%in% c(NBrM1,NBrM2,NBrM3,NBrM4))
+  
 ## Add indexT ans age class time
 
-data.NBR$indexT <- c(1:4,1:4,1:4,1:4)
-data.NBR$Year <- c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4)
-data.NBR <- data.NBR[order(data.NBR$Year),]
+data.NBRF$indexT <- (1:Amax)
+data.NBRF$Year <- rep(1:Tmax, each = Amax)
+data.NBRF <- data.NBRF[order(data.NBRF$Year),]
+
+data.NBRM$indexT <- (1:Amax)
+data.NBRM$Year <- rep(1:Tmax, each = Amax)
+data.NBRM <- data.NBRM[order(data.NBRM$Year),]
 
 ## Plot - Estimate with 95% CI
 
-plot.NBR <- ggplot(data.NBR, aes(x = Year, y = median, group = indexT, color = indexT)) + 
+plot.NBRF <- ggplot(data.NBRF, aes(x = Year, y = median, group = indexT, color = indexT)) + 
+  geom_line(size = 1) + geom_point(size = 3) + 
+  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.2) + 
+  facet_wrap(~indexT)
+plot.NBRM <- ggplot(data.NBRM, aes(x = Year, y = median, group = indexT, color = indexT)) + 
   geom_line(size = 1) + geom_point(size = 3) + 
   geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.2) + 
   facet_wrap(~indexT) 
-plot.NBR
 
+plot.NBRF
+plot.NBRM
 
 ## Set data for Non-Breeding
 
-NNo1 <- paste('NNon[', c(1),',',' ', c(1:4), ']', sep = '') # Chick
-NNo2 <- paste('NNon[', c(2),',',' ', c(1:4), ']', sep = '') # Yearling
-NNo3 <- paste('NNon[', c(3),',',' ', c(1:4), ']', sep = '') # 2 Years
-NNo4 <- paste('NNon[', c(4),',',' ', c(1:4), ']', sep = '') # 3 Years
+NNoF1 <- paste('NNonF[', c(1),',',' ', c(1:Tmax), ']', sep = '') # Chick
+NNoF2 <- paste('NNonF[', c(2),',',' ', c(1:Tmax), ']', sep = '') # Yearling
+NNoF3 <- paste('NNonF[', c(3),',',' ', c(1:Tmax), ']', sep = '') # 2 Years
+NNoF4 <- paste('NNonF[', c(4),',',' ', c(1:Tmax), ']', sep = '') # 3 Years
+
+NNoM1 <- paste('NNonM[', c(1),',',' ', c(1:Tmax), ']', sep = '') # Chick
+NNoM2 <- paste('NNonM[', c(2),',',' ', c(1:Tmax), ']', sep = '') # Yearling
+NNoM3 <- paste('NNonM[', c(3),',',' ', c(1:Tmax), ']', sep = '') # 2 Years
+NNoM4 <- paste('NNonM[', c(4),',',' ', c(1:Tmax), ']', sep = '') # 3 Years
 
 ## Subset data 
 
-data.NNO <- subset(data.sum, parameter%in% c(NNo1,NNo2,NNo3,NNo4))
+data.NNOF <- subset(data.sum, parameter%in% c(NNoF1,NNoF2,NNoF3,NNoF4))
+                                             
+data.NNOM <- subset(data.sum, parameter%in% c(NNoM1,NNoM2,NNoM3,NNoM4))
 
 ## Add indexT ans age class time
 
-data.NNO$indexT <- c(1:4,1:4,1:4,1:4)
-data.NNO$Year <- c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4)
-data.NNO <- data.NNO[order(data.NNO$Year),]
+data.NNOF$indexT <- (1:Amax)
+data.NNOF$Year <- rep(1:Tmax, each = Amax)
+data.NNOF <- data.NNOF[order(data.NNOF$Year),]
+
+data.NNOM$indexT <- (1:Amax)
+data.NNOM$Year <- rep(1:Tmax, each = Amax)
+data.NNOM <- data.NNOM[order(data.NNOM$Year),]
 
 ## Plot - Estimate with 95% CI
 
-plot.NNO <- ggplot(data.NNO, aes(x = Year, y = median, group = indexT, color = indexT)) + 
+plot.NNOF <- ggplot(data.NNOF, aes(x = Year, y = median, group = indexT, color = indexT)) + 
   geom_line(size = 1) + geom_point(size = 3) + 
   geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.2) + 
   facet_wrap(~indexT) 
-plot.NNO
+plot.NNOM <- ggplot(data.NNOM, aes(x = Year, y = median, group = indexT, color = indexT)) + 
+  geom_line(size = 1) + geom_point(size = 3) + 
+  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.2) + 
+  facet_wrap(~indexT)
 
+plot.NNOF
+plot.NNOM
 
 
 

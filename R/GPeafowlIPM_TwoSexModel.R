@@ -263,7 +263,7 @@ GP.IPMcode <- nimbleCode({
 
 # Initial values
 
-source("R/GPIPM_SIM_EX.R")
+source("R/GPeafowlIPM_InitialSim_TwoSex.R")
 
 
 Inits <- GP_IPM_Init(Tmax = ny.data + ny.sim, mean.p = 0.9, constant_p = TRUE)
@@ -312,7 +312,7 @@ out <- nimbleMCMC(code = GP.IPMcode,
                   nchains = nc)
 
 # Save output
-saveRDS(out, file = "GP_Extension.rds")
+saveRDS(out, file = "PeafowlIPM_TwoSex_TestRun.rds")
 
 print(out,2)
 summary(out)
