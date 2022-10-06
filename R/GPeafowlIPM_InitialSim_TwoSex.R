@@ -96,7 +96,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     
     # Allocate chicks to a sex
     NNonF[1,t+1] <- rbinom(1, Fec[t], gamma) # Female chicks 
-    NNonM[1,t+1] <- rbinom(1, Fec[t], gamma) # Male chicks 
+    NNonM[1,t+1] <- Fec[t] - NNonF[1,t+1] # Male chicks 
     
     # Survival
     for(a in 2:3){

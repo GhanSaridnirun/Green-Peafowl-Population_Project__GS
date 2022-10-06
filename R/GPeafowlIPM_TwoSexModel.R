@@ -190,7 +190,7 @@ GP.IPMcode <- nimbleCode({
     # Allocate chicks to a sex
     
     NNonF[1,t+1] ~ dbin(gamma, Fec[t]) # Female chicks 
-    NNonM[1,t+1] ~ dbin(gamma, Fec[t]) # Male chicks
+    NNonM[1,t+1] <- Fec[t] - NNonF[1,t+1] # Male chicks
     
     
     # Survival
