@@ -6,7 +6,7 @@ library(reshape2)
 library(viridis)
 library(tidyr)
 library(plyr)
-
+library(patchwork)
 
 # Set up Age and time 
 
@@ -62,28 +62,68 @@ data.NBRM <- subset(data.sum, parameter%in% c(NBrM1,NBrM2,NBrM3,NBrM4))
 ## Add indexT ans age class time
 
 data.NBRF$indexT <- (1:Amax)
+data.NBRF$gen <- rep("Female")
 data.NBRF$Year <- rep(1:Tmax, each = Amax)
 data.NBRF <- data.NBRF[order(data.NBRF$Year),]
 
 data.NBRM$indexT <- (1:Amax)
+data.NBRM$gen <- rep("Male")
 data.NBRM$Year <- rep(1:Tmax, each = Amax)
 data.NBRM <- data.NBRM[order(data.NBRM$Year),]
 
+## Label age class 
+
+BrF <- within(data.NBRF, {
+  Age <- factor(indexT,labels = c("Chick","Yearling","2 Years","3 Years"))
+})
+BrM <- within(data.NBRM, {
+  Age <- factor(indexT,labels = c("Chick","Yearling","2 Years","3 Years"))
+})         
+
 ## Plot - Estimate with 95% CI
+  
+PBRF <- ggplot(BrF, aes(x = Year, y = median)) +
+  geom_line(aes(color = Age),size = 1) +
+  geom_point(aes(color = Age), size = 3) +
+  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90, fill = Age), alpha = 0.3) +
+  facet_grid(rows = vars(Age), scales = "free_y") +
+  theme_bw() +
+  labs(
+    title = "Prediction number of 4 female age classes in 20 years",
+    subtitle = "Breeding Season",
+    # caption =
+    x = "Year", 
+    y = "Number",
+    tag = "Figure 1",
+    # colour = 
+  )
+PBRM <- ggplot(BrM, aes(x = Year, y = median)) +
+  geom_line(aes(color = Age),size = 1) +
+  geom_point(aes(color = Age), size = 3) +
+  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90, fill = Age), alpha = 0.3) +
+  facet_grid(rows = vars(Age), scales = "free_y") +
+  theme_bw() +
+  labs(
+    title = "Prediction number of 4 male age classes in 20 years",
+    subtitle = "Non-breeding Season",
+    # caption =
+    x = "Year", 
+    y = "Number",
+    tag = "Figure 2",
+    # colour = 
+  )
 
-plot.NBRF <- ggplot(data.NBRF, aes(x = Year, y = median, group = indexT, color = indexT)) + 
-  geom_line(size = 1) + geom_point(size = 3) + 
-  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.2) + 
-  facet_wrap(~indexT)
-plot.NBRM <- ggplot(data.NBRM, aes(x = Year, y = median, group = indexT, color = indexT)) + 
-  geom_line(size = 1) + geom_point(size = 3) + 
-  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.2) + 
-  facet_wrap(~indexT) 
+PBRF
+PBRM
 
-plot.NBRF
-plot.NBRM
+# Aggregate !!!!!! Not function yet
 
-## Set data for Non-Breeding
+# Plote.Br <- PBRF + PBRM + guide_area() + plot_layout(ncol = 2)
+
+
+
+
+# ## Set data for Non-Breeding
 
 NNoF1 <- paste('NNonF[', c(1),',',' ', c(1:Tmax), ']', sep = '') # Chick
 NNoF2 <- paste('NNonF[', c(2),',',' ', c(1:Tmax), ']', sep = '') # Yearling
@@ -95,36 +135,67 @@ NNoM2 <- paste('NNonM[', c(2),',',' ', c(1:Tmax), ']', sep = '') # Yearling
 NNoM3 <- paste('NNonM[', c(3),',',' ', c(1:Tmax), ']', sep = '') # 2 Years
 NNoM4 <- paste('NNonM[', c(4),',',' ', c(1:Tmax), ']', sep = '') # 3 Years
 
-## Subset data 
+# ## Subset data 
 
 data.NNOF <- subset(data.sum, parameter%in% c(NNoF1,NNoF2,NNoF3,NNoF4))
-                                             
+
 data.NNOM <- subset(data.sum, parameter%in% c(NNoM1,NNoM2,NNoM3,NNoM4))
 
-## Add indexT ans age class time
+# ## Add indexT ans age class time
 
 data.NNOF$indexT <- (1:Amax)
+data.NNOF$gen <- rep("Female")
 data.NNOF$Year <- rep(1:Tmax, each = Amax)
 data.NNOF <- data.NNOF[order(data.NNOF$Year),]
 
 data.NNOM$indexT <- (1:Amax)
+data.NNOM$gen <- rep("Male")
 data.NNOM$Year <- rep(1:Tmax, each = Amax)
 data.NNOM <- data.NNOM[order(data.NNOM$Year),]
 
+
+## Label age class 
+
+NoF <- within(data.NNOF, {
+  Age <- factor(indexT,labels = c("Chick","Yearling","2 Years","3 Years"))
+})
+NoM <- within(data.NNOM, {
+  Age <- factor(indexT,labels = c("Chick","Yearling","2 Years","3 Years"))
+})    
+
 ## Plot - Estimate with 95% CI
 
-plot.NNOF <- ggplot(data.NNOF, aes(x = Year, y = median, group = indexT, color = indexT)) + 
-  geom_line(size = 1) + geom_point(size = 3) + 
-  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.2) + 
-  facet_wrap(~indexT) 
-plot.NNOM <- ggplot(data.NNOM, aes(x = Year, y = median, group = indexT, color = indexT)) + 
-  geom_line(size = 1) + geom_point(size = 3) + 
-  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90), alpha = 0.2) + 
-  facet_wrap(~indexT)
+PNOF <- ggplot(NoF, aes(x = Year, y = median)) +
+  geom_line(aes(color = Age),size = 1) +
+  geom_point(aes(color = Age), size = 3) +
+  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90, fill = Age), alpha = 0.3) +
+  facet_grid(rows = vars(Age), scales = "free_y") +
+  theme_bw() +
+  labs(
+    title = "Prediction number of 4 female age classes in 20 years",
+    subtitle = "Breeding Season",
+    # caption =
+    x = "Year", 
+    y = "Number",
+    tag = "Figure 1",
+    # colour = 
+  )
+PNOM <- ggplot(NoM, aes(x = Year, y = median)) +
+  geom_line(aes(color = Age),size = 1) +
+  geom_point(aes(color = Age), size = 3) +
+  geom_ribbon(aes(ymin = lCI_90, ymax = uCI_90, fill = Age), alpha = 0.3) +
+  facet_grid(rows = vars(Age), scales = "free_y") +
+  theme_bw() +
+  labs(
+    title = "Prediction number of 4 male age classes in 20 years",
+    subtitle = "Non-breeding Season",
+    # caption =
+    x = "Year", 
+    y = "Number",
+    tag = "Figure 2",
+    # colour = 
+  )
 
-plot.NNOF
-plot.NNOM
-
-
-
+PNOF
+PNOM 
 
