@@ -77,41 +77,11 @@ M2y_NB <- c(5,1,8,4,0,2,2,1,0,0,0,1)                 #Male 2 years count in Non-
 M3y_BN <- c(27,118,164,119,49,57,54,60,76,91,111,83,26,1) #Male 3 years count in Breeding
 M3y_NB <- c(75,57,143,139,85,34,71,63,83,82,56,37)   #Male 3 years count in Non-Breeding
 
+M_BN <- rbind(JuM_BN, M1y_BN, M2y_BN, M3y_BN)
+M_NB <- rbind(ChM_NB, M1y_NB, M2y_NB, M3y_NB)
+
 ny.data <- 3 # Number of years for which the data collected
 ny.sim <- 20 # Number of years to simulate after the data collection
-
-
-# Matrix Section
-
-# # Set up Female Matrix
-
-ChF <- rbind("Female Chick" = ChF_NB)
-ChFNA <- cbind(ChF, NA, NA)
-JuF <- rbind("Female Juvenile" = JuF_BN)
-AF1 <- rbind("Female Adult 1" = AF_NB)
-AF1NA <- cbind(AF1, NA, NA)
-AF2 <- rbind("Female Adult 2" = AF_BN)
-
-Female.Mat <- rbind(ChFNA,JuF,AF1NA,AF2)
-
-
-# # Set up Male Matrix
-
-ChM <- rbind("Male Chick" = ChM_NB)
-ChMNA <- cbind(ChM, NA, NA)
-JuM <- rbind("Male Juvenile" = JuM_BN)
-AM1 <- rbind("Male Yearling_NB" = M1y_NB)
-AM1NA <- cbind(AM1, NA, NA)
-AM2 <- rbind("Male Yearling_BN" = M1y_BN)
-AM3 <- rbind("Male 2 Years_NB" = M2y_NB)
-AM3NA <- cbind(AM3, NA, NA)
-AM4 <- rbind("Male 2 Years_BN" = M2y_BN)
-AM5 <- rbind("Male 3 Years_NB" = M3y_NB)
-AM5NA <- cbind(AM5, NA, NA)
-AM6 <- rbind("Male 3 Years_BN" = M3y_BN)
-
-Male.Mat <- rbind(ChMNA,JuM,AM1NA,AM2,AM3NA,AM4,AM5NA,AM6)
-
 
 
 ## Arrange constants
@@ -127,17 +97,11 @@ GP.IPMconstants <- list(Tmax = ny.data + ny.sim,
 
 ## Arrange data
 GP.IPMdata <- list(ChF_NB = ChF_NB,
-                   JuF_BN = JuF_BN,  
+                   JuF_BN = JuF_BN,
                    AF_NB = AF_NB,
                    AF_BN = AF_BN,
-                   ChM_NB = ChM_NB,
-                   JuM_BN = JuM_BN,
-                   M1y_BN = M1y_BN,
-                   M1y_NB = M1y_NB,
-                   M2y_BN = M2y_BN,
-                   M2y_NB = M2y_NB,
-                   M3y_BN = M3y_BN,
-                   M3y_NB = M3y_NB
+                   M_BN = M_BN,
+                   M_NB = M_NB
 ) 
 
 
@@ -155,17 +119,44 @@ GP.IPMcode <- nimbleCode({
   
   # Survival 
   
-  s_NB[1] ~ dunif(0.30, 0.40)  # chick (half year)
-  s_BN[1] ~ dunif(0.60, 0.80)  # juvenile (half year)
+  ## Chicks and juveniles
   
-  s_yr_sa ~ dunif(0.50, 0.70) # sub adult (whole year)
-  s_NB[2:3] <- sqrt(s_yr_sa) # sub adult (half year, N -> B)
-  s_BN[2:3] <- sqrt(s_yr_sa) # sub adult (half year, B -> N)
+  sF_NB[1] ~ dunif(0.30, 0.40) 
+  sF_BN[1] ~ dunif(0.60, 0.80) 
   
-  s_yr_ad ~ dunif(0.60, 0.80)  # breeder (whole year)
-  s_NB[4] <- sqrt(s_yr_ad) # breeder (half year, N -> B)
-  s_BN[4] <- sqrt(s_yr_ad) # breeder (half year, B -> N)
+  sM_NB[1] <- sF_NB[1] 
+  sM_BN[1] <- sF_BN[1]  
   
+  ## Adults (no sex difference)
+  
+  s_yr_sa ~ dunif(0.50, 0.70) 
+  s_yr_ad ~ dunif(0.60, 0.80)  
+  
+  s_yr_saF <- s_yr_sa
+  s_yr_saM <- s_yr_sa 
+  
+  s_yr_adF <- s_yr_ad
+  s_yr_adM <- s_yr_ad 
+  
+  ## Adults (with sex difference)
+  
+  # s_yr_saF ~ dunif(0.50, 0.70) 
+  # s_yr_adF ~ dunif(0.60, 0.80)  
+  # s_yr_saM ~ dunif(0.50, 0.70) 
+  # s_yr_adM ~ dunif(0.60, 0.80)  
+  
+  
+  sF_NB[2:3] <- sqrt(s_yr_saF) 
+  sF_BN[2:3] <- sqrt(s_yr_saF) 
+
+  sF_NB[4] <- sqrt(s_yr_adF) 
+  sF_BN[4] <- sqrt(s_yr_adF) 
+
+  sM_NB[2:3] <- sqrt(s_yr_saM) 
+  sM_BN[2:3] <- sqrt(s_yr_saM) 
+
+  sM_NB[4] <- sqrt(s_yr_adM) 
+  sM_BN[4] <- sqrt(s_yr_adM) 
   
   
   # Productivity
@@ -231,28 +222,28 @@ GP.IPMcode <- nimbleCode({
     # Survival
     
     for(a in 2:3){
-      NNonF[a,t+1] ~ dbin(s_BN[a-1], NBreedF[a-1,t]) # Female
-      NNonM[a,t+1] ~ dbin(s_BN[a-1], NBreedM[a-1,t]) # Male
+      NNonF[a,t+1] ~ dbin(sF_BN[a-1], NBreedF[a-1,t]) # Female
+      NNonM[a,t+1] ~ dbin(sM_BN[a-1], NBreedM[a-1,t]) # Male
     }
     
     # Female
     
     NNonF[4,t+1] <- surv_NBreedF3[t+1] + surv_NBreedF4[t+1] 
-    surv_NBreedF3[t+1] ~ dbin(s_BN[3], NBreedF[3,t])
-    surv_NBreedF4[t+1] ~ dbin(s_BN[4], NBreedF[4,t])
+    surv_NBreedF3[t+1] ~ dbin(sF_BN[3], NBreedF[3,t])
+    surv_NBreedF4[t+1] ~ dbin(sF_BN[4], NBreedF[4,t])
     
     # Male
     
     NNonM[4,t+1] <- surv_NBreedM3[t+1] + surv_NBreedM4[t+1]
-    surv_NBreedM3[t+1] ~ dbin(s_BN[3], NBreedM[3,t])
-    surv_NBreedM4[t+1] ~ dbin(s_BN[4], NBreedM[4,t])
+    surv_NBreedM3[t+1] ~ dbin(sM_BN[3], NBreedM[3,t])
+    surv_NBreedM4[t+1] ~ dbin(sM_BN[4], NBreedM[4,t])
     
     
     # Process model: Non-Breeding -> Breeding season transition
     
     for(a in 1:4){
-      NBreedF[a,t+1] ~ dbin(s_NB[a], NNonF[a,t+1])  # Female
-      NBreedM[a,t+1] ~ dbin(s_NB[a], NNonM[a,t+1])  # Male
+      NBreedF[a,t+1] ~ dbin(sF_NB[a], NNonF[a,t+1])  # Female
+      NBreedM[a,t+1] ~ dbin(sM_NB[a], NNonM[a,t+1])  # Male
       
     }
   }   
@@ -268,11 +259,9 @@ GP.IPMcode <- nimbleCode({
     
     # Male 
     
-    ChM_NB[j] ~ dpois(p[NB_yr[j]] * NNonM[1,NB_yr[j]])
-    M1y_NB[j] ~ dpois(p[NB_yr[j]] * NNonM[2,NB_yr[j]])
-    M2y_NB[j] ~ dpois(p[NB_yr[j]] * NNonM[3,NB_yr[j]])
-    M3y_NB[j] ~ dpois(p[NB_yr[j]] * NNonM[4,NB_yr[j]])
-    
+    for(a in 1:4){
+      M_NB[a,j] ~ dpois(p[NB_yr[j]] * NNonM[a,NB_yr[j]])
+    }
   }
   
   # Observation Model in Breeding
@@ -285,12 +274,9 @@ GP.IPMcode <- nimbleCode({
     AF_BN[h] ~ dpois(p[BN_yr[h]] * sum(NBreedF[2:4,BN_yr[h]]))
     
     # Male
-    
-    JuM_BN[h] ~ dpois(p[BN_yr[h]] * NBreedM[1,BN_yr[h]])
-    M1y_BN[h] ~ dpois(p[BN_yr[h]] * NBreedM[2,BN_yr[h]])
-    M2y_BN[h] ~ dpois(p[BN_yr[h]] * NBreedM[3,BN_yr[h]])
-    M3y_BN[h] ~ dpois(p[BN_yr[h]] * NBreedM[4,BN_yr[h]])
-    
+    for(a in 1:4){
+      M_BN[a,h] ~ dpois(p[BN_yr[h]] * NBreedM[a,BN_yr[h]])
+    } 
   }
   
 }
@@ -301,13 +287,15 @@ GP.IPMcode <- nimbleCode({
 source("R/GPeafowlIPM_InitialSim_TwoSex_Matrix.R")
 
 
-Inits <- GP_IPM_Init(Tmax = ny.data + ny.sim, mean.p = 0.9, constant_p = TRUE)
+Inits <- GP_IPM_Init(Tmax = ny.data + ny.sim, mean.p = 0.9, constant_p = TRUE,
+                     survSexDiff = FALSE)
 Inits
 
 
 # Parameters monitored
-parameters <- c("s_NB", "s_BN", "mean.rho", "gamma", "sigma.rho", "rho", "p",
-                "NBreedF","NBreedM", "NNonF","NNonM", "Fec")
+parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", "mean.rho","gamma",
+                "sigma.rho","rho", "p", "NBreedF", "NBreedM", "NNonF", "NNonM", 
+                "Fec")
 
 
 # MCMC settings
