@@ -112,10 +112,10 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     NNonF[4,t+1] <- surv_NBreedF3[t+1] + surv_NBreedF4[t+1]
     
     # Male
-
+    
     surv_NBreedM3[t+1] <- rbinom(1, NBreedM[3,t], s_BN[3])
     surv_NBreedM4[t+1] <- rbinom(1, NBreedM[4,t], s_BN[4])
-
+    
     NNonM[4,t+1] <- surv_NBreedM3[t+1] + surv_NBreedM4[t+1]
     
     
