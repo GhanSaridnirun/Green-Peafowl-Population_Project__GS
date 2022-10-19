@@ -69,39 +69,36 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   if(survSexDiff) {
     
-  ## Adults (with sex difference)
+    # ## Adults (with sex difference)------------(TRUE)
     
-    # s_yr_saF <- runif(1, 0.50, 0.70) 
-    # s_yr_adF <- runif(1, 0.60, 0.80)  
-    # s_yr_saM <- runif(1, 0.50, 0.70) 
-    # s_yr_adM <- runif(1, 0.60, 0.80)  
+    s_yr_saF <- runif(1, 0.50, 0.70)
+    s_yr_adF <- runif(1, 0.60, 0.80)
+    s_yr_saM <- runif(1, 0.50, 0.70)
+    s_yr_adM <- runif(1, 0.60, 0.80)
     
   } else {
     
-    ## Adults (no sex difference)
+    #   ## Adults (no sex difference)--------------(FALSE)
     
-    s_yr_sa <- runif(1, 0.50, 0.70) 
-    s_yr_ad <- runif(1, 0.60, 0.80)  
+    s_yr_sa <- runif(1, 0.50, 0.70)
+    s_yr_ad <- runif(1, 0.60, 0.80)
     
     s_yr_saF <- s_yr_sa
-    s_yr_saM <- s_yr_sa 
-    
+    s_yr_saM <- s_yr_sa
     s_yr_adF <- s_yr_ad
-    s_yr_adM <- s_yr_ad 
-    
-    sF_NB[2:3] <- sqrt(s_yr_saF) 
-    sF_BN[2:3] <- sqrt(s_yr_saF) 
-    
-    sF_NB[4] <- sqrt(s_yr_adF) 
-    sF_BN[4] <- sqrt(s_yr_adF) 
-    
-    sM_NB[2:3] <- sqrt(s_yr_saM) 
-    sM_BN[2:3] <- sqrt(s_yr_saM) 
-    
-    sM_NB[4] <- sqrt(s_yr_adM) 
-    sM_BN[4] <- sqrt(s_yr_adM) 
+    s_yr_adM <- s_yr_ad
     
   }
+  
+  sF_NB[2:3] <- sqrt(s_yr_saF)
+  sF_BN[2:3] <- sqrt(s_yr_saF)
+  sF_NB[4] <- sqrt(s_yr_adF)
+  sF_BN[4] <- sqrt(s_yr_adF)
+  
+  sM_NB[2:3] <- sqrt(s_yr_saM)
+  sM_BN[2:3] <- sqrt(s_yr_saM)
+  sM_NB[4] <- sqrt(s_yr_adM)
+  sM_BN[4] <- sqrt(s_yr_adM)
   
 
   # Calculate vital rates
@@ -168,8 +165,9 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   # Arrange as list and return
   
-  Inits <- list(
+  if(survSexDiff) {
     
+  Inits <- list(  
     NBreedF = NBreedF,
     NBreedM = NBreedM,
     NNonF = NNonF,
@@ -178,8 +176,6 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     sF_BN = sF_BN,
     sM_NB = sM_NB,
     sM_BN = sM_BN,
-    s_yr_sa = s_yr_sa,
-    s_yr_ad = s_yr_ad,
     s_yr_saF = s_yr_saF,
     s_yr_adF = s_yr_adF,
     s_yr_saM = s_yr_saM,
@@ -198,15 +194,48 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     surv_NBreedF3 = surv_NBreedF3,
     surv_NBreedF4 = surv_NBreedF4,
     surv_NBreedM3 = surv_NBreedM3,
-    surv_NBreedM4 = surv_NBreedM4
-    
+    surv_NBreedM4 = surv_NBreedM4    
   )
+
+  } else {
+    
+    Inits <- list(  
+      NBreedF = NBreedF,
+      NBreedM = NBreedM,
+      NNonF = NNonF,
+      NNonM = NNonM,
+      sF_NB = sF_NB,
+      sF_BN = sF_BN,
+      sM_NB = sM_NB,
+      sM_BN = sM_BN,
+      s_yr_sa = s_yr_sa,
+      s_yr_ad = s_yr_ad,
+      s_yr_saF = s_yr_saF,
+      s_yr_adF = s_yr_adF,
+      s_yr_saM = s_yr_saM,
+      s_yr_adM = s_yr_adM,
+      pinit = pinit,
+      Fec = Fec,
+      p = p,
+      logit.p = logit.p,
+      mean.p = mean.p,
+      sigma.p = sigma.p,
+      rho = rho,
+      log.rho = log.rho,
+      mean.rho = mean.rho,
+      sigma.rho = sigma.rho,
+      gamma = gamma,
+      surv_NBreedF3 = surv_NBreedF3,
+      surv_NBreedF4 = surv_NBreedF4,
+      surv_NBreedM3 = surv_NBreedM3,
+      surv_NBreedM4 = surv_NBreedM4    
+    )    
+
+  }
   
   Inits
   
   return(Inits)
   
-  
 }
-
 

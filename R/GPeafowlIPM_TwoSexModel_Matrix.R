@@ -129,21 +129,21 @@ GP.IPMcode <- nimbleCode({
   
   ## Adults (no sex difference)
   
-  s_yr_sa ~ dunif(0.50, 0.70) 
-  s_yr_ad ~ dunif(0.60, 0.80)  
-  
-  s_yr_saF <- s_yr_sa
-  s_yr_saM <- s_yr_sa 
-  
-  s_yr_adF <- s_yr_ad
-  s_yr_adM <- s_yr_ad 
+  # s_yr_sa ~ dunif(0.50, 0.70) 
+  # s_yr_ad ~ dunif(0.60, 0.80)  
+  # 
+  # s_yr_saF <- s_yr_sa
+  # s_yr_saM <- s_yr_sa 
+  # 
+  # s_yr_adF <- s_yr_ad
+  # s_yr_adM <- s_yr_ad 
   
   ## Adults (with sex difference)
   
-  # s_yr_saF ~ dunif(0.50, 0.70) 
-  # s_yr_adF ~ dunif(0.60, 0.80)  
-  # s_yr_saM ~ dunif(0.50, 0.70) 
-  # s_yr_adM ~ dunif(0.60, 0.80)  
+  s_yr_saF ~ dunif(0.50, 0.70)
+  s_yr_adF ~ dunif(0.60, 0.80)
+  s_yr_saM ~ dunif(0.50, 0.70)
+  s_yr_adM ~ dunif(0.60, 0.80)
   
   
   sF_NB[2:3] <- sqrt(s_yr_saF) 
@@ -288,7 +288,7 @@ source("R/GPeafowlIPM_InitialSim_TwoSex_Matrix.R")
 
 
 Inits <- GP_IPM_Init(Tmax = ny.data + ny.sim, mean.p = 0.9, constant_p = TRUE,
-                     survSexDiff = FALSE)
+                     survSexDiff = TRUE)
 Inits
 
 
