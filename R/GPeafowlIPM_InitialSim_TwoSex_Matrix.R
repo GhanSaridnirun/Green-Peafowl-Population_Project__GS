@@ -94,6 +94,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   sF_BN[2:3] <- sqrt(s_yr_saF)
   sF_NB[4] <- sqrt(s_yr_adF)
   sF_BN[4] <- sqrt(s_yr_adF)
+
   sM_NB[2:3] <- sqrt(s_yr_saM)
   sM_BN[2:3] <- sqrt(s_yr_saM)
   sM_NB[4] <- sqrt(s_yr_adM)
@@ -164,8 +165,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   # Arrange as list and return
   
-  Inits <- list(
-    
+  Inits <- list(  
     NBreedF = NBreedF,
     NBreedM = NBreedM,
     NNonF = NNonF,
@@ -174,8 +174,6 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     sF_BN = sF_BN,
     sM_NB = sM_NB,
     sM_BN = sM_BN,
-    # s_yr_sa = s_yr_sa,
-    # s_yr_ad = s_yr_ad,
     s_yr_saF = s_yr_saF,
     s_yr_adF = s_yr_adF,
     s_yr_saM = s_yr_saM,
@@ -194,15 +192,17 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     surv_NBreedF3 = surv_NBreedF3,
     surv_NBreedF4 = surv_NBreedF4,
     surv_NBreedM3 = surv_NBreedM3,
-    surv_NBreedM4 = surv_NBreedM4
-    
+    surv_NBreedM4 = surv_NBreedM4    
   )
+
+  if(!survSexDiff){
+    Inits$s_yr_sa <- s_yr_sa
+    Inits$s_yr_ad <- s_yr_ad 
+  }
   
   Inits
   
   return(Inits)
   
-  
 }
-
 
