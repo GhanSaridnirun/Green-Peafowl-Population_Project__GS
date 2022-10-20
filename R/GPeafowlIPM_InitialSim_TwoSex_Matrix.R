@@ -94,7 +94,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   sF_BN[2:3] <- sqrt(s_yr_saF)
   sF_NB[4] <- sqrt(s_yr_adF)
   sF_BN[4] <- sqrt(s_yr_adF)
-  
+
   sM_NB[2:3] <- sqrt(s_yr_saM)
   sM_BN[2:3] <- sqrt(s_yr_saM)
   sM_NB[4] <- sqrt(s_yr_adM)

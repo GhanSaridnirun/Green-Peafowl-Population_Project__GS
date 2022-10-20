@@ -63,6 +63,10 @@ AF_BN <- c(18,49,79,71,47,44,30,25,38,54,48,97,17,1) #All Female
 # 7ch <- c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0)
 # brood <- c(9,28,39,28,12,12,45,41,98,87,65,29,15,11,15,33,15,30,36,31,50,62,16,8,8,0)
 
+# Clutch Sizes
+
+# ClutchSize <- c(3,7,4,4,4,11,3,3,5,5,10)
+
 # # Male count Data
 # 
 ChM_NB <- c(20,39,78,72,52,21,25,26,33,54,13,4)      #Male Chicks Count
@@ -129,31 +133,32 @@ GP.IPMcode <- nimbleCode({
   
   ## Adults (no sex difference)
   
-  # s_yr_sa ~ dunif(0.50, 0.70) 
-  # s_yr_ad ~ dunif(0.60, 0.80)  
-  # 
-  # s_yr_saF <- s_yr_sa
-  # s_yr_saM <- s_yr_sa 
-  # 
-  # s_yr_adF <- s_yr_ad
-  # s_yr_adM <- s_yr_ad 
+  s_yr_sa ~ dunif(0.50, 0.70) 
+  s_yr_ad ~ dunif(0.60, 0.80)  
+  
+  s_yr_saF <- s_yr_sa
+  s_yr_saM <- s_yr_sa 
+  
+  s_yr_adF <- s_yr_ad
+  s_yr_adM <- s_yr_ad 
   
   ## Adults (with sex difference)
   
-  s_yr_saF ~ dunif(0.50, 0.70)
-  s_yr_adF ~ dunif(0.60, 0.80)
-  s_yr_saM ~ dunif(0.50, 0.70)
-  s_yr_adM ~ dunif(0.60, 0.80)
+  # s_yr_saF ~ dunif(0.50, 0.70) 
+  # s_yr_adF ~ dunif(0.60, 0.80)  
+  # s_yr_saM ~ dunif(0.50, 0.70) 
+  # s_yr_adM ~ dunif(0.60, 0.80)  
+  
   
   sF_NB[2:3] <- sqrt(s_yr_saF) 
   sF_BN[2:3] <- sqrt(s_yr_saF) 
-
+  
   sF_NB[4] <- sqrt(s_yr_adF) 
   sF_BN[4] <- sqrt(s_yr_adF) 
-
+  
   sM_NB[2:3] <- sqrt(s_yr_saM) 
   sM_BN[2:3] <- sqrt(s_yr_saM) 
-
+  
   sM_NB[4] <- sqrt(s_yr_adM) 
   sM_BN[4] <- sqrt(s_yr_adM) 
   
@@ -287,7 +292,7 @@ source("R/GPeafowlIPM_InitialSim_TwoSex_Matrix.R")
 
 
 Inits <- GP_IPM_Init(Tmax = ny.data + ny.sim, mean.p = 0.9, constant_p = TRUE,
-                     survSexDiff = TRUE)
+                     survSexDiff = FALSE)
 Inits
 
 
