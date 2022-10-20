@@ -165,8 +165,6 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   # Arrange as list and return
   
-  if(survSexDiff) {
-    
   Inits <- list(  
     NBreedF = NBreedF,
     NBreedM = NBreedM,
@@ -197,40 +195,9 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     surv_NBreedM4 = surv_NBreedM4    
   )
 
-  } else {
-    
-    Inits <- list(  
-      NBreedF = NBreedF,
-      NBreedM = NBreedM,
-      NNonF = NNonF,
-      NNonM = NNonM,
-      sF_NB = sF_NB,
-      sF_BN = sF_BN,
-      sM_NB = sM_NB,
-      sM_BN = sM_BN,
-      s_yr_sa = s_yr_sa,
-      s_yr_ad = s_yr_ad,
-      s_yr_saF = s_yr_saF,
-      s_yr_adF = s_yr_adF,
-      s_yr_saM = s_yr_saM,
-      s_yr_adM = s_yr_adM,
-      pinit = pinit,
-      Fec = Fec,
-      p = p,
-      logit.p = logit.p,
-      mean.p = mean.p,
-      sigma.p = sigma.p,
-      rho = rho,
-      log.rho = log.rho,
-      mean.rho = mean.rho,
-      sigma.rho = sigma.rho,
-      gamma = gamma,
-      surv_NBreedF3 = surv_NBreedF3,
-      surv_NBreedF4 = surv_NBreedF4,
-      surv_NBreedM3 = surv_NBreedM3,
-      surv_NBreedM4 = surv_NBreedM4    
-    )    
-
+  if(!survSexDiff){
+    Inits$s_yr_sa <- s_yr_sa
+    Inits$s_yr_ad <- s_yr_ad 
   }
   
   Inits
