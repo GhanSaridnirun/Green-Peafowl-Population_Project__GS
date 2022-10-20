@@ -1,6 +1,6 @@
 
 
-GP_IPM_Init <- function(Tmax, mean.p, constant_p){
+GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   Amax <- 4                      # set Tmax and Amax as constants
   
@@ -8,7 +8,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
   ## Set up vectors and matrices
   NBreedF <- NNonF <- matrix(NA, nrow = Amax, ncol = Tmax+1)
   NBreedM <- NNonM <- matrix(NA, nrow = Amax, ncol = Tmax+1)
-  s_NB <- s_BN <- rep(NA, Amax)
+  sM_NB <- sM_BN <- sF_NB <- sF_BN <- rep(NA, Amax)
   pinit <- rep(NA, Amax)
   Fec <- rep(NA, Tmax)
   p <- logit.p <- rep(NA, Tmax) 
@@ -56,19 +56,51 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
   surv_NBreedM3[1] <- surv_NBreedM4[1] <- 0
   
   # Survival rates
-  s_NB[1] <- runif(1, 0.30, 0.40)
-  s_BN[1] <- runif(1, 0.60, 0.80)
   
-  s_yr_sa <- runif(1, 0.50, 0.70) # sub adult (whole year)
-  s_NB[2:3] <- sqrt(s_yr_sa) # sub adult (half year, N -> B)
-  s_BN[2:3] <- sqrt(s_yr_sa) # sub adult (half year, B -> N)
+  ## Chicks and juveniles
   
-  s_yr_ad <- runif(1, 0.60, 0.80)  # breeder (whole year)
-  s_NB[4] <- sqrt(s_yr_ad) # breeder (half year, N -> B)
-  s_BN[4] <- sqrt(s_yr_ad) # breeder (half year, B -> N)
+  sF_NB[1] <- runif(1, 0.30, 0.40) 
+  sF_BN[1] <- runif(1, 0.60, 0.80) 
   
+  sM_NB[1] <- sF_NB[1] 
+  sM_BN[1] <- sF_BN[1]
   
+  ## Sub-adult and Adult
   
+  if(survSexDiff) {
+    
+    # ## Adults (with sex difference)------------(TRUE)
+    
+    s_yr_saF <- runif(1, 0.50, 0.70)
+    s_yr_adF <- runif(1, 0.60, 0.80)
+    s_yr_saM <- runif(1, 0.50, 0.70)
+    s_yr_adM <- runif(1, 0.60, 0.80)
+    
+  } else {
+    
+    #   ## Adults (no sex difference)--------------(FALSE)
+    
+    s_yr_sa <- runif(1, 0.50, 0.70)
+    s_yr_ad <- runif(1, 0.60, 0.80)
+    
+    s_yr_saF <- s_yr_sa
+    s_yr_saM <- s_yr_sa
+    s_yr_adF <- s_yr_ad
+    s_yr_adM <- s_yr_ad
+    
+  }
+  
+  sF_NB[2:3] <- sqrt(s_yr_saF)
+  sF_BN[2:3] <- sqrt(s_yr_saF)
+  sF_NB[4] <- sqrt(s_yr_adF)
+  sF_BN[4] <- sqrt(s_yr_adF)
+
+  sM_NB[2:3] <- sqrt(s_yr_saM)
+  sM_BN[2:3] <- sqrt(s_yr_saM)
+  sM_NB[4] <- sqrt(s_yr_adM)
+  sM_BN[4] <- sqrt(s_yr_adM)
+  
+
   # Calculate vital rates
   
   for (t in 1:Tmax){
@@ -100,21 +132,21 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     
     # Survival
     for(a in 2:3){
-      NNonF[a,t+1] <- rbinom(1, NBreedF[a-1,t], s_BN[a-1])  # Female
-      NNonM[a,t+1] <- rbinom(1, NBreedM[a-1,t], s_BN[a-1])  # Male
+      NNonF[a,t+1] <- rbinom(1, NBreedF[a-1,t], sF_BN[a-1])  # Female
+      NNonM[a,t+1] <- rbinom(1, NBreedM[a-1,t], sM_BN[a-1])  # Male
     }
     
     # Female
     
-    surv_NBreedF3[t+1] <- rbinom(1, NBreedF[3,t], s_BN[3])
-    surv_NBreedF4[t+1] <- rbinom(1, NBreedF[4,t], s_BN[4])
+    surv_NBreedF3[t+1] <- rbinom(1, NBreedF[3,t], sF_BN[3])
+    surv_NBreedF4[t+1] <- rbinom(1, NBreedF[4,t], sF_BN[4])
     
     NNonF[4,t+1] <- surv_NBreedF3[t+1] + surv_NBreedF4[t+1]
     
     # Male
     
-    surv_NBreedM3[t+1] <- rbinom(1, NBreedM[3,t], s_BN[3])
-    surv_NBreedM4[t+1] <- rbinom(1, NBreedM[4,t], s_BN[4])
+    surv_NBreedM3[t+1] <- rbinom(1, NBreedM[3,t], sM_BN[3])
+    surv_NBreedM4[t+1] <- rbinom(1, NBreedM[4,t], sM_BN[4])
     
     NNonM[4,t+1] <- surv_NBreedM3[t+1] + surv_NBreedM4[t+1]
     
@@ -122,8 +154,8 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     # Process model: Non-Breeding -> Breeding season transition
     
     for(a in 1:Amax){
-      NBreedF[a,t+1] <- rbinom(1, NNonF[a,t+1], s_NB[a])  #
-      NBreedM[a,t+1] <- rbinom(1, NNonM[a,t+1], s_NB[a])
+      NBreedF[a,t+1] <- rbinom(1, NNonF[a,t+1], sF_NB[a])  #
+      NBreedM[a,t+1] <- rbinom(1, NNonM[a,t+1], sM_NB[a])
     }
     
     
@@ -133,16 +165,19 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
   
   # Arrange as list and return
   
-  Inits <- list(
-    
+  Inits <- list(  
     NBreedF = NBreedF,
     NBreedM = NBreedM,
     NNonF = NNonF,
     NNonM = NNonM,
-    s_NB = s_NB,
-    s_BN = s_BN,
-    s_yr_sa = s_yr_sa,
-    s_yr_ad = s_yr_ad,
+    sF_NB = sF_NB,
+    sF_BN = sF_BN,
+    sM_NB = sM_NB,
+    sM_BN = sM_BN,
+    s_yr_saF = s_yr_saF,
+    s_yr_adF = s_yr_adF,
+    s_yr_saM = s_yr_saM,
+    s_yr_adM = s_yr_adM,
     pinit = pinit,
     Fec = Fec,
     p = p,
@@ -157,14 +192,17 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p){
     surv_NBreedF3 = surv_NBreedF3,
     surv_NBreedF4 = surv_NBreedF4,
     surv_NBreedM3 = surv_NBreedM3,
-    surv_NBreedM4 = surv_NBreedM4
-    
+    surv_NBreedM4 = surv_NBreedM4    
   )
+
+  if(!survSexDiff){
+    Inits$s_yr_sa <- s_yr_sa
+    Inits$s_yr_ad <- s_yr_ad 
+  }
   
   Inits
   
   return(Inits)
-  
   
 }
 
