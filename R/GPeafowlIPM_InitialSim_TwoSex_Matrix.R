@@ -12,15 +12,14 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   pinit <- rep(NA, Amax)
   Fec <- rep(NA, Tmax)
   p <- logit.p <- rep(NA, Tmax) 
-  rho <- log.rho <- rep(NA, Tmax)
+  rho <- rep(NA, Tmax)
   
   surv_NBreedF3 <- surv_NBreedF4 <- rep(NA, Tmax+1)
   surv_NBreedM3 <- surv_NBreedM4 <- rep(NA, Tmax+1)
   
   ## Sample values for parameters with priors
   # Productivity
-  mean.rho <- runif(1, 3, 5)
-  sigma.rho <- runif(1, 0, 0.1)
+  mean.rho <- runif(1, 1, 5)
   gamma <- 0.5
   
   
@@ -110,8 +109,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   
   for (t in 1:Tmax){
-    log.rho[t] <- rnorm(1, log(mean.rho), sigma.rho)
-    rho[t] <- exp(log.rho[t])
+    rho[t] <- mean.rho
   }
   
   #----------------------------------------------------------
@@ -185,9 +183,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     mean.p = mean.p,
     sigma.p = sigma.p,
     rho = rho,
-    log.rho = log.rho,
     mean.rho = mean.rho,
-    sigma.rho = sigma.rho,
     gamma = gamma,
     surv_NBreedF3 = surv_NBreedF3,
     surv_NBreedF4 = surv_NBreedF4,
