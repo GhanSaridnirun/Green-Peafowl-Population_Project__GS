@@ -87,6 +87,9 @@ M_NB <- rbind(ChM_NB, M1y_NB, M2y_NB, M3y_NB)
 ny.data <- 3 # Number of years for which the data collected
 ny.sim <- 20 # Number of years to simulate after the data collection
 
+# Reproduction data
+
+source("R/ReproductionDataPrep.R")
 
 ## Arrange constants
 
@@ -95,7 +98,9 @@ GP.IPMconstants <- list(Tmax = ny.data + ny.sim,
                         ny.sim = ny.sim,
                         ny.data = ny.data,
                         NB_yr = NB_yr,
-                        BN_yr = BN_yr
+                        BN_yr = BN_yr,
+                        xmax = xmax,
+                        Year_BS = Year_BS 
                         
 )
 
@@ -105,12 +110,15 @@ GP.IPMdata <- list(ChF_NB = ChF_NB,
                    AF_NB = AF_NB,
                    AF_BN = AF_BN,
                    M_BN = M_BN,
-                   M_NB = M_NB
+                   M_NB = M_NB,
+                   BroodSize = BroodSize
 ) 
 
 
 GPIPM <- list(GP.IPMconstants, GP.IPMdata)  
 str(GPIPM)  
+
+
 
 
 
@@ -165,13 +173,28 @@ GP.IPMcode <- nimbleCode({
   
   # Productivity
   
+  for (x in 1:xmax) {
+
+    BroodSize[x] ~ dpois(rho[Year_BS[x]])
+
+  }
+
   for (t in 1:Tmax){
     log.rho[t] ~ dnorm(log(mean.rho), sd = sigma.rho)
     rho[t] <- exp(log.rho[t])
   }
-  
+
   mean.rho ~ dunif(3, 5)
-  sigma.rho ~ dunif(0, 1) 
+  sigma.rho ~ dunif(0, 1)
+  
+  # for (t in 1:Tmax){
+  #   log.rho[t] ~ dnorm(log(mean.rho), sd = sigma.rho)
+  #   rho[t] <- exp(log.rho[t])
+  # }
+  # 
+  # mean.rho ~ dunif(3, 5)
+  # sigma.rho ~ dunif(0, 1)
+  
   
   # Sex ratio of the chicks
   
@@ -304,10 +327,10 @@ parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", "mean.rho","gamma",
 
 # MCMC settings
 
-ni <- 10
-nb <- 0
-nt <- 1
-nc <- 3
+# ni <- 10
+# nb <- 0
+# nt <- 1
+# nc <- 3
 
 # ni <- 200000     # Run Time around 15 minutes
 # nb <- 50000      # Using initial values
@@ -319,10 +342,10 @@ nc <- 3
 # nt <- 30
 # nc <- 4
 
-# ni <- 10000
-# nb <- 5000
-# nt <- 1
-# nc <- 3
+ni <- 10000
+nb <- 5000
+nt <- 1
+nc <- 3
 
 
 
