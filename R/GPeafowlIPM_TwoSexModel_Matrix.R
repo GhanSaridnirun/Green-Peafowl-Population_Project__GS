@@ -81,7 +81,7 @@ M_BN <- rbind(JuM_BN, M1y_BN, M2y_BN, M3y_BN)
 M_NB <- rbind(ChM_NB, M1y_NB, M2y_NB, M3y_NB)
 
 ny.data <- 3 # Number of years for which the data collected
-ny.sim <- 20 # Number of years to simulate after the data collection
+ny.sim <- 5 # Number of years to simulate after the data collection
 
 
 ## Arrange constants
@@ -161,12 +161,12 @@ GP.IPMcode <- nimbleCode({
   # Productivity
   
   for (t in 1:Tmax){
-    log.rho[t] ~ dnorm(log(mean.rho), sd = sigma.rho)
-    rho[t] <- exp(log.rho[t])
+    
+    rho[t] <- mean.rho
+    
   }
   
-  mean.rho ~ dunif(3, 5)
-  sigma.rho ~ dunif(0, 1) 
+  mean.rho ~ dunif(1, 5)
   
   # Sex ratio of the chicks
   
@@ -293,16 +293,16 @@ Inits
 
 # Parameters monitored
 parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", "mean.rho","gamma",
-                "sigma.rho","rho", "p", "NBreedF", "NBreedM", "NNonF", "NNonM", 
+                "rho", "p", "NBreedF", "NBreedM", "NNonF", "NNonM", 
                 "Fec")
 
 
 # MCMC settings
 
-ni <- 10
-nb <- 0
-nt <- 1
-nc <- 3
+# ni <- 10
+# nb <- 0
+# nt <- 1
+# nc <- 3
 
 # ni <- 200000     # Run Time around 15 minutes
 # nb <- 50000      # Using initial values
@@ -314,10 +314,10 @@ nc <- 3
 # nt <- 30
 # nc <- 4
 
-# ni <- 10000
-# nb <- 5000
-# nt <- 1
-# nc <- 3
+ni <- 10000
+nb <- 5000
+nt <- 1
+nc <- 3
 
 
 
@@ -333,8 +333,11 @@ out <- nimbleMCMC(code = GP.IPMcode,
                   thin = nt,
                   nchains = nc)
 
+# Plot the results
+plot(out, ask = T)
+
 # Save output
-saveRDS(out, file = "PeafowlIPM_TwoSex_Matrix_TestRun.rds")
+saveRDS(out, file = "PeafowlIPM_TwoSex_Matrix_TestRun_ComRep_Origin.rds")
 
 print(out,2)
 summary(out)
