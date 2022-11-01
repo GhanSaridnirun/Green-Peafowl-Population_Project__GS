@@ -100,6 +100,7 @@ GP.IPMconstants <- list(Tmax = ny.data + ny.sim,
                         NB_yr = NB_yr,
                         BN_yr = BN_yr,
                         xmax = xmax,
+                        ymax = ymax,
                         Year_BS = Year_BS 
                         
 )
@@ -111,6 +112,7 @@ GP.IPMdata <- list(ChF_NB = ChF_NB,
                    AF_BN = AF_BN,
                    M_BN = M_BN,
                    M_NB = M_NB,
+                   Rep = Rep,
                    BroodSize = BroodSize
 ) 
 
@@ -171,6 +173,17 @@ GP.IPMcode <- nimbleCode({
   sM_BN[4] <- sqrt(s_yr_adM) 
   
   
+  # Breeding Probability
+  
+  for (y in 1:ymax) {
+    
+    Rep[y] ~ dbern(pRep) 
+    
+  }
+  
+  pRep ~ dunif(0, 1)
+  
+  
   # Productivity
   
   for (x in 1:xmax) {
@@ -186,7 +199,7 @@ GP.IPMcode <- nimbleCode({
   }
   
   mean.rho ~ dunif(1, 5)
-  
+
   
   # Sex ratio of the chicks
   
@@ -229,7 +242,7 @@ GP.IPMcode <- nimbleCode({
     
     # Total number of chicks
     
-    Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * rho[t])
+    Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep * rho[t])
     
     
     # Allocate chicks to a sex
@@ -303,7 +316,7 @@ GP.IPMcode <- nimbleCode({
 
 # Initial values
 
-source("R/GPeafowlIPM_InitialSim_TwoSex_Matrix.R")
+source("R/GPeafowlIPM_InitialSim_TwoSex_Matrix_BreedProb.R")
 
 
 Inits <- GP_IPM_Init(Tmax = ny.data + ny.sim, mean.p = 0.9, constant_p = TRUE,
@@ -354,7 +367,7 @@ out <- nimbleMCMC(code = GP.IPMcode,
                   nchains = nc)
 
 # Save output
-saveRDS(out, file = "PeafowlIPM_TwoSex_Matrix_TestRun_ComRep_Clutch_Origin.rds")
+saveRDS(out, file = "PeafowlIPM_TwoSex_Matrix_TestRun_BreedProb.rds")
 
 plot(out, ask = T)
 

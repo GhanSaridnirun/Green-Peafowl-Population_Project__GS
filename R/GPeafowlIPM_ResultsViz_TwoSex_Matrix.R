@@ -35,7 +35,7 @@ data.sum <- ddply(data, .(parameter), summarise, median = median(value, na.rm = 
                   uCI_50 = quantile(value, probs = 0.75, na.rm = T))
 
 data.sum
-
+write.csv(data.sum, "Summary.csv", row.names = FALSE)
 
 # Other parameter
 # popN <- paste('s_BN[', c(1:16), ']', sep = '')
@@ -56,8 +56,12 @@ NBrM4 <- paste('NBreedM[', c(4),',',' ', c(1:Tmax), ']', sep = '') # 3 Years
 ## Subset data 
 
 data.NBRF <- subset(data.sum, parameter%in% c(NBrF1,NBrF2,NBrF3,NBrF4))
+write.csv(data.NBRF, "NBRF.csv", row.names = FALSE)
+
 
 data.NBRM <- subset(data.sum, parameter%in% c(NBrM1,NBrM2,NBrM3,NBrM4))
+write.csv(data.NBRM, "NBRM.csv", row.names = FALSE)
+
 
 ## Add indexT ans age class time
 
@@ -93,7 +97,7 @@ PBRF <- ggplot(BrF, aes(x = Year, y = median)) +
     subtitle = "Breeding Season",
     # caption =
     x = "Year", 
-    y = "Number",
+    y = "Population size",
     tag = "Figure 1",
     # colour = 
   )
@@ -105,10 +109,10 @@ PBRM <- ggplot(BrM, aes(x = Year, y = median)) +
   theme_bw() +
   labs(
     title = "Prediction number of 4 male age classes in 20 years",
-    subtitle = "Non-breeding Season",
+    subtitle = "Breeding Season",
     # caption =
     x = "Year", 
-    y = "Number",
+    y = "Population size",
     tag = "Figure 2",
     # colour = 
   )
@@ -138,8 +142,10 @@ NNoM4 <- paste('NNonM[', c(4),',',' ', c(1:Tmax), ']', sep = '') # 3 Years
 # ## Subset data 
 
 data.NNOF <- subset(data.sum, parameter%in% c(NNoF1,NNoF2,NNoF3,NNoF4))
+write.csv(data.NNOF, "NNOF.csv", row.names = FALSE)
 
 data.NNOM <- subset(data.sum, parameter%in% c(NNoM1,NNoM2,NNoM3,NNoM4))
+write.csv(data.NNOM, "NNOM.csv", row.names = FALSE)
 
 # ## Add indexT ans age class time
 
@@ -176,7 +182,7 @@ PNOF <- ggplot(NoF, aes(x = Year, y = median)) +
     subtitle = "Non-breeding Season",
     # caption =
     x = "Year", 
-    y = "Number",
+    y = "Population size",
     tag = "Figure 3",
     # colour = 
   )
@@ -191,7 +197,7 @@ PNOM <- ggplot(NoM, aes(x = Year, y = median)) +
     subtitle = "Non-breeding Season",
     # caption =
     x = "Year", 
-    y = "Number",
+    y = "Population size",
     tag = "Figure 4",
     # colour = 
   )

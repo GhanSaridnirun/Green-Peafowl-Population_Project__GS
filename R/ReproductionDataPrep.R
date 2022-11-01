@@ -12,6 +12,21 @@ str(RepData)
     BroodSize <- as.vector(RepFCh$Brood.size)       # Brood size
     
     Year_BS <- as.vector(RepFCh$index_y)            # Year index Breeding   
-  
-  
 
+      
+# Breeding probability
+    
+  NonBreedRep <- subset(RepData, Season == 'Non-Breeding')
+    
+  NonBreedRep$Rep <- ifelse(NonBreedRep$Age.Class == 'Single_Female', 0, 1)
+  
+  table(NonBreedRep$Age.Class, NonBreedRep$Rep)
+
+  Rep <- as.vector(NonBreedRep$Rep)
+  
+  ymax <- length(Rep)
+
+
+  
+  
+  
