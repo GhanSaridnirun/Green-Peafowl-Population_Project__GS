@@ -177,7 +177,7 @@ GP.IPMcode <- nimbleCode({
   
   for (y in 1:ymax) {
     
-    Rep[y] ~ dbern(pRep) 
+  Rep[y] ~ dbern(pRep) 
     
   }
   

@@ -19,14 +19,14 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   ## Sample values for parameters with priors
   
-  # Productivity
-  mean.rho <- runif(1, 1, 5)
-  gamma <- 0.5
-  
-  
   # Breeding Probability
   
   pRep <- runif(1, 0, 1)
+  
+  # Productivity
+  
+  mean.rho <- runif(1, 1, 5)
+  gamma <- 0.5
   
   
   # Detection Probability
