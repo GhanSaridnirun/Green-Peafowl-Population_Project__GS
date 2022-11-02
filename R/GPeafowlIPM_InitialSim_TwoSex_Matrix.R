@@ -18,7 +18,9 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   surv_NBreedM3 <- surv_NBreedM4 <- rep(NA, Tmax+1)
   
   ## Sample values for parameters with priors
+  
   # Productivity
+  
   mean.rho <- runif(1, 1, 5)
   gamma <- 0.5
   

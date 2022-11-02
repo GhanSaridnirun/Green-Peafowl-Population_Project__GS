@@ -110,8 +110,7 @@ GP.IPMdata <- list(ChF_NB = ChF_NB,
                    AF_NB = AF_NB,
                    AF_BN = AF_BN,
                    M_BN = M_BN,
-                   M_NB = M_NB,
-                   BroodSize = BroodSize
+                   M_NB = M_NB
 ) 
 
 
@@ -172,12 +171,6 @@ GP.IPMcode <- nimbleCode({
   
   
   # Productivity
-  
-  for (x in 1:xmax) {
-    
-    BroodSize[x] ~ dpois(rho[Year_BS[x]])
-    
-  }
   
   for (t in 1:Tmax){
     
