@@ -25,8 +25,39 @@ str(RepData)
   Rep <- as.vector(NonBreedRep$Rep)
   
   ymax <- length(Rep)
+  
+  
+# Brood data in breeding season 
+  
+  BreedRep <- subset(RepData, Season == 'Breeding')
+  
+  BreedRep$Rep <- ifelse(BreedRep$Age.Class == 'Single_Female', 0, 1)
+  
+  table(BreedRep$Age.Class, BreedRep$Rep)
+  
+  BrRep <- as.vector(BreedRep$Rep)
+  
+  vmax <- length(BrRep)
+  
+
+# Clutch Sizes
+  
+  ClutchSize <- c(3,7,4,4,4,11,3,3,5,5,10)  
 
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
