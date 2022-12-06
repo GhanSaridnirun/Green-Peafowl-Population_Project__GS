@@ -18,7 +18,7 @@ str(RepData)
     
   NonBreedRep <- subset(RepData, Season == 'Non-Breeding')
     
-  NonBreedRep$Rep <- ifelse(NonBreedRep$Age.Class == 'Single_Female', 0, 1)
+  NonBreedRep$Rep <- ifelse(NonBreedRep$Age.Class == 'Single Female', 0, 1)
   
   table(NonBreedRep$Age.Class, NonBreedRep$Rep)
 
@@ -31,7 +31,7 @@ str(RepData)
   
   BreedRep <- subset(RepData, Season == 'Breeding')
   
-  BreedRep$Rep <- ifelse(BreedRep$Age.Class == 'Single_Female', 0, 1)
+  BreedRep$Rep <- ifelse(BreedRep$Age.Class == 'Single Female', 0, 1)
   
   table(BreedRep$Age.Class, BreedRep$Rep)
   
@@ -42,8 +42,7 @@ str(RepData)
 
 # Clutch Sizes
   
-  ClutchSize <- c(3,7,4,4,4,11,3,3,5,5,10)  
-
+  ClutchSize <- c(3,7,4,4,4,11,3,3,5,5,10)
 
   
   

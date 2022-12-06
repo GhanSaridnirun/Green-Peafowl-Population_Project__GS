@@ -11,13 +11,13 @@ library(plyr)
 # Set up Age and time 
 
 Amax <- 4
-Tmax <- 24
+Tmax <- 50
 
 
 # Set up
 ## Load posterior data
 
-gpipm <- readRDS('PeafowlIPM_TwoSex_Matrix_TestRun.rds')
+gpipm <- readRDS('PeafowlIPM_TwoSex_Matrix_TestRun_TOTOlong.rds')
 gpipm
 
 ## Re-arrange data
@@ -35,7 +35,7 @@ data.sum <- ddply(data, .(parameter), summarise, median = median(value, na.rm = 
                   uCI_50 = quantile(value, probs = 0.75, na.rm = T))
 
 data.sum
-write.csv(data.sum, "Summary.csv", row.names = FALSE)
+# write.csv(data.sum, "Summary.csv", row.names = FALSE)
 
 # Other parameter
 # popN <- paste('s_BN[', c(1:16), ']', sep = '')
@@ -56,11 +56,11 @@ NBrM4 <- paste('NBreedM[', c(4),',',' ', c(1:Tmax), ']', sep = '') # 3 Years
 ## Subset data 
 
 data.NBRF <- subset(data.sum, parameter%in% c(NBrF1,NBrF2,NBrF3,NBrF4))
-write.csv(data.NBRF, "NBRF.csv", row.names = FALSE)
+# write.csv(data.NBRF, "NBRF.csv", row.names = FALSE)
 
 
 data.NBRM <- subset(data.sum, parameter%in% c(NBrM1,NBrM2,NBrM3,NBrM4))
-write.csv(data.NBRM, "NBRM.csv", row.names = FALSE)
+# write.csv(data.NBRM, "NBRM.csv", row.names = FALSE)
 
 
 ## Add indexT ans age class time
@@ -142,10 +142,10 @@ NNoM4 <- paste('NNonM[', c(4),',',' ', c(1:Tmax), ']', sep = '') # 3 Years
 # ## Subset data 
 
 data.NNOF <- subset(data.sum, parameter%in% c(NNoF1,NNoF2,NNoF3,NNoF4))
-write.csv(data.NNOF, "NNOF.csv", row.names = FALSE)
+# write.csv(data.NNOF, "NNOF.csv", row.names = FALSE)
 
 data.NNOM <- subset(data.sum, parameter%in% c(NNoM1,NNoM2,NNoM3,NNoM4))
-write.csv(data.NNOM, "NNOM.csv", row.names = FALSE)
+# write.csv(data.NNOM, "NNOM.csv", row.names = FALSE)
 
 # ## Add indexT ans age class time
 
