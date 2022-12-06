@@ -43,7 +43,7 @@ str(RepData)
 # Clutch Sizes
   
   ClutchSize <- c(3,7,4,4,4,11,3,3,5,5,10)
-
+  cmax <- length(ClutchSize) 
   
   
   

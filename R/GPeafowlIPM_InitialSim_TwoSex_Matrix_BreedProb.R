@@ -13,9 +13,11 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   Fec <- rep(NA, Tmax)
   p <- logit.p <- rep(NA, Tmax) 
   rho <- rep(NA, Tmax)
+  S_C <- rep(NA, Tmax)
   
   surv_NBreedF3 <- surv_NBreedF4 <- rep(NA, Tmax+1)
   surv_NBreedM3 <- surv_NBreedM4 <- rep(NA, Tmax+1)
+  
   
   ## Sample values for parameters with priors
   
@@ -23,10 +25,19 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   pRep <- runif(1, 0, 1)
   
+  
   # Productivity
+  
+  
+  # Brood Size
   
   mean.rho <- runif(1, 1, 5)
   gamma <- 0.5
+  
+
+  # Clutch Size
+  
+  mean.CS <- runif(1, 3, 11) 
   
   
   # Detection Probability
@@ -118,6 +129,12 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     rho[t] <- mean.rho
   }
   
+  
+  # Clutch Survival [from egg to chick]
+  
+   S_C[1:Tmax] <- rho[1:Tmax]/mean.CS 
+
+   
   #----------------------------------------------------------
   
   # Project population size
@@ -128,7 +145,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     # Process model: Breeding -> Non-Breeding season transition    
     
     # Total number of chicks
-    Fec[t] <- rpois(1, sum(NBreedF[3:4,t]) * pRep  * rho[t])
+    Fec[t] <- rpois(1, sum(NBreedF[3:4,t]) * pRep  * mean.CS * S_C[t])
     
     # Allocate chicks to a sex
     NNonF[1,t+1] <- rbinom(1, Fec[t], gamma) # Female chicks 
@@ -182,6 +199,8 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     s_yr_adF = s_yr_adF,
     s_yr_saM = s_yr_saM,
     s_yr_adM = s_yr_adM,
+    mean.CS = mean.CS,
+    S_C = S_C,
     pRep = pRep,
     pinit = pinit,
     Fec = Fec,

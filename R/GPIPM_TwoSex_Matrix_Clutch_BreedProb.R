@@ -63,9 +63,6 @@ AF_BN <- c(18,49,79,71,47,44,30,25,38,54,48,97,17,1) #All Female
 # 7ch <- c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0)
 # brood <- c(9,28,39,28,12,12,45,41,98,87,65,29,15,11,15,33,15,30,36,31,50,62,16,8,8,0)
 
-# Clutch Sizes
-
-# ClutchSize <- c(3,7,4,4,4,11,3,3,5,5,10)
 
 # # Male count Data
 # 
@@ -101,7 +98,8 @@ GP.IPMconstants <- list(Tmax = ny.data + ny.sim,
                         BN_yr = BN_yr,
                         xmax = xmax,
                         ymax = ymax,
-                        Year_BS = Year_BS 
+                        Year_BS = Year_BS,
+                        cmax = cmax
                         
 )
 
@@ -113,7 +111,8 @@ GP.IPMdata <- list(ChF_NB = ChF_NB,
                    M_BN = M_BN,
                    M_NB = M_NB,
                    Rep = Rep,
-                   BroodSize = BroodSize
+                   BroodSize = BroodSize,
+                   ClutchSize = ClutchSize
 ) 
 
 
@@ -184,7 +183,7 @@ GP.IPMcode <- nimbleCode({
   pRep ~ dunif(0, 1)
   
   
-  # Productivity
+  # Brood Size
   
   for (x in 1:xmax) {
     
@@ -200,6 +199,22 @@ GP.IPMcode <- nimbleCode({
   
   mean.rho ~ dunif(1, 5)
 
+  
+  # Clutch Survival [from egg to chick]
+  
+  S_C[1:Tmax] <- (rho[1:Tmax]/mean.CS) 
+  
+  
+  # Clutch Size
+  
+  for (x in 1:cmax) {
+    
+    ClutchSize[x] ~ dpois(mean.CS)
+    
+  }
+  
+  mean.CS ~ dunif(3, 11) 
+  
   
   # Sex ratio of the chicks
   
@@ -244,7 +259,7 @@ GP.IPMcode <- nimbleCode({
     
     # Total number of chicks
     
-    Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep * rho[t])
+    Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep * mean.CS * S_C[t])
     
     
     # Allocate chicks to a sex
