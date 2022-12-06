@@ -203,7 +203,9 @@ GP.IPMcode <- nimbleCode({
   
   # Sex ratio of the chicks
   
-  gamma ~ dbeta(1, 1)  
+  gamma <- 0.5
+  
+  
   
   #Detection Probability
   
@@ -325,7 +327,7 @@ Inits
 
 
 # Parameters monitored
-parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", "mean.rho","gamma",
+parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", "mean.rho",
                 "rho", "p", "NBreedF", "NBreedM", "NNonF", "NNonM", 
                 "Fec")
 
@@ -392,7 +394,8 @@ MCMCsummary(out, params = 'rho', round = 2)
 MCMCsummary(out, params = 'p', round = 2)
 
 MCMCsummary(out, 
-            params = c('s_NB','s_BN','gamma',
+            params = c('s_NB','s_BN',
+                      
                        'mean.rho', 'sigma.rho'#,
                        #'mean.p','sigma.p'
             ), round = 2)

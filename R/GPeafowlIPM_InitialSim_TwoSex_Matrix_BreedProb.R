@@ -191,7 +191,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     sigma.p = sigma.p,
     rho = rho,
     mean.rho = mean.rho,
-    gamma = gamma,
+    # gamma = gamma,
     surv_NBreedF3 = surv_NBreedF3,
     surv_NBreedF4 = surv_NBreedF4,
     surv_NBreedM3 = surv_NBreedM3,
