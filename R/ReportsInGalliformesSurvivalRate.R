@@ -127,7 +127,7 @@ abline(v = mean(all.Tu), col = '#ca0020', lty = 2)
 plot(CuFY01, rep(0.1, 2), type = 'l', xlim = c(0, 0.9), ylim = c(0, 0.8), xlab = 'Reported values', yaxt = 'n', ylab = '', lwd = 1.5)
 title('d) Annual Greater Sage-Grouse survival', adj = 0)
 text(max(CuFY01)+0.07, 0.1,'CuFY01', col ='grey')
-lines(CuFA01, rep(0.2, 2), lwd = 1.5)
+lines(CuFA01, rep(0.2, 2), lwd = 3.5, col = "red")
 text(max(CuFA01)+0.07, 0.2,'CuFA01', col ='grey')
 lines(CuA01, rep(0.3, 2), lwd = 1.5)
 text(max(CuA01)+0.07, 0.3,'CuA01', col ='grey')
@@ -142,6 +142,77 @@ abline(v = mean(all.Cu), col = '#ca0020', lty = 2)
 
 
 ##------------------------------------------------------------
+
+
+
+## Visualization across species
+
+
+
+all.sp <- rbind(MgF01,MgF02,MgF03,MgF04,MgF05,MgF06,MgF07,MgM01,MgM02,
+                 TuBJu01,TuBAd01,TuF01,
+                 CuFY01,CuFA01,CuA01,CuA02)
+
+mean(all.sp) 
+median(all.sp) 
+min(all.sp) 
+max(all.sp) 
+
+quantile(all.MgF, probs = c(0.05, 0.25, 0.5, 0.75, 0.95))
+
+par(mfrow = c(1,2), mar=c(5.1,3.0,3.0,1))
+plot(MgF01, rep(0.0, 2), type = 'l', xlim = c(0, 1.0), ylim = c(0, 1.8),
+     xlab = 'Reported values', yaxt = 'n', ylab = '', lwd = 4.5, col = 'blue')
+title('Annual survival of 3 species', adj = 0)
+text(max(MgF01)+0.09, 0.0,'MgF01', col ='grey')
+lines(MgF02, rep(0.1, 2), lwd = 4.5, col = 'blue')
+text(max(MgF02)+0.09, 0.1,'MgF02', col ='grey')
+lines(MgF03, rep(0.2, 2), lwd = 4.5, col = 'blue')
+text(max(MgF03)+0.09, 0.2,'MgF03', col ='grey')
+lines(MgF04, rep(0.3, 2), lwd = 4.5, col = 'blue')
+text(max(MgF04)+0.09, 0.3,'MgF04', col ='grey')
+lines(MgF05, rep(0.4, 2), lwd = 4.5, col = 'blue')
+text(max(MgF05)+0.09, 0.4,'MgF05', col ='grey')
+lines(MgF06, rep(0.5, 2), lwd = 4.5, col = 'blue')
+text(max(MgF06)+0.09, 0.5,'MgF06', col ='grey')
+lines(MgF07, rep(0.6, 2), lwd = 4.5, col = 'blue')
+text(max(MgF07)+0.09, 0.6,'MgF07', col ='grey')
+lines(MgM01, rep(0.7, 2), lwd = 4.5, col = 'blue')
+text(max(MgM01)+0.09, 0.7,'MgM01', col ='grey')
+lines(MgM02, rep(0.8, 2), lwd = 4.5, col = 'blue')
+text(max(MgM02)+0.09, 0.8,'MgM02', col ='grey')
+
+
+lines(TuBJu01, rep(0.9, 2), lwd = 4.5, col = 'purple')
+text(max(TuBJu01)+0.09, 0.9,'TuBJu01', col ='grey')
+lines(TuBAd01, rep(1.0, 2), lwd = 4.5, col = 'purple')
+text(max(TuBAd01)+0.09, 1.0,'TuBAd01', col ='grey')
+lines(TuF01, rep(1.1, 2), lwd = 4.5, col = 'purple')
+text(max(TuF01)+0.07, 1.1,'TuF01', col ='grey')
+
+
+lines(CuFY01, rep(1.2, 2), lwd = 4.5, col = "green")
+text(max(CuFY01)+0.09, 1.2,'CuFY01', col ='grey')
+lines(CuFA01, rep(1.3, 2), lwd = 4.5, col = "green")
+text(max(CuFA01)+0.09, 1.3,'CuFA01', col ='grey')
+lines(CuA01, rep(1.4, 2), lwd = 4.5, col = "green")
+text(max(CuA01)+0.09, 1.4,'CuA01', col ='grey')
+lines(CuA02, rep(1.5, 2), lwd = 4.5, col = "green")
+text(max(CuA02)+0.09, 1.5,'CuA02', col ='grey')
+
+abline(v = quantile(all.Cu, probs = c(0.25, 0.75)), lty = 2, col = '#00C0E2')
+abline(v = mean(all.Cu), col = '#ca0020', lty = 2)
+
+legend(x = "topleft",box.col = "black", title="Legend", 
+       legend = c("Wild Turkey", "Capercaillie", "Greater Sage-Grouse"),
+       fill = c("Blue", "Purple", "Green"))
+
+
+
+
+
+##----------------------------------------------------------------------------
+
 
 
 
