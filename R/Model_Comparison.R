@@ -82,12 +82,12 @@ for(i in 1:length(ModelIDs)){
   model.sum.data <- data.frame(
     ModelID = ModelIDs[i],
     Year = StudyYears,
-    Parameter = rep(c('NTOT_Breed', 'NTOT_Non'), each = ModelTmax[i])
+    Parameter = rep(c('NTOT_Breed', 'NTOT_Non'), each = ModelTmax)
   )
   
   model.sum.data <- cbind(
     model.sum.data,
-    c(NTOT_Breed, NTOT_Non))
+    rbind(NTOT_Breed, NTOT_Non))
   
   # Store summary data
   sum.list[[i]] <- model.sum.data
@@ -121,6 +121,32 @@ ggplot(allModel.data, aes(x = Year, y = Median, group = ModelID)) +
 #-----------------------------------------------------------------------------
 
 
+## Set vital rate parameters to plot
+VR.params <- c("mean.rho", "mean.S_C", "mean.CS", 
+               paste0("sF_NB[", 1:4, "]"), paste0("sF_BN[", 1:4, "]"),
+               paste0("sM_NB[", 1:4, "]"), paste0("sM_BN[", 1:4, "]"))
+
+
+## Re-organize data for whole posteriors of vital rate parameters
+post.data <- data.frame()
+
+for(i in 1:2){
+  out.data <- melt(out.mat[[i]][,VR.params])
+  colnames(out.data) <- c('Sample', 'Parameter', 'Estimate')
+  out.data$ModelID <- ModelIDs[i]
+  post.data <- rbind(post.data, out.data)
+}
+
+
+
+# Plotting: Vital rate posteriors, across models 
+
+pdf('ModelComp_VRs.pdf', width = 10, height = 8)
+ggplot(post.data, aes(x = Estimate, group = ModelID)) + 
+  geom_density(aes(color = ModelID, fill = ModelID), alpha = 0.5) +
+  facet_wrap(~Parameter, scales = 'free') +
+  theme_bw() + theme(panel.grid.minor = element_blank(), panel.grid.major = element_blank(), plot.title = element_text(face = 'bold'))
+dev.off()
 
 
 
