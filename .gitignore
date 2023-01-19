@@ -2,8 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-
+*.rds
 .pdf
+
 TOT_Sum_Reccomended_C40-50_J50-60_Fs80-90_Ms50-70.csv
 
 TOT_Sum_Reccomended_C40-50_J50-60_Fs80-90_Ms50-90.csv
