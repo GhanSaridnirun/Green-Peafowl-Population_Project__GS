@@ -82,7 +82,7 @@ M_BN <- rbind(JuM_BN, M1y_BN, M2y_BN, M3y_BN)
 M_NB <- rbind(ChM_NB, M1y_NB, M2y_NB, M3y_NB)
 
 ny.data <- 3 # Number of years for which the data collected
-ny.sim <- 5 # Number of years to simulate after the data collection
+ny.sim <- 51 # Number of years to simulate after the data collection
 
 # Reproduction data
 
@@ -134,16 +134,16 @@ GP.IPMcode <- nimbleCode({
   
   ## Chicks and juveniles
   
-  sF_NB[1] ~ dunif(0.30, 0.40) 
-  sF_BN[1] ~ dunif(0.60, 0.80) 
+  sF_NB[1] ~ dunif(0.50, 0.60) 
+  sF_BN[1] ~ dunif(0.50, 0.60) 
   
   sM_NB[1] <- sF_NB[1] 
   sM_BN[1] <- sF_BN[1]  
   
   ## Adults (no sex difference)
   
-  s_yr_sa ~ dunif(0.50, 0.70) 
-  s_yr_ad ~ dunif(0.60, 0.80)  
+  s_yr_sa ~ dunif(0.80, 0.90) 
+  s_yr_ad ~ dunif(0.80, 0.90)  
   
   s_yr_saF <- s_yr_sa
   s_yr_saM <- s_yr_sa 
@@ -192,9 +192,10 @@ GP.IPMcode <- nimbleCode({
   }
   
   for (t in 1:Tmax){
-    
+
     rho[t] <- mean.rho
-    
+    # rho[t] ~ dbinom(S_C[t], mean.CS)
+
   }
   
   mean.rho ~ dunif(1, 5)
@@ -208,6 +209,7 @@ GP.IPMcode <- nimbleCode({
   # Clutch Size
   
   for (x in 1:cmax) {
+    
     
     ClutchSize[x] ~ dpois(mean.CS)
     
@@ -259,7 +261,9 @@ GP.IPMcode <- nimbleCode({
     
     # Total number of chicks
     
-    Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep * mean.CS * S_C[t])
+    Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep * rho[t])
+    # Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep * mean.CS * S_C[t])
+    # Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep)
     
     
     # Allocate chicks to a sex
@@ -384,7 +388,7 @@ out <- nimbleMCMC(code = GP.IPMcode,
                   nchains = nc)
 
 # Save output
-saveRDS(out, file = "PeafowlIPM_TwoSex_Matrix_TestRun_BreedProb.rds")
+saveRDS(out, file = "[A__PeafowlIPM_rhoxpRep_rho_onlyprior.rds")
 
 plot(out, ask = T)
 

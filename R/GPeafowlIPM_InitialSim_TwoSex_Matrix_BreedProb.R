@@ -19,6 +19,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   surv_NBreedM3 <- surv_NBreedM4 <- rep(NA, Tmax+1)
   
   
+  
   ## Sample values for parameters with priors
   
   # Breeding Probability
@@ -75,8 +76,8 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   ## Chicks and juveniles
   
-  sF_NB[1] <- runif(1, 0.30, 0.40) 
-  sF_BN[1] <- runif(1, 0.60, 0.80) 
+  sF_NB[1] <- runif(1, 0.50, 0.60) 
+  sF_BN[1] <- runif(1, 0.50, 0.60) 
   
   sM_NB[1] <- sF_NB[1] 
   sM_BN[1] <- sF_BN[1]
@@ -96,8 +97,8 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     
     #   ## Adults (no sex difference)--------------(FALSE)
     
-    s_yr_sa <- runif(1, 0.50, 0.70)
-    s_yr_ad <- runif(1, 0.60, 0.80)
+    s_yr_sa <- runif(1, 0.80, 0.90)
+    s_yr_ad <- runif(1, 0.80, 0.90)
     
     s_yr_saF <- s_yr_sa
     s_yr_saM <- s_yr_sa
@@ -145,7 +146,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     # Process model: Breeding -> Non-Breeding season transition    
     
     # Total number of chicks
-    Fec[t] <- rpois(1, sum(NBreedF[3:4,t]) * pRep  * mean.CS * S_C[t])
+    Fec[t] <- rpois(1, sum(NBreedF[3:4,t]) * pRep * mean.CS * S_C[t])
     
     # Allocate chicks to a sex
     NNonF[1,t+1] <- rbinom(1, Fec[t], gamma) # Female chicks 
