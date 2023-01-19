@@ -135,8 +135,6 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
    S_C[1:Tmax] <- rho[1:Tmax]/mean.CS 
 
-   mean.S_C <- mean.rho/mean.CS
-   
    
   #----------------------------------------------------------
   
@@ -204,7 +202,6 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     s_yr_adM = s_yr_adM,
     mean.CS = mean.CS,
     S_C = S_C,
-    mean.S_C = mean.S_C,
     pRep = pRep,
     pinit = pinit,
     Fec = Fec,

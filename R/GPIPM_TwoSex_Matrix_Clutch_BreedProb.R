@@ -4,9 +4,6 @@ library(nimble)
 mySeed <- 0
 set.seed(mySeed)
 
-# Switch for estimation of rho / use of clutch size data in process model
-#estimate.rho <- TRUE
-estimate.rho <- FALSE
 
 # Data Bundle
 
@@ -179,14 +176,14 @@ GP.IPMcode <- nimbleCode({
   
   for (y in 1:ymax) {
     
-    Rep[y] ~ dbern(pRep) 
+  Rep[y] ~ dbern(pRep) 
     
   }
   
   pRep ~ dunif(0, 1)
   
   
-  # Brood Size and clutch survival [egg to chick]
+  # Brood Size
   
   for (x in 1:xmax) {
     
@@ -194,25 +191,25 @@ GP.IPMcode <- nimbleCode({
     
   }
   
-  if(estimate.rho){
-    
-    rho[1:Tmax] <- mean.rho
-    S_C[1:Tmax] <- (rho[1:Tmax]/mean.CS) 
+  for (t in 1:Tmax){
 
-  }else{
-    
-    rho[1:Tmax] <- mean.CS*S_C[1:Tmax]
-    S_C[1:Tmax] <- mean.S_C
+    rho[t] <- mean.rho
+    # rho[t] ~ dbinom(S_C[t], mean.CS)
+
   }
   
-
   mean.rho ~ dunif(1, 5)
-  mean.S_C ~ dunif(0, 1)
 
+  
+  # Clutch Survival [from egg to chick]
+  
+  S_C[1:Tmax] <- (rho[1:Tmax]/mean.CS) 
+  
   
   # Clutch Size
   
   for (x in 1:cmax) {
+    
     
     ClutchSize[x] ~ dpois(mean.CS)
     
@@ -254,6 +251,7 @@ GP.IPMcode <- nimbleCode({
   # Book-keeping
   
   NNonF[1:Amax,1] <- 0   # Female
+  
   NNonM[1:Amax,1] <- 0   # Male
   
   
@@ -264,6 +262,8 @@ GP.IPMcode <- nimbleCode({
     # Total number of chicks
     
     Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep * rho[t])
+    # Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep * mean.CS * S_C[t])
+    # Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep)
     
     
     # Allocate chicks to a sex
@@ -346,9 +346,8 @@ Inits
 
 
 # Parameters monitored
-parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", 
-                "NBreedF", "NBreedM", "NNonF", "NNonM", 
-                "mean.rho", "rho", "mean.S_C", "S_C", "mean.CS",
+parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", "mean.rho",
+                "rho", "p", "NBreedF", "NBreedM", "NNonF", "NNonM", 
                 "Fec")
 
 
@@ -389,11 +388,7 @@ out <- nimbleMCMC(code = GP.IPMcode,
                   nchains = nc)
 
 # Save output
-if(estimate.rho){
-  saveRDS(out, file = "GPIPM_TwoSex_Matrix_Clutch_BreedProb_rhoEst.rds")
-}else{
-  saveRDS(out, file = "GPIPM_TwoSex_Matrix_Clutch_BreedProb_rhoDeriv.rds")
-}
+saveRDS(out, file = "[A__PeafowlIPM_rhoxpRep_rho_onlyprior.rds")
 
 plot(out, ask = T)
 
