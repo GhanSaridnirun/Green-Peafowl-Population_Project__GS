@@ -1,0 +1,87 @@
+---
+title: "Weighted regression of Annual Survival"
+format: html
+editor: visual
+---
+
+```{r}
+#| message: false
+#| warning: false
+#load libraries
+library(tidyverse, quietly = TRUE)
+library(metafor, quietly = TRUE)
+
+#load data
+AnnualSurvival<-readRDS("data/AnnualSurvivalRate.RDS")
+
+# Prepare the data
+AnnualSurvival$var<-AnnualSurvival$SD^2
+
+
+```
+
+## Data 
+
+```{r}
+AnnualSurvival |> 
+  mutate(N=Quality,
+         Mean_Survival=Avg,
+         Species=Sp.,
+         Harvested_population = `Harvest?`) |> 
+  select(Species, Mean_Survival, SD, N, Harvested_population) |> 
+kableExtra::kable() |> 
+  kableExtra::kable_styling()
+```
+
+## Weighted regression model 
+
+Survival estimates combined and weighted by sample size
+
+```{r}
+# Weighted regression
+
+mod1<-rma(Avg, var, weights = Quality, data=AnnualSurvival)
+
+```
+
+```{r}
+theme_set(theme_bw(base_size=10))
+forrest_data<-rbind(data.frame(ES=mod1$yi,SE=sqrt(mod1$vi),
+                               Type="Study",
+                               Study=c(paste0("Study", 1:11))),
+                    data.frame(ES=mod1$b,SE=mod1$se,Type="Summary",Study="Summary"))
+
+forrest_data$order=c(1:12)
+forrest_data
+plot1<-ggplot(data=forrest_data,aes(x=reorder(Study, -order),y=ES,ymax=ES+(1.96*SE),ymin=ES-(1.96*SE),size=factor(Type),colour=factor(Type)))+
+  geom_pointrange()
+plot2<-plot1+
+  coord_flip()+
+  geom_hline(yintercept=0, lty=2,linewidth=1)+
+  scale_size_manual(values=c(0.5,1))
+plot3<-plot2+
+  xlab("Study")+
+  ylab("Survival estimate")+
+  scale_colour_manual(values=c("grey","black"))
+plot3+theme(legend.position="none")
+
+
+
+```
+
+## Estimated Survival
+
+From the weighted regression model we get an mean annual survival of `r round(coef(mod1),2)` , with a lower estimate of `r round(mod1$ci.lb,2)` and an upper estimate of `r round(mod1$ci.ub,2)` .
+
+## Is there a difference with harvested and non-harvested populations?
+
+```{r}
+mod2<-rma(Avg, var, weights = Quality, data=AnnualSurvival, subset= AnnualSurvival$`Harvest?`=="1")
+mod3<-rma(Avg, var, weights = Quality, data=AnnualSurvival, subset= AnnualSurvival$`Harvest?`=="0")
+
+dat.comp <- data.frame(estimate = c(coef(mod2), coef(mod3)), stderror = c(mod2$se, mod3$se),
+                       meta = c("Harvest","No harvest"), tau2 = round(c(mod2$tau2, mod3$tau2),3))
+
+(comp_mod<-rma(estimate, sei=stderror, mods = ~ meta, method="FE", data=dat.comp, digits=3))
+
+```
