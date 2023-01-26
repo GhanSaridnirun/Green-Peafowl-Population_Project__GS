@@ -210,13 +210,13 @@ ann.pop.mat.num <- ann.pop.mat
 # Column index = produces
 
 # Female chicks (NB)
-# ann.pop.mat["ChF", "1yF"] <- sF1y_NB * pRep * mean.CS * S_C * gamma
+ann.pop.mat["ChF", "1yF"] <- sF1y_NB * pRep * mean.CS * S_C * gamma
 ann.pop.mat["ChF", "2yF"] <- sF2y_NB * pRep * mean.CS * S_C * gamma
 ann.pop.mat["ChF", "3yF"] <- sF3y_NB * pRep * mean.CS * S_C * gamma
 
 
 # Male chicks (NB)
-# ann.pop.mat["ChM", "1yF"] <- sF1y_NB * pRep * mean.CS * S_C * (1-gamma)
+ann.pop.mat["ChM", "1yF"] <- sF1y_NB * pRep * mean.CS * S_C * (1-gamma)
 ann.pop.mat["ChM", "2yF"] <- sF2y_NB * pRep * mean.CS * S_C * (1-gamma)
 ann.pop.mat["ChM", "3yF"] <- sF3y_NB * pRep * mean.CS * S_C * (1-gamma)
 
