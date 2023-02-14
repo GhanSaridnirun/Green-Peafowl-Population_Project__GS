@@ -36,8 +36,8 @@ pop.mat["ChF_NB", "2yF_BN"] <- "pRep * mean.CS * S_C * gamma"
 pop.mat["ChF_NB", "3yF_BN"] <- "pRep * mean.CS * S_C * gamma"
 
 # Male chicks (NB)
-pop.mat["ChF_NB", "2yF_BN"] <- "pRep * mean.CS * S_C * (1-gamma)"
-pop.mat["ChF_NB", "3yF_BN"] <- "pRep * mean.CS * S_C * (1-gamma)"
+pop.mat["ChM_NB", "2yF_BN"] <- "pRep * mean.CS * S_C * (1-gamma)"
+pop.mat["ChM_NB", "3yF_BN"] <- "pRep * mean.CS * S_C * (1-gamma)"
 
 # Female juvenile (BN)
 pop.mat["JuF_BN", "ChF_NB"] <- "sF_NB[1]"
