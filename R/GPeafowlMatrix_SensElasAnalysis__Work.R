@@ -20,7 +20,6 @@ sM_NB <- c(0.55, 0.65, 0.75, 0.9) # Male survival Non-breeding -> Breeding (chic
 sM_BN <- c(0.55, 0.65, 0.75, 0.9) # Male survival Breeding -> Non-breeding (juveniles, 1yr, 2yr, 3yr)
 
 
-
 # 2. Build projection matrix #
 #----------------------------#
 
@@ -32,12 +31,10 @@ mat.ann <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = 
                              sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
                              seasonal = FALSE)
 
-
 ## Build seasonal matrix
 mat.season <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
                                 sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
                                 seasonal = TRUE)
-
 
 
 # 3. Calculate asymptotic population growth rate #
@@ -157,49 +154,101 @@ A_orig <- mat.ann$A
 A_pert <- A_orig
 
 # Perturb target element in matrix
-
-A_pert[3, 1] <- A_pert[3, 1] + dy
-A_pert[4, 2] <- A_pert[4, 2] + dy
-A_pert[5, 3] <- A_pert[5, 3] + dy
-A_pert[6, 4] <- A_pert[6, 4] + dy
-A_pert[1, 5] <- A_pert[1, 5] + dy
-A_pert[2, 5] <- A_pert[2, 5] + dy
-A_pert[7, 5] <- A_pert[7, 5] + dy
-A_pert[8, 6] <- A_pert[8, 6] + dy
-A_pert[1, 7] <- A_pert[1, 7] + dy
-A_pert[2, 7] <- A_pert[2, 7] + dy
-A_pert[7, 7] <- A_pert[7, 7] + dy
-A_pert[8, 8] <- A_pert[8, 8] + dy
-
-A_pert
+A_pert_SChF <- A_pert
+A_pert_SChF[3, 1] <- A_pert_SChF[3, 1] + dy
 
 # Calculate population growth rate for both matrices
 lam_orig <- as.numeric(eigen(A_orig)$values[1])
-lam_pert <- as.numeric(eigen(A_pert)$values[1])
+lam_pert_SChF <- as.numeric(eigen(A_pert_SChF)$values[1])
 
 # Calculate sensitivity of population growth rate to target element
 sens <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens[3, 1] <- (lam_pert - lam_orig) / dy 
-sens[4, 2] <- (lam_pert - lam_orig) / dy 
-sens[5, 3] <- (lam_pert - lam_orig) / dy 
-sens[6, 4] <- (lam_pert - lam_orig) / dy 
-sens[1, 5] <- (lam_pert - lam_orig) / dy 
-sens[2, 5] <- (lam_pert - lam_orig) / dy 
-sens[7, 5] <- (lam_pert - lam_orig) / dy 
-sens[8, 6] <- (lam_pert - lam_orig) / dy 
-sens[1, 7] <- (lam_pert - lam_orig) / dy 
-sens[2, 7] <- (lam_pert - lam_orig) / dy 
-sens[7, 7] <- (lam_pert - lam_orig) / dy 
-sens[8, 8] <- (lam_pert - lam_orig) / dy 
-
-sens
+sens[3, 1] <- (lam_pert_SChF - lam_orig) / dy 
 
 
 # TODO: 
 # - Generalize above code to calculate sensitivities for all (non-0) matrix elements
+
+#Sensitivity of ChM
+A_pert_SChM <- A_pert
+A_pert_SChM[4, 2] <- A_pert_SChM[4, 2] + dy
+lam_pert_SChM <- as.numeric(eigen(A_pert_SChM)$values[1])
+sens[4, 2] <- (lam_pert_SChM - lam_orig) / dy
+
+#Sensitivity of 1yF
+A_pert_S1yF <- A_pert
+A_pert_S1yF[5, 3] <- A_pert_S1yF[5, 3] + dy
+lam_pert_S1yF <- as.numeric(eigen(A_pert_S1yF)$values[1])
+sens[5, 3] <- (lam_pert_S1yF - lam_orig) / dy
+
+#Sensitivity of 1yM
+A_pert_S1yM <- A_pert
+A_pert_S1yM[6, 4] <- A_pert_S1yM[6, 4] + dy
+lam_pert_S1yM <- as.numeric(eigen(A_pert_S1yM)$values[1])
+sens[6, 4] <- (lam_pert_S1yM - lam_orig) / dy
+
+#Sensitivity of 2yF produce ChF
+A_pert_S2yFF <- A_pert
+A_pert_S2yFF[1, 5] <- A_pert_S2yFF[1, 5] + dy
+lam_pert_S2yFF <- as.numeric(eigen(A_pert_S2yFF)$values[1])
+sens[1, 5] <- (lam_pert_S2yFF - lam_orig) / dy
+
+#Sensitivity of 2yF produce ChM
+A_pert_S2yFM <- A_pert
+A_pert_S2yFM[2, 5] <- A_pert_S2yFM[2, 5] + dy 
+lam_pert_S2yFM <- as.numeric(eigen(A_pert_S2yFM)$values[1])
+sens[2, 5] <- (lam_pert_S2yFM - lam_orig) / dy
+
+#Sensitivity of 2yF
+A_pert_S2yF <- A_pert
+A_pert_S2yF[7, 5] <- A_pert_S2yF[7, 5] + dy 
+lam_pert_S2yF <- as.numeric(eigen(A_pert_S2yF)$values[1])
+sens[7, 5] <- (lam_pert_S2yF - lam_orig) / dy 
+
+#Sensitivity of 2yM
+A_pert_S2yM <- A_pert
+A_pert_S2yM[8, 6] <- A_pert_S2yM[8, 6] + dy
+lam_pert_S2yM <- as.numeric(eigen(A_pert_S2yM)$values[1])
+sens[8, 6] <- (lam_pert_S2yM - lam_orig) / dy 
+
+#Sensitivity of 3yF produce ChF
+A_pert_S3yFF <- A_pert
+A_pert_S3yFF[1, 7] <- A_pert_S3yFF[1, 7] + dy
+lam_pert_S3yFF <- as.numeric(eigen(A_pert_S3yFF)$values[1])
+sens[1, 7] <- (lam_pert_S3yFF - lam_orig) / dy 
+
+#Sensitivity of 3yF produce ChM
+A_pert_S3yFM <- A_pert
+A_pert_S3yFM[2, 7] <- A_pert_S3yFM[2, 7] + dy
+lam_pert_S3yFM <- as.numeric(eigen(A_pert_S3yFM)$values[1])
+sens[2, 7] <- (lam_pert_S3yFM - lam_orig) / dy 
+
+#Sensitivity of 3yF
+A_pert_S3yF <- A_pert
+A_pert_S3yF[7, 7] <- A_pert_S3yF[7, 7] + dy
+lam_pert_S3yF <- as.numeric(eigen(A_pert_S3yF)$values[1])
+sens[7, 7] <- (lam_pert_S3yF - lam_orig) / dy 
+
+#Sensitivity of 3yM
+A_pert_S3yM <- A_pert
+A_pert_S3yM[8, 8] <- A_pert_S3yM[8, 8] + dy
+lam_pert_S3yM <- as.numeric(eigen(A_pert_S3yM)$values[1])
+sens[8, 8] <- (lam_pert_S3yM - lam_orig) / dy 
+
+
+sens
+
+row.names(sens) <- (c("ChF", "ChM","1yF", "1yM","2yF", "2yM","3yF", "3yM"))
+colnames(sens) <- (c("ChF", "ChM","1yF", "1yM","2yF", "2yM","3yF", "3yM"))
+
+sens
+
+
+
 # - Visualize sensitivity matrix (tip: start with fields::image.plot)
 
 fields::image.plot(sens)
+
 
 
 # 5. Calculate matrix element elasticities #
@@ -215,46 +264,97 @@ A_orig <- mat.ann$A
 A_pert <- A_orig
 
 # Perturb target element in matrix
-A_pert[3, 1] <- A_pert[3, 1] * (1 + dy) 
-A_pert[4, 2] <- A_pert[4, 2] * (1 + dy) 
-A_pert[5, 3] <- A_pert[5, 3] * (1 + dy) 
-A_pert[6, 4] <- A_pert[6, 4] * (1 + dy) 
-A_pert[1, 5] <- A_pert[1, 5] * (1 + dy) 
-A_pert[2, 5] <- A_pert[2, 5] * (1 + dy) 
-A_pert[7, 5] <- A_pert[7, 5] * (1 + dy) 
-A_pert[8, 6] <- A_pert[8, 6] * (1 + dy) 
-A_pert[1, 7] <- A_pert[1, 7] * (1 + dy) 
-A_pert[2, 7] <- A_pert[2, 7] * (1 + dy) 
-A_pert[7, 7] <- A_pert[7, 7] * (1 + dy) 
-A_pert[8, 8] <- A_pert[8, 8] * (1 + dy)
-
-A_pert
+A_pert_EChF <- A_pert
+A_pert_EChF[3, 1] <- A_pert_EChF[3, 1] * (1 + dy) 
 
 
 # Calculate population growth rate for both matrices
 lam_orig <- as.numeric(eigen(A_orig)$values[1])
-lam_pert <- as.numeric(eigen(A_pert)$values[1])
+lam_pert_EChF <- as.numeric(eigen(A_pert_EChF)$values[1])
 
 # Calculate sensitivity of population growth rate to target element
 elas <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas[3, 1] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[4, 2] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[5, 3] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[6, 4] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[1, 5] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[2, 5] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[7, 5] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[8, 6] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[1, 7] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[2, 7] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[7, 7] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-elas[8, 8] <- (lam_pert - lam_orig) / (lam_orig * dy) 
-
-elas
+elas[3, 1] <- (lam_pert_EChF - lam_orig) / (lam_orig * dy) 
 
 
 # TODO: 
 # - Generalize above code to calculate sensitivities for all (non-0) matrix elements
+
+# Elasticity of ChM
+A_pert_EChM <- A_pert
+A_pert_EChM[4, 2] <- A_pert_EChM[4, 2] * (1 + dy)  
+lam_pert_EChM <- as.numeric(eigen(A_pert_EChM)$values[1])
+elas[4, 2] <- (lam_pert_EChM - lam_orig) / (lam_orig * dy) 
+
+# Elasticity of 1yF
+A_pert_E1yF <- A_pert
+A_pert_E1yF[5, 3] <- A_pert_E1yF[5, 3] * (1 + dy) 
+lam_pert_E1yF <- as.numeric(eigen(A_pert_E1yF)$values[1])
+elas[5, 3] <- (lam_pert_E1yF - lam_orig) / (lam_orig * dy) 
+
+# Elasticity of 1yM
+A_pert_E1yM <- A_pert
+A_pert_E1yM[6, 4] <- A_pert_E1yM[6, 4] * (1 + dy)  
+lam_pert_E1yM <- as.numeric(eigen(A_pert_E1yM)$values[1])
+elas[6, 4] <- (lam_pert_E1yM - lam_orig) / (lam_orig * dy) 
+
+# Elasticity of 2yF produce ChF
+A_pert_E2yFF <- A_pert
+A_pert_E2yFF[1, 5] <- A_pert_E2yFF[1, 5] * (1 + dy) 
+lam_pert_E2yFF <- as.numeric(eigen(A_pert_E2yFF)$values[1])
+elas[1, 5] <- (lam_pert_E2yFF - lam_orig) / (lam_orig * dy) 
+
+# Elasticity of 2yF produce ChM
+A_pert_E2yFM <- A_pert
+A_pert_E2yFM[2, 5] <- A_pert_E2yFM[2, 5] * (1 + dy)  
+lam_pert_E2yFM <- as.numeric(eigen(A_pert_E2yFM)$values[1])
+elas[2, 5] <- (lam_pert_E2yFM - lam_orig) / (lam_orig * dy) 
+
+# Elasticity of 2yF
+A_pert_E2yF <- A_pert
+A_pert_E2yF[7, 5] <- A_pert_E2yF[7, 5] * (1 + dy)   
+lam_pert_E2yF <- as.numeric(eigen(A_pert_E2yF)$values[1])
+elas[7, 5] <- (lam_pert_E2yF - lam_orig) / (lam_orig * dy) 
+
+# Elasticity of 2yM
+A_pert_E2yM <- A_pert
+A_pert_E2yM[8, 6] <- A_pert_E2yM[8, 6] * (1 + dy)  
+lam_pert_E2yM <- as.numeric(eigen(A_pert_E2yM)$values[1])
+elas[8, 6] <- (lam_pert_E2yM - lam_orig) / (lam_orig * dy) 
+
+# Elasticity of 3yF produce ChF
+A_pert_E3yFF <- A_pert
+A_pert_E3yFF[1, 7] <- A_pert_E3yFF[1, 7] * (1 + dy) 
+lam_pert_E3yFF <- as.numeric(eigen(A_pert_E3yFF)$values[1])
+elas[1, 7] <- (lam_pert_E3yFF - lam_orig) / (lam_orig * dy) 
+
+# Elasticity of 3yF produce ChM
+A_pert_E3yFM <- A_pert
+A_pert_E3yFM[2, 7] <- A_pert_E3yFM[2, 7] * (1 + dy) 
+lam_pert_E3yFM <- as.numeric(eigen(A_pert_E3yFM)$values[1])
+elas[2, 7] <- (lam_pert_E3yFM - lam_orig) / (lam_orig * dy) 
+
+# Elasticity of 3yF
+A_pert_E3yF <- A_pert
+A_pert_E3yF[7, 7] <- A_pert_E3yF[7, 7] * (1 + dy)  
+lam_pert_E3yF <- as.numeric(eigen(A_pert_E3yF)$values[1])
+elas[7, 7] <- (lam_pert_E3yF - lam_orig) / (lam_orig * dy) 
+
+# Elasticity of 3yM
+A_pert_E3yM <- A_pert
+A_pert_E3yM[8, 8] <- A_pert_E3yM[8, 8] * (1 + dy) 
+lam_pert_E3yM <- as.numeric(eigen(A_pert_E3yM)$values[1])
+elas[8, 8] <- (lam_pert_E3yM - lam_orig) / (lam_orig * dy) 
+
+
+elas
+
+row.names(elas) <- (c("ChF", "ChM","1yF", "1yM","2yF", "2yM","3yF", "3yM"))
+colnames(elas) <- (c("ChF", "ChM","1yF", "1yM","2yF", "2yM","3yF", "3yM"))
+
+elas
+
+
 # - Visualize elasticity matrix (tip: start with fields::image.plot)
 
 fields::image.plot(elas)
@@ -271,299 +371,208 @@ fields::image.plot(elas)
 
 ## Using perturbation analysis
 
+# Set perturbation factor
+dy <- 1e-5
+
+# Setting the perturbation for sensitivity of target vital rates
+S.pRep <- pRep + dy # pertubate Breeding probability
+S.mean.CS <- mean.CS + dy # pertubate Mean clutch size
+S.S_C <- S_C + dy # pertubate Clutch survival
+S.sF_NB_Ch <- sF_NB + c(dy, 0, 0, 0) # pertubate Female chick Non-breeding survival
+S.sF_NB_1yr <- sF_NB + c(0, dy, 0, 0) # pertubate Female 1yr Non-breeding survival
+S.sF_NB_2yr <- sF_NB + c(0, 0, dy, 0) # pertubate Female 2yr Non-breeding survival
+S.sF_NB_3yr <- sF_NB + c(0, 0, 0, dy) # pertubate Female 3yr Non-breeding survival
+S.sF_BN_Ju <- sF_BN + c(dy, 0, 0, 0) # pertubate Female Juvenile Breeding survival
+S.sF_BN_1yr <- sF_BN + c(0, dy, 0, 0) # pertubate Female 1yr Breeding survival
+S.sF_BN_2yr <- sF_BN + c(0, 0, dy, 0) # pertubate Female 2yr Breeding survival
+S.sF_BN_3yr <- sF_BN + c(0, 0, 0, dy) # pertubate Female 3yr Breeding survival
+S.sM_NB_Ch <- sM_NB + c(dy, 0, 0, 0) # pertubate Male chick Non-breeding survival
+S.sM_NB_1yr <- sM_NB + c(0, dy, 0, 0) # pertubate Male 1yr Non-breeding survival
+S.sM_NB_2yr <- sM_NB + c(0, 0, dy, 0) # pertubate Male 2yr Non-breeding survival
+S.sM_NB_3yr <- sM_NB + c(0, 0, 0, dy) # pertubate Male 3yr Non-breeding survival
+S.sM_BN_Ju <- sM_BN + c(dy, 0, 0, 0) # pertubate Male juvenile Breeding survival
+S.sM_BN_1yr <- sM_BN + c(0, dy, 0, 0) # pertubate Male 1yr Breeding survival
+S.sM_BN_2yr <- sM_BN + c(0, 0, dy, 0) # pertubate Male 2yr Breeding survival
+S.sM_BN_3yr <- sM_BN + c(0, 0, 0, dy) # pertubate Male 3yr Breeding survival
+
 # Origin Matrix
-A_orig
+Sen_orig <- mat.ann$A
 
-# Perturbation Matrix
-A_pert[3, 1] <- A_pert[3, 1] + dy 
-A_pert[4, 2] <- A_pert[4, 2] + dy 
-A_pert[5, 3] <- A_pert[5, 3] + dy 
-A_pert[6, 4] <- A_pert[6, 4] + dy 
-A_pert[1, 5] <- A_pert[1, 5] + dy 
-A_pert[2, 5] <- A_pert[2, 5] + dy 
-A_pert[7, 5] <- A_pert[7, 5] + dy 
-A_pert[8, 6] <- A_pert[8, 6] + dy 
-A_pert[1, 7] <- A_pert[1, 7] + dy 
-A_pert[2, 7] <- A_pert[2, 7] + dy 
-A_pert[7, 7] <- A_pert[7, 7] + dy 
-A_pert[8, 8] <- A_pert[8, 8] + dy
+# Build matrix with pertubated target vital rate for sensitivity
 
-A_pert 
+# Breeding probability
+mat.Sen.pRep <- make.GPprojMatrix(pRep = S.pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                  sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                  seasonal = FALSE)
 
+# Mean clutch size
+mat.Sen.mean.CS <- make.GPprojMatrix(pRep = pRep, mean.CS = S.mean.CS, S_C = S_C, gamma = gamma, 
+                                     sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                     seasonal = FALSE)
 
-# Calculate sensitivities with respect to vital rates
+# Clutch survival
+mat.Sen.S_C <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S.S_C, gamma = gamma, 
+                                 sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                 seasonal = FALSE)
 
-# Sensitivity with respect to Female chick survival  
-Res.sF.Chick.orig <- A_orig/(sF_NB[1] * sF_BN[1])  
-Res.sF.Chick.pert <- A_pert/(sF_NB[1] * sF_BN[1])
+# Female chick Non-breeding survival
+mat.Sen.sF_NB_Ch <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                      sF_NB = S.sF_NB_Ch, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                      seasonal = FALSE)
 
-lam_Res.sF.Chick.orig <- as.numeric(eigen(Res.sF.Chick.orig)$values[1])
-lam_Res.sF.Chick.pert <- as.numeric(eigen(Res.sF.Chick.pert)$values[1])
+# Female 1yr Non-breeding survival
+mat.Sen.sF_NB_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = S.sF_NB_1yr, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-sens.Res.sF.Chick <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.sF.Chick[3, 1] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[4, 2] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[5, 3] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[6, 4] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[1, 5] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[2, 5] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[7, 5] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[8, 6] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[1, 7] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[2, 7] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[7, 7] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
-sens.Res.sF.Chick[8, 8] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / dy
+# Female 2yr Non-breeding survival
+mat.Sen.sF_NB_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = S.sF_NB_2yr, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-sens.Res.sF.Chick
+# Female 3yr Non-breeding survival
+mat.Sen.sF_NB_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = S.sF_NB_3yr, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
+# Female Juvenile Breeding survival
+mat.Sen.sF_BN_Ju <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                      sF_NB = sF_NB, sF_BN = S.sF_BN_Ju, sM_NB = sM_NB, sM_BN = sM_BN,
+                                      seasonal = FALSE)
 
+# Female 1yr Breeding survival
+mat.Sen.sF_BN_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = S.sF_BN_1yr, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-# Sensitivity with respect to Male chick survival
-Res.sM.Chick.orig <- A_orig/(sM_NB[1] * sM_BN[1]) 
-Res.sM.Chick.pert <- A_pert/(sM_NB[1] * sM_BN[1])
+# Female 2yr Breeding survival
+mat.Sen.sF_BN_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = S.sF_BN_2yr, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-lam_Res.sM.Chick.orig <- as.numeric(eigen(Res.sM.Chick.orig)$values[1])
-lam_Res.sM.Chick.pert <- as.numeric(eigen(Res.sM.Chick.pert)$values[1])
+# Female 3yr Breeding survival
+mat.Sen.sF_BN_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = S.sF_BN_3yr, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-sens.Res.sM.Chick <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.sM.Chick[3, 1] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy 
-sens.Res.sM.Chick[4, 2] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy
-sens.Res.sM.Chick[5, 3] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy 
-sens.Res.sM.Chick[6, 4] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy 
-sens.Res.sM.Chick[1, 5] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy
-sens.Res.sM.Chick[2, 5] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy
-sens.Res.sM.Chick[7, 5] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy
-sens.Res.sM.Chick[8, 6] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy
-sens.Res.sM.Chick[1, 7] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy
-sens.Res.sM.Chick[2, 7] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy
-sens.Res.sM.Chick[7, 7] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy
-sens.Res.sM.Chick[8, 8] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / dy
+# Male chick Non-breeding survival
+mat.Sen.sM_NB_Ch <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                      sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = S.sM_NB_Ch, sM_BN = sM_BN,
+                                      seasonal = FALSE)
 
-sens.Res.sM.Chick
+# Male 1yr Non-breeding survival
+mat.Sen.sM_NB_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = S.sM_NB_1yr, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
+# Male 2yr Non-breeding survival
+mat.Sen.sM_NB_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = S.sM_NB_2yr, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-# Sensitivity with respect to Female 1Y survival
-Res.sF.1Y.orig <- A_orig/(sF_NB[2] * sF_BN[2])
-Res.sF.1Y.pert <- A_pert/(sF_NB[2] * sF_BN[2])
+# Male 3yr Non-breeding survival
+mat.Sen.sM_NB_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = S.sM_NB_3yr, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-lam_Res.sF.1Y.orig <- as.numeric(eigen(Res.sF.1Y.orig)$values[1])
-lam_Res.sF.1Y.pert <- as.numeric(eigen(Res.sF.1Y.pert)$values[1])
+# Male juvenile Breeding survival
+mat.Sen.sM_BN_Ju <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                      sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = S.sM_BN_Ju,
+                                      seasonal = FALSE)
 
-sens.Res.sF.1Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.sF.1Y[3, 1] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy 
-sens.Res.sF.1Y[4, 2] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy
-sens.Res.sF.1Y[5, 3] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy
-sens.Res.sF.1Y[6, 4] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy
-sens.Res.sF.1Y[1, 5] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy
-sens.Res.sF.1Y[2, 5] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy
-sens.Res.sF.1Y[7, 5] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy
-sens.Res.sF.1Y[8, 6] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy
-sens.Res.sF.1Y[1, 7] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy
-sens.Res.sF.1Y[2, 7] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy
-sens.Res.sF.1Y[7, 7] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy 
-sens.Res.sF.1Y[8, 8] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / dy
+# Male 1yr Breeding survival
+mat.Sen.sM_BN_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = S.sM_BN_1yr,
+                                       seasonal = FALSE)
 
-sens.Res.sF.1Y
+# Male 2yr Breeding survival
+mat.Sen.sM_BN_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = S.sM_BN_2yr,
+                                       seasonal = FALSE)
 
-
-# Sensitivity with respect to Male 1Y survival
-Res.sM.1Y.orig <- A_orig/(sM_NB[2] * sM_BN[2])
-Res.sM.1Y.pert <- A_pert/(sM_NB[2] * sM_BN[2])
-
-lam_Res.sM.1Y.orig <- as.numeric(eigen(Res.sM.1Y.orig)$values[1])
-lam_Res.sM.1Y.pert <- as.numeric(eigen(Res.sM.1Y.pert)$values[1])
-
-sens.Res.sM.1Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.sM.1Y[3, 1] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-sens.Res.sM.1Y[4, 2] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-sens.Res.sM.1Y[5, 3] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-sens.Res.sM.1Y[6, 4] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-sens.Res.sM.1Y[1, 5] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-sens.Res.sM.1Y[2, 5] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-sens.Res.sM.1Y[7, 5] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-sens.Res.sM.1Y[8, 6] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-sens.Res.sM.1Y[1, 7] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-sens.Res.sM.1Y[2, 7] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-sens.Res.sM.1Y[7, 7] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy  
-sens.Res.sM.1Y[8, 8] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / dy 
-
-sens.Res.sM.1Y
+# Male 3yr Breeding survival
+mat.Sen.sM_BN_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = S.sM_BN_3yr,
+                                       seasonal = FALSE)
 
 
-# Sensitivity with respect to Female 2Y survival
-Res.sF.2Y.orig <- A_orig/(sF_NB[3] * sF_BN[3])
-Res.sF.2Y.pert <- A_pert/(sF_NB[3] * sF_BN[3])
+# Select only numerical matrix for calculation
+Sen.pRep <- mat.Sen.pRep$A # Breeding probability
+Sen.mean.CS <- mat.Sen.mean.CS$A
+Sen.S_C <- mat.Sen.S_C$A
+Sen.sF_NB_Ch <- mat.Sen.sF_NB_Ch$A
+Sen.sF_NB_1yr <- mat.Sen.sF_NB_1yr$A 
+Sen.sF_NB_2yr <- mat.Sen.sF_NB_2yr$A
+Sen.sF_NB_3yr <- mat.Sen.sF_NB_3yr$A
+Sen.sF_BN_Ju <- mat.Sen.sF_BN_Ju$A
+Sen.sF_BN_1yr <- mat.Sen.sF_BN_1yr$A
+Sen.sF_BN_2yr <- mat.Sen.sF_BN_2yr$A
+Sen.sF_BN_3yr <- mat.Sen.sF_BN_3yr$A
+Sen.sM_NB_Ch <- mat.Sen.sM_NB_Ch$A
+Sen.sM_NB_1yr <- mat.Sen.sM_NB_1yr$A
+Sen.sM_NB_2yr <- mat.Sen.sM_NB_2yr$A
+Sen.sM_NB_3yr <- mat.Sen.sM_NB_3yr$A
+Sen.sM_BN_Ju <- mat.Sen.sM_BN_Ju$A
+Sen.sM_BN_1yr <- mat.Sen.sM_BN_1yr$A
+Sen.sM_BN_2yr <- mat.Sen.sM_BN_2yr$A
+Sen.sM_BN_3yr <- mat.Sen.sM_BN_3yr$A
 
-lam_Res.sF.2Y.orig <- as.numeric(eigen(Res.sF.2Y.orig)$values[1])
-lam_Res.sF.2Y.pert <- as.numeric(eigen(Res.sF.2Y.pert)$values[1])
+# Calculate population growth rate for Origin matrix
+lam_Sen_orig <- as.numeric(eigen(Sen_orig)$values[1])
 
-sens.Res.sF.2Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.sF.2Y[3, 1] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
-sens.Res.sF.2Y[4, 2] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
-sens.Res.sF.2Y[5, 3] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
-sens.Res.sF.2Y[6, 4] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
-sens.Res.sF.2Y[1, 5] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
-sens.Res.sF.2Y[2, 5] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
-sens.Res.sF.2Y[7, 5] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
-sens.Res.sF.2Y[8, 6] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
-sens.Res.sF.2Y[1, 7] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
-sens.Res.sF.2Y[2, 7] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
-sens.Res.sF.2Y[7, 7] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy  
-sens.Res.sF.2Y[8, 8] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / dy 
+# Calculate population growth rate for Origin matrix
+lam_Sen.pRep <- as.numeric(eigen(Sen.pRep)$values[1])
+lam_Sen.mean.CS <- as.numeric(eigen(Sen.mean.CS)$values[1])
+lam_Sen.S_C <- as.numeric(eigen(Sen.S_C)$values[1])
+lam_Sen.sF_NB_Ch <- as.numeric(eigen(Sen.sF_NB_Ch)$values[1])
+lam_Sen.sF_NB_1yr <- as.numeric(eigen(Sen.sF_NB_1yr)$values[1])
+lam_Sen.sF_NB_2yr <- as.numeric(eigen(Sen.sF_NB_2yr)$values[1])
+lam_Sen.sF_NB_3yr <- as.numeric(eigen(Sen.sF_NB_3yr)$values[1])
+lam_Sen.sF_BN_Ju <- as.numeric(eigen(Sen.sF_BN_Ju)$values[1])
+lam_Sen.sF_BN_1yr <- as.numeric(eigen(Sen.sF_BN_1yr)$values[1])
+lam_Sen.sF_BN_2yr <- as.numeric(eigen(Sen.sF_BN_2yr)$values[1])
+lam_Sen.sF_BN_3yr <- as.numeric(eigen(Sen.sF_BN_3yr)$values[1])
+lam_Sen.sM_NB_Ch <- as.numeric(eigen(Sen.sM_NB_Ch)$values[1])
+lam_Sen.sM_NB_1yr <- as.numeric(eigen(Sen.sM_NB_1yr)$values[1])
+lam_Sen.sM_NB_2yr <- as.numeric(eigen(Sen.sM_NB_2yr)$values[1])
+lam_Sen.sM_NB_3yr <- as.numeric(eigen(Sen.sM_NB_3yr)$values[1])
+lam_Sen.sM_BN_Ju <- as.numeric(eigen(Sen.sM_BN_Ju)$values[1])
+lam_Sen.sM_BN_1yr <- as.numeric(eigen(Sen.sM_BN_1yr)$values[1])
+lam_Sen.sM_BN_2yr <- as.numeric(eigen(Sen.sM_BN_2yr)$values[1])
+lam_Sen.sM_BN_3yr <- as.numeric(eigen(Sen.sM_BN_3yr)$values[1])
 
-sens.Res.sF.2Y
+# Calculate sensitivity of population growth rate to target element
+Sen_pRep <- (lam_Sen.pRep - lam_Sen_orig) / dy
+Sen_mean.CS  <- (lam_Sen.mean.CS - lam_Sen_orig) / dy
+Sen_S_C <- (lam_Sen.S_C - lam_Sen_orig) / dy
+Sen_sF_NB_Ch <- (lam_Sen.sF_NB_Ch - lam_Sen_orig) / dy
+Sen_sF_NB_1yr <- (lam_Sen.sF_NB_1yr - lam_Sen_orig) / dy
+Sen_sF_NB_2yr <- (lam_Sen.sF_NB_2yr - lam_Sen_orig) / dy
+Sen_sF_NB_3yr <- (lam_Sen.sF_NB_3yr - lam_Sen_orig) / dy
+Sen_sF_BN_Ju <- (lam_Sen.sF_BN_Ju - lam_Sen_orig) / dy
+Sen_sF_BN_1yr <- (lam_Sen.sF_BN_1yr - lam_Sen_orig) / dy
+Sen_sF_BN_2yr <- (lam_Sen.sF_BN_2yr - lam_Sen_orig) / dy
+Sen_sF_BN_3yr <- (lam_Sen.sF_BN_3yr - lam_Sen_orig) / dy
+Sen_sM_NB_Ch <- (lam_Sen.sM_NB_Ch - lam_Sen_orig) / dy
+Sen_sM_NB_1yr <- (lam_Sen.sM_NB_1yr - lam_Sen_orig) / dy
+Sen_sM_NB_2yr <- (lam_Sen.sM_NB_2yr - lam_Sen_orig) / dy
+Sen_sM_NB_3yr <- (lam_Sen.sM_NB_3yr - lam_Sen_orig) / dy
+Sen_sM_BN_Ju <- (lam_Sen.sM_BN_Ju - lam_Sen_orig) / dy
+Sen_sM_BN_1yr <- (lam_Sen.sM_BN_1yr - lam_Sen_orig) / dy
+Sen_sM_BN_2yr <- (lam_Sen.sM_BN_2yr - lam_Sen_orig) / dy
+Sen_sM_BN_3yr <- (lam_Sen.sM_BN_3yr - lam_Sen_orig) / dy
 
-
-# Sensitivity with respect to Male 2Y survival
-Res.sM.2Y.orig <- A_orig/(sM_NB[3] * sM_BN[3])
-Res.sM.2Y.pert <- A_pert/(sM_NB[3] * sM_BN[3])
-
-lam_Res.sM.2Y.orig <- as.numeric(eigen(Res.sM.2Y.orig)$values[1])
-lam_Res.sM.2Y.pert <- as.numeric(eigen(Res.sM.2Y.pert)$values[1])
-
-sens.Res.sM.2Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.sM.2Y[3, 1] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy 
-sens.Res.sM.2Y[4, 2] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy 
-sens.Res.sM.2Y[5, 3] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy 
-sens.Res.sM.2Y[6, 4] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy 
-sens.Res.sM.2Y[1, 5] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy 
-sens.Res.sM.2Y[2, 5] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy 
-sens.Res.sM.2Y[7, 5] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy 
-sens.Res.sM.2Y[8, 6] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy 
-sens.Res.sM.2Y[1, 7] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy 
-sens.Res.sM.2Y[2, 7] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy  
-sens.Res.sM.2Y[7, 7] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy  
-sens.Res.sM.2Y[8, 8] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / dy 
-
-sens.Res.sM.2Y
-
-
-# Sensitivity with respect to Female 3+Y survival
-Res.sF.3Y.orig <- A_orig/(sF_NB[4] * sF_BN[4])
-Res.sF.3Y.pert <- A_pert/(sF_NB[4] * sF_BN[4])
-
-lam_Res.sF.3Y.orig <- as.numeric(eigen(Res.sF.3Y.orig)$values[1])
-lam_Res.sF.3Y.pert <- as.numeric(eigen(Res.sF.3Y.pert)$values[1])
-
-sens.Res.sF.3Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.sF.3Y[3, 1] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy 
-sens.Res.sF.3Y[4, 2] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy 
-sens.Res.sF.3Y[5, 3] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy 
-sens.Res.sF.3Y[6, 4] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy 
-sens.Res.sF.3Y[1, 5] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy 
-sens.Res.sF.3Y[2, 5] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy 
-sens.Res.sF.3Y[7, 5] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy 
-sens.Res.sF.3Y[8, 6] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy 
-sens.Res.sF.3Y[1, 7] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy 
-sens.Res.sF.3Y[2, 7] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy  
-sens.Res.sF.3Y[7, 7] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy  
-sens.Res.sF.3Y[8, 8] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / dy  
-
-sens.Res.sF.3Y
-
-
-# Sensitivity with respect to Male 3+Y survival
-Res.sM.3Y.orig <- A_orig/(sM_NB[4] * sM_BN[4])
-Res.sM.3Y.pert <- A_pert/(sM_NB[4] * sM_BN[4])
-
-lam_Res.sM.3Y.orig <- as.numeric(eigen(Res.sM.3Y.orig)$values[1])
-lam_Res.sM.3Y.pert <- as.numeric(eigen(Res.sM.3Y.pert)$values[1])
-
-sens.Res.sM.3Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.sM.3Y[3, 1] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy 
-sens.Res.sM.3Y[4, 2] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy 
-sens.Res.sM.3Y[5, 3] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy 
-sens.Res.sM.3Y[6, 4] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy 
-sens.Res.sM.3Y[1, 5] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy  
-sens.Res.sM.3Y[2, 5] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy 
-sens.Res.sM.3Y[7, 5] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy 
-sens.Res.sM.3Y[8, 6] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy 
-sens.Res.sM.3Y[1, 7] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy 
-sens.Res.sM.3Y[2, 7] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy  
-sens.Res.sM.3Y[7, 7] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy 
-sens.Res.sM.3Y[8, 8] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / dy  
-
-sens.Res.sM.3Y
-
-
-# Sensitivity with respect to Breeding probability
-Res.pRep.orig <- A_orig/pRep
-Res.pRep.pert <- A_pert/pRep
-
-lam_Res.pRep.orig <- as.numeric(eigen(Res.pRep.orig)$values[1])
-lam_Res.pRep.pert <- as.numeric(eigen(Res.pRep.pert)$values[1])
-
-sens.Res.pRep <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.pRep[3, 1] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy 
-sens.Res.pRep[4, 2] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy  
-sens.Res.pRep[5, 3] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy 
-sens.Res.pRep[6, 4] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy 
-sens.Res.pRep[1, 5] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy  
-sens.Res.pRep[2, 5] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy  
-sens.Res.pRep[7, 5] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy  
-sens.Res.pRep[8, 6] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy 
-sens.Res.pRep[1, 7] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy 
-sens.Res.pRep[2, 7] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy  
-sens.Res.pRep[7, 7] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy 
-sens.Res.pRep[8, 8] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / dy  
-
-sens.Res.pRep
-
-
-# Sensitivity with respect to Mean clutch size
-Res.mean.CS.orig <- A_orig/mean.CS
-Res.mean.CS.pert <- A_pert/mean.CS
-
-lam_Res.mean.CS.orig <- as.numeric(eigen(Res.mean.CS.orig)$values[1])
-lam_Res.mean.CS.pert <- as.numeric(eigen(Res.mean.CS.pert)$values[1])
-
-sens.Res.mean.CS <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.mean.CS[3, 1] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy 
-sens.Res.mean.CS[4, 2] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy  
-sens.Res.mean.CS[5, 3] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy 
-sens.Res.mean.CS[6, 4] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy 
-sens.Res.mean.CS[1, 5] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy  
-sens.Res.mean.CS[2, 5] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy   
-sens.Res.mean.CS[7, 5] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy  
-sens.Res.mean.CS[8, 6] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy 
-sens.Res.mean.CS[1, 7] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy  
-sens.Res.mean.CS[2, 7] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy  
-sens.Res.mean.CS[7, 7] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy 
-sens.Res.mean.CS[8, 8] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / dy  
-
-sens.Res.mean.CS
-
-
-# Sensitivity with respect to Clutch survival
-Res.S_C.orig <- A_orig/S_C
-Res.S_C.pert <- A_pert/S_C
-
-lam_Res.S_C.orig <- as.numeric(eigen(Res.S_C.orig)$values[1])
-lam_Res.S_C.pert <- as.numeric(eigen(Res.S_C.pert)$values[1])
-
-sens.Res.S_C <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens.Res.S_C[3, 1] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy 
-sens.Res.S_C[4, 2] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy 
-sens.Res.S_C[5, 3] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy 
-sens.Res.S_C[6, 4] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy  
-sens.Res.S_C[1, 5] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy   
-sens.Res.S_C[2, 5] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy   
-sens.Res.S_C[7, 5] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy 
-sens.Res.S_C[8, 6] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy 
-sens.Res.S_C[1, 7] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy 
-sens.Res.S_C[2, 7] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy 
-sens.Res.S_C[7, 7] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy 
-sens.Res.S_C[8, 8] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / dy 
-
-sens.Res.S_C
+#Gather the results
+Sensitivities <- list(c(Sen_pRep, Sen_mean.CS, Sen_S_C, 
+                      Sen_sF_NB_Ch, Sen_sF_NB_1yr, Sen_sF_NB_2yr, Sen_sF_NB_3yr,
+                      Sen_sF_BN_Ju, Sen_sF_BN_1yr, Sen_sF_BN_2yr, Sen_sF_BN_3yr,
+                      Sen_sM_NB_Ch, Sen_sM_NB_1yr, Sen_sM_NB_2yr, Sen_sM_NB_3yr,
+                      Sen_sM_BN_Ju, Sen_sM_BN_1yr, Sen_sM_BN_2yr, Sen_sM_BN_3yr))
 
 
 
 # - Visualize sensitivities for all vital rates 
 
-sense.all <- list(sens.Res.sF.Chick, sens.Res.sM.Chick, sens.Res.sF.1Y, sens.Res.sM.1Y,
-                  sens.Res.sF.2Y, sens.Res.sM.2Y, sens.Res.sF.3Y, sens.Res.sM.1Y,
-                  sens.Res.pRep, sens.Res.mean.CS, sens.Res.S_C)
 
 
 # 7. Calculate vital rate elasticieites #
@@ -573,298 +582,208 @@ sense.all <- list(sens.Res.sF.Chick, sens.Res.sM.Chick, sens.Res.sF.1Y, sens.Res
 # TODO: 
 # - Analogous to 6., but using formulas for elasticity (see 5.)
 
+# Set perturbation factor
+dy <- 1e-5
+
+# Setting the perturbation for elasticity of target vital rates
+E.pRep <- pRep * (1 + dy) # pertubate Breeding probability
+E.mean.CS <- mean.CS * (1 + dy) # pertubate Mean clutch size
+E.S_C <- S_C * (1 + dy) # pertubate Clutch survival
+E.sF_NB_Ch <- sF_NB * c(1 + dy, 1, 1, 1) # pertubate Female chick Non-breeding survival
+E.sF_NB_1yr <- sF_NB * c(1, 1 + dy, 1, 1) # pertubate Female 1yr Non-breeding survival
+E.sF_NB_2yr <- sF_NB * c(1, 1, 1 + dy, 1) # pertubate Female 2yr Non-breeding survival
+E.sF_NB_3yr <- sF_NB * c(1, 1, 1, 1 + dy) # pertubate Female 3yr Non-breeding survival
+E.sF_BN_Ju <- sF_BN * c(1 + dy, 1, 1, 1) # pertubate Female Juvenile Breeding survival
+E.sF_BN_1yr <- sF_BN * c(1, 1 + dy, 1, 1) # pertubate Female 1yr Breeding survival
+E.sF_BN_2yr <- sF_BN * c(1, 1, 1 + dy, 1) # pertubate Female 2yr Breeding survival
+E.sF_BN_3yr <- sF_BN * c(1, 1, 1, 1 + dy) # pertubate Female 3yr Breeding survival
+E.sM_NB_Ch <- sM_NB * c(1 + dy, 1, 1, 1) # pertubate Male chick Non-breeding survival
+E.sM_NB_1yr <- sM_NB * c(1, 1 + dy, 1, 1) # pertubate Male 1yr Non-breeding survival
+E.sM_NB_2yr <- sM_NB * c(1, 1, 1 + dy, 1) # pertubate Male 2yr Non-breeding survival
+E.sM_NB_3yr <- sM_NB * c(1, 1, 1, 1 + dy) # pertubate Male 3yr Non-breeding survival
+E.sM_BN_Ju <- sM_BN * c(1 + dy, 1, 1, 1) # pertubate Male juvenile Breeding survival
+E.sM_BN_1yr <- sM_BN * c(1, 1 + dy, 1, 1) # pertubate Male 1yr Breeding survival
+E.sM_BN_2yr <- sM_BN * c(1, 1, 1 + dy, 1) # pertubate Male 2yr Breeding survival
+E.sM_BN_3yr <- sM_BN * c(1, 1, 1, 1 + dy) # pertubate Male 3yr Breeding survival
+
 # Origin Matrix
-A_orig.elas <- A_orig
+Ela_orig <- mat.ann$A
 
-# Perturbation Matrix
-A_pert.elas <- A_pert
+# Build matrix with pertubated target vital rate for elasticity
 
-A_pert.elas[3, 1] <- A_pert.elas[3, 1] * (1 + dy) # ChF to 1yF
-A_pert.elas[4, 2] <- A_pert.elas[4, 2] * (1 + dy) # ChM to 1yM
-A_pert.elas[5, 3] <- A_pert.elas[5, 3] * (1 + dy)# 1yF to 2yF
-A_pert.elas[6, 4] <- A_pert.elas[6, 4] * (1 + dy) # 1yM to 2yM
-A_pert.elas[1, 5] <- A_pert.elas[1, 5] * (1 + dy) # 2yF produce ChF
-A_pert.elas[2, 5] <- A_pert.elas[2, 5] * (1 + dy) # 2yF produce ChM
-A_pert.elas[7, 5] <- A_pert.elas[7, 5] * (1 + dy) # 2yF to 3yF
-A_pert.elas[8, 6] <- A_pert.elas[8, 6] * (1 + dy)# 2yM to 3yM
-A_pert.elas[1, 7] <- A_pert.elas[1, 7] * (1 + dy) # 3yF produce ChF
-A_pert.elas[2, 7] <- A_pert.elas[2, 7] * (1 + dy) # 3yF produce ChM
-A_pert.elas[7, 7] <- A_pert.elas[7, 7] * (1 + dy)# 3yF to 3yF
-A_pert.elas[8, 8] <- A_pert.elas[8, 8] * (1 + dy)# 3yM to 3yM
+# Breeding probability
+mat.Ela.pRep <- make.GPprojMatrix(pRep = E.pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                  sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                  seasonal = FALSE)
 
-A_pert.elas
+# Mean clutch size
+mat.Ela.mean.CS <- make.GPprojMatrix(pRep = pRep, mean.CS = E.mean.CS, S_C = S_C, gamma = gamma, 
+                                     sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                     seasonal = FALSE)
 
+# Clutch survival
+mat.Ela.S_C <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = E.S_C, gamma = gamma, 
+                                 sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                 seasonal = FALSE)
 
-# Calculate elasticities with respect to vital rates
+# Female chick Non-breeding survival
+mat.Ela.sF_NB_Ch <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                      sF_NB = E.sF_NB_Ch, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                      seasonal = FALSE)
 
-# Elasticity with respect to Female chick survival  
-Res.elas.sF.Chick.orig <- A_orig.elas/(sF_NB[1] * sF_BN[1])  
-Res.elas.sF.Chick.pert <- A_pert.elas/(sF_NB[1] * sF_BN[1])
+# Female 1yr Non-breeding survival
+mat.Ela.sF_NB_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = E.sF_NB_1yr, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-lam_Res.sF.Chick.orig <- as.numeric(eigen(Res.sF.Chick.orig)$values[1])
-lam_Res.sF.Chick.pert <- as.numeric(eigen(Res.sF.Chick.pert)$values[1])
+# Female 2yr Non-breeding survival
+mat.Ela.sF_NB_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = E.sF_NB_2yr, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-elas.Res.sF.Chick <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.sF.Chick[3, 1] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # ChF to 1yF
-elas.Res.sF.Chick[4, 2] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # ChM to 1yM
-elas.Res.sF.Chick[5, 3] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # 1yF to 2yF
-elas.Res.sF.Chick[6, 4] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # 1yM to 2yM
-elas.Res.sF.Chick[1, 5] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # 2yF produce ChF
-elas.Res.sF.Chick[2, 5] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # 2yF produce ChM
-elas.Res.sF.Chick[7, 5] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # 2yF to 3yF
-elas.Res.sF.Chick[8, 6] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # 2yM to 3yM
-elas.Res.sF.Chick[1, 7] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # 3yF produce ChF
-elas.Res.sF.Chick[2, 7] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # 3yF produce ChM
-elas.Res.sF.Chick[7, 7] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # 3yF to 3yF
-elas.Res.sF.Chick[8, 8] <- (lam_Res.sF.Chick.pert - lam_Res.sF.Chick.orig) / (lam_Res.sF.Chick.orig * dy) # 3yM to 3yM
+# Female 3yr Non-breeding survival
+mat.Ela.sF_NB_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = E.sF_NB_3yr, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-elas.Res.sF.Chick
+# Female Juvenile Breeding survival
+mat.Ela.sF_BN_Ju <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                      sF_NB = sF_NB, sF_BN = E.sF_BN_Ju, sM_NB = sM_NB, sM_BN = sM_BN,
+                                      seasonal = FALSE)
 
+# Female 1yr Breeding survival
+mat.Ela.sF_BN_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = E.sF_BN_1yr, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-# Sensitivity with respect to Male chick survival
-Res.elas.sM.Chick.orig <- A_orig.elas/(sM_NB[1] * sM_BN[1])  
-Res.elas.sM.Chick.pert <- A_pert.elas/(sM_NB[1] * sM_BN[1])
+# Female 2yr Breeding survival
+mat.Ela.sF_BN_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = E.sF_BN_2yr, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-lam_Res.sM.Chick.orig <- as.numeric(eigen(Res.sM.Chick.orig)$values[1])
-lam_Res.sM.Chick.pert <- as.numeric(eigen(Res.sM.Chick.pert)$values[1])
+# Female 3yr Breeding survival
+mat.Ela.sF_BN_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = E.sF_BN_3yr, sM_NB = sM_NB, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-elas.Res.sM.Chick <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.sM.Chick[3, 1] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[4, 2] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[5, 3] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[6, 4] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[1, 5] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[2, 5] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[7, 5] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[8, 6] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[1, 7] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[2, 7] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[7, 7] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
-elas.Res.sM.Chick[8, 8] <- (lam_Res.sM.Chick.pert - lam_Res.sM.Chick.orig) / (lam_Res.sM.Chick.orig * dy)
+# Male chick Non-breeding survival
+mat.Ela.sM_NB_Ch <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                      sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = E.sM_NB_Ch, sM_BN = sM_BN,
+                                      seasonal = FALSE)
 
-elas.Res.sM.Chick
+# Male 1yr Non-breeding survival
+mat.Ela.sM_NB_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = E.sM_NB_1yr, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
+# Male 2yr Non-breeding survival
+mat.Ela.sM_NB_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = E.sM_NB_2yr, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-# Sensitivity with respect to Female 1Y survival
-Res.elas.sF.1Y.orig <- A_orig.elas/(sF_NB[2] * sF_BN[2])  
-Res.elas.sF.1Y.pert <- A_pert.elas/(sF_NB[2] * sF_BN[2])
+# Male 3yr Non-breeding survival
+mat.Ela.sM_NB_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = E.sM_NB_3yr, sM_BN = sM_BN,
+                                       seasonal = FALSE)
 
-lam_Res.sF.1Y.orig <- as.numeric(eigen(Res.elas.sF.1Y.orig )$values[1])
-lam_Res.sF.1Y.pert <- as.numeric(eigen(Res.elas.sF.1Y.pert)$values[1])
+# Male juvenile Breeding survival
+mat.Ela.sM_BN_Ju <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                      sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = E.sM_BN_Ju,
+                                      seasonal = FALSE)
 
-elas.Res.sF.1Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.sF.1Y[3, 1] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[4, 2] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[5, 3] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[6, 4] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[1, 5] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[2, 5] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[7, 5] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[8, 6] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[1, 7] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[2, 7] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[7, 7] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
-elas.Res.sF.1Y[8, 8] <- (lam_Res.sF.1Y.pert - lam_Res.sF.1Y.orig) / (lam_Res.sF.1Y.orig * dy)
+# Male 1yr Breeding survival
+mat.Ela.sM_BN_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = E.sM_BN_1yr,
+                                       seasonal = FALSE)
 
-elas.Res.sF.1Y
+# Male 2yr Breeding survival
+mat.Ela.sM_BN_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = E.sM_BN_2yr,
+                                       seasonal = FALSE)
 
+# Male 3yr Breeding survival
+mat.Ela.sM_BN_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = E.sM_BN_3yr,
+                                       seasonal = FALSE)
 
-# Sensitivity with respect to Male 1Y survival
-Res.elas.sM.1Y.orig <- A_orig.elas/(sM_NB[2] * sM_BN[2])  
-Res.elas.sM.1Y.pert <- A_pert.elas/(sM_NB[2] * sM_BN[2])
+# Select only numerical matrix for calculation
+Ela.pRep <- mat.Ela.pRep$A
+Ela.mean.CS <- mat.Ela.mean.CS$A
+Ela.S_C <- mat.Ela.S_C$A
+Ela.sF_NB_Ch <- mat.Ela.sF_NB_Ch$A
+Ela.sF_NB_1yr <- mat.Ela.sF_NB_1yr$A
+Ela.sF_NB_2yr <- mat.Ela.sF_NB_2yr$A
+Ela.sF_NB_3yr <- mat.Ela.sF_NB_3yr$A
+Ela.sF_BN_Ju <- mat.Ela.sF_BN_Ju$A
+Ela.sF_BN_1yr <- mat.Ela.sF_BN_1yr$A
+Ela.sF_BN_2yr <- mat.Ela.sF_BN_2yr$A
+Ela.sF_BN_3yr <- mat.Ela.sF_BN_3yr$A
+Ela.sM_NB_Ch <- mat.Ela.sM_NB_Ch$A
+Ela.sM_NB_1yr <- mat.Ela.sM_NB_1yr$A
+Ela.sM_NB_2yr <- mat.Ela.sM_NB_2yr$A
+Ela.sM_NB_3yr <- mat.Ela.sM_NB_3yr$A
+Ela.sM_BN_Ju <- mat.Ela.sM_BN_Ju$A
+Ela.sM_BN_1yr <- mat.Ela.sM_BN_1yr$A
+Ela.sM_BN_2yr <- mat.Ela.sM_BN_2yr$A
+Ela.sM_BN_3yr <- mat.Ela.sM_BN_3yr$A
 
-lam_Res.sM.1Y.orig <- as.numeric(eigen(Res.elas.sM.1Y.orig )$values[1])
-lam_Res.sM.1Y.pert <- as.numeric(eigen(Res.elas.sM.1Y.pert)$values[1])
+# Calculate population growth rate for Origin matrix
+lam_Ela_orig <- as.numeric(eigen(Ela_orig)$values[1])
 
-elas.Res.sM.1Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.sM.1Y[3, 1] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[4, 2] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[5, 3] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[6, 4] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[1, 5] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[2, 5] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[7, 5] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[8, 6] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[1, 7] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[2, 7] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[7, 7] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
-elas.Res.sM.1Y[8, 8] <- (lam_Res.sM.1Y.pert - lam_Res.sM.1Y.orig) / (lam_Res.sM.1Y.orig * dy)
+# Calculate population growth rate for Origin matrix
+lam_Ela.pRep <- as.numeric(eigen(Ela.pRep)$values[1])
+lam_Ela.mean.CS <- as.numeric(eigen(Ela.mean.CS)$values[1])
+lam_Ela.S_C <- as.numeric(eigen(Ela.S_C)$values[1])
+lam_Ela.sF_NB_Ch <- as.numeric(eigen(Ela.sF_NB_Ch)$values[1])
+lam_Ela.sF_NB_1yr <- as.numeric(eigen(Ela.sF_NB_1yr)$values[1])
+lam_Ela.sF_NB_2yr <- as.numeric(eigen(Ela.sF_NB_2yr)$values[1])
+lam_Ela.sF_NB_3yr <- as.numeric(eigen(Ela.sF_NB_3yr)$values[1])
+lam_Ela.sF_BN_Ju <- as.numeric(eigen(Ela.sF_BN_Ju)$values[1])
+lam_Ela.sF_BN_1yr <- as.numeric(eigen(Ela.sF_BN_1yr)$values[1])
+lam_Ela.sF_BN_2yr <- as.numeric(eigen(Ela.sF_BN_2yr)$values[1])
+lam_Ela.sF_BN_3yr <- as.numeric(eigen(Ela.sF_BN_3yr)$values[1])
+lam_Ela.sM_NB_Ch <- as.numeric(eigen(Ela.sM_NB_Ch)$values[1])
+lam_Ela.sM_NB_1yr <- as.numeric(eigen(Ela.sM_NB_1yr)$values[1])
+lam_Ela.sM_NB_2yr <- as.numeric(eigen(Ela.sM_NB_2yr)$values[1])
+lam_Ela.sM_NB_3yr <- as.numeric(eigen(Ela.sM_NB_3yr)$values[1])
+lam_Ela.sM_BN_Ju <- as.numeric(eigen(Ela.sM_BN_Ju)$values[1])
+lam_Ela.sM_BN_1yr <- as.numeric(eigen(Ela.sM_BN_1yr)$values[1])
+lam_Ela.sM_BN_2yr <- as.numeric(eigen(Ela.sM_BN_2yr)$values[1])
+lam_Ela.sM_BN_3yr <- as.numeric(eigen(Ela.sM_BN_3yr)$values[1])
 
-elas.Res.sM.1Y
+# Calculate elasticity of population growth rate to target element
+Ela_pRep <- (lam_Ela.pRep - lam_Ela_orig) / (lam_Ela_orig * dy) 
+Ela_mean.CS <- (lam_Ela.mean.CS - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_S_C <- (lam_Ela.S_C - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sF_NB_Ch <- (lam_Ela.sF_NB_Ch - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sF_NB_1yr <- (lam_Ela.sF_NB_1yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sF_NB_2yr <- (lam_Ela.sF_NB_2yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sF_NB_3yr <- (lam_Ela.sF_NB_3yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sF_BN_Ju <- (lam_Ela.sF_BN_Ju - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sF_BN_1yr <- (lam_Ela.sF_BN_1yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sF_BN_2yr <- (lam_Ela.sF_BN_2yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sF_BN_3yr <- (lam_Ela.sF_BN_3yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sM_NB_Ch  <- (lam_Ela.sM_NB_Ch - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sM_NB_1yr <- (lam_Ela.sM_NB_1yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sM_NB_2yr <- (lam_Ela.sM_NB_2yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sM_NB_3yr <- (lam_Ela.sM_NB_3yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sM_BN_Ju <- (lam_Ela.sM_BN_Ju - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sM_BN_1yr <- (lam_Ela.sM_BN_1yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sM_BN_2yr <- (lam_Ela.sM_BN_2yr - lam_Ela_orig) / (lam_Ela_orig * dy)
+Ela_sM_BN_3yr <- (lam_Ela.sM_BN_3yr - lam_Ela_orig) / (lam_Ela_orig * dy)
 
-
-# Sensitivity with respect to Female 2Y survival
-Res.elas.sF.2Y.orig <- A_orig.elas/(sF_NB[3] * sF_BN[3])  
-Res.elas.sF.2Y.pert <- A_pert.elas/(sF_NB[3] * sF_BN[3])
-
-lam_Res.sF.2Y.orig <- as.numeric(eigen(Res.elas.sF.2Y.orig )$values[1])
-lam_Res.sF.2Y.pert <- as.numeric(eigen(Res.elas.sF.2Y.pert)$values[1])
-
-elas.Res.sF.2Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.sF.2Y[3, 1] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[4, 2] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[5, 3] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[6, 4] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[1, 5] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[2, 5] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[7, 5] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[8, 6] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[1, 7] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[2, 7] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[7, 7] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-elas.Res.sF.2Y[8, 8] <- (lam_Res.sF.2Y.pert - lam_Res.sF.2Y.orig) / (lam_Res.sF.2Y.orig * dy)
-
-elas.Res.sF.2Y
-
-
-# Sensitivity with respect to Male 2Y survival
-Res.elas.sM.2Y.orig <- A_orig.elas/(sM_NB[3] * sM_BN[3])  
-Res.elas.sM.2Y.pert <- A_pert.elas/(sM_NB[3] * sM_BN[3])
-
-lam_Res.sM.2Y.orig <- as.numeric(eigen(Res.elas.sM.2Y.orig )$values[1])
-lam_Res.sM.2Y.pert <- as.numeric(eigen(Res.elas.sM.2Y.pert)$values[1])
-
-elas.Res.sM.2Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.sM.2Y[3, 1] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[4, 2] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[5, 3] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[6, 4] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[1, 5] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[2, 5] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[7, 5] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[8, 6] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[1, 7] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[2, 7] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[7, 7] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-elas.Res.sM.2Y[8, 8] <- (lam_Res.sM.2Y.pert - lam_Res.sM.2Y.orig) / (lam_Res.sM.2Y.orig * dy)
-
-elas.Res.sM.2Y
-
-
-# Sensitivity with respect to Female 3+Y survival
-Res.elas.sF.3Y.orig <- A_orig.elas/(sF_NB[4] * sF_BN[4])  
-Res.elas.sF.3Y.pert <- A_pert.elas/(sF_NB[4] * sF_BN[4])
-
-lam_Res.sF.3Y.orig <- as.numeric(eigen(Res.elas.sF.3Y.orig )$values[1])
-lam_Res.sF.3Y.pert <- as.numeric(eigen(Res.elas.sF.3Y.pert)$values[1])
-
-elas.Res.sF.3Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.sF.3Y[3, 1] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[4, 2] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[5, 3] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[6, 4] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[1, 5] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[2, 5] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[7, 5] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[8, 6] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[1, 7] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[2, 7] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[7, 7] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-elas.Res.sF.3Y[8, 8] <- (lam_Res.sF.3Y.pert - lam_Res.sF.3Y.orig) / (lam_Res.sF.3Y.orig * dy)
-
-elas.Res.sF.3Y
+#Gather the results
+Elasticities <- list(c(Ela_pRep, Ela_mean.CS, Ela_S_C, 
+                     Ela_sF_NB_Ch, Ela_sF_NB_1yr, Ela_sF_NB_2yr, Ela_sF_NB_3yr,
+                     Ela_sF_BN_Ju, Ela_sF_BN_1yr, Ela_sF_BN_2yr, Ela_sF_BN_3yr,
+                     Ela_sM_NB_Ch, Ela_sM_NB_1yr, Ela_sM_NB_2yr, Ela_sM_NB_3yr,
+                     Ela_sM_BN_Ju, Ela_sM_BN_1yr, Ela_sM_BN_2yr, Ela_sM_BN_3yr))
 
 
-# Sensitivity with respect to Male 3+Y survival
-Res.elas.sM.3Y.orig <- A_orig.elas/(sM_NB[4] * sM_BN[4])  
-Res.elas.sM.3Y.pert <- A_pert.elas/(sM_NB[4] * sM_BN[4])
 
-lam_Res.sM.3Y.orig <- as.numeric(eigen(Res.elas.sM.3Y.orig )$values[1])
-lam_Res.sM.3Y.pert <- as.numeric(eigen(Res.elas.sM.3Y.pert)$values[1])
-
-elas.Res.sM.3Y <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.sM.3Y[3, 1] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[4, 2] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[5, 3] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[6, 4] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[1, 5] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[2, 5] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[7, 5] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[8, 6] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[1, 7] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[2, 7] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[7, 7] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-elas.Res.sM.3Y[8, 8] <- (lam_Res.sM.3Y.pert - lam_Res.sM.3Y.orig) / (lam_Res.sM.3Y.orig * dy)
-
-elas.Res.sM.3Y
-
-
-# Sensitivity with respect to Breeding probability
-Res.elas.pRep.orig <- A_orig.elas/pRep  
-Res.elas.pRep.pert <- A_pert.elas/pRep
-
-lam_Res.pRep.orig <- as.numeric(eigen(Res.elas.pRep.orig )$values[1])
-lam_Res.pRep.pert <- as.numeric(eigen(Res.elas.pRep.pert)$values[1])
-
-elas.Res.pRep <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.pRep[3, 1] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[4, 2] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[5, 3] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[6, 4] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[1, 5] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[2, 5] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[7, 5] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[8, 6] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[1, 7] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[2, 7] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[7, 7] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-elas.Res.pRep[8, 8] <- (lam_Res.pRep.pert - lam_Res.pRep.orig) / (lam_Res.pRep.orig * dy)
-
-elas.Res.pRep
-
-
-# Sensitivity with respect to Mean clutch size
-Res.elas.mean.CS.orig <- A_orig.elas/mean.CS
-Res.elas.mean.CS.pert <- A_pert.elas/mean.CS
-
-lam_Res.mean.CS.orig <- as.numeric(eigen(Res.elas.mean.CS.orig )$values[1])
-lam_Res.mean.CS.pert <- as.numeric(eigen(Res.elas.mean.CS.pert)$values[1])
-
-elas.Res.mean.CS <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.mean.CS[3, 1] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[4, 2] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[5, 3] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[6, 4] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[1, 5] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[2, 5] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[7, 5] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[8, 6] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[1, 7] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[2, 7] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[7, 7] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-elas.Res.mean.CS[8, 8] <- (lam_Res.mean.CS.pert - lam_Res.mean.CS.orig) / (lam_Res.mean.CS.orig * dy)
-
-elas.Res.mean.CS
-
-
-# Sensitivity with respect to Clutch survival
-Res.elas.S_C.orig <- A_orig.elas/S_C
-Res.elas.S_C.pert <- A_pert.elas/S_C
-
-lam_Res.S_C.orig <- as.numeric(eigen(Res.elas.S_C.orig )$values[1])
-lam_Res.S_C.pert <- as.numeric(eigen(Res.elas.S_C.pert)$values[1])
-
-elas.Res.S_C <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas.Res.S_C[3, 1] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[4, 2] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[5, 3] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[6, 4] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[1, 5] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[2, 5] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[7, 5] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[8, 6] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[1, 7] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[2, 7] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[7, 7] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-elas.Res.S_C[8, 8] <- (lam_Res.S_C.pert - lam_Res.S_C.orig) / (lam_Res.S_C.orig * dy)
-
-elas.Res.S_C
 
 # - Visualize elasticities for all vital rates 
 
-elas.all <- list(elas.Res.sF.Chick, elas.Res.sM.Chick, elas.Res.sF.1Y, elas.Res.sM.1Y,
-                 elas.Res.sF.2Y, elas.Res.sM.2Y, elas.Res.sF.3Y, elas.Res.sM.1Y,
-                 elas.Res.pRep, elas.Res.mean.CS, elas.Res.S_C)
 
 
 
