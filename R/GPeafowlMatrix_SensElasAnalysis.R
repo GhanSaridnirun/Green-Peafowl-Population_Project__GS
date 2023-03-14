@@ -149,106 +149,43 @@ popbio::eigen.analysis(mat.ann$A)
 # Set perturbation factor
 dy <- 1e-5
 
-# Set up original and perturbed matrix
+# Set up original and sensitivity matrices
 A_orig <- mat.ann$A
-A_pert <- A_orig
+sens <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig), dimnames = dimnames(A_orig))
 
-# Perturb target element in matrix
-A_pert_SChF <- A_pert
-A_pert_SChF[3, 1] <- A_pert_SChF[3, 1] + dy
-
-# Calculate population growth rate for both matrices
-lam_orig <- as.numeric(eigen(A_orig)$values[1])
-lam_pert_SChF <- as.numeric(eigen(A_pert_SChF)$values[1])
-
-# Calculate sensitivity of population growth rate to target element
-sens <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-sens[3, 1] <- (lam_pert_SChF - lam_orig) / dy 
-
-
-# TODO: 
-# - Generalize above code to calculate sensitivities for all (non-0) matrix elements
-
-#Sensitivity of ChM
-A_pert_SChM <- A_pert
-A_pert_SChM[4, 2] <- A_pert_SChM[4, 2] + dy
-lam_pert_SChM <- as.numeric(eigen(A_pert_SChM)$values[1])
-sens[4, 2] <- (lam_pert_SChM - lam_orig) / dy
-
-#Sensitivity of 1yF
-A_pert_S1yF <- A_pert
-A_pert_S1yF[5, 3] <- A_pert_S1yF[5, 3] + dy
-lam_pert_S1yF <- as.numeric(eigen(A_pert_S1yF)$values[1])
-sens[5, 3] <- (lam_pert_S1yF - lam_orig) / dy
-
-#Sensitivity of 1yM
-A_pert_S1yM <- A_pert
-A_pert_S1yM[6, 4] <- A_pert_S1yM[6, 4] + dy
-lam_pert_S1yM <- as.numeric(eigen(A_pert_S1yM)$values[1])
-sens[6, 4] <- (lam_pert_S1yM - lam_orig) / dy
-
-#Sensitivity of 2yF produce ChF
-A_pert_S2yFF <- A_pert
-A_pert_S2yFF[1, 5] <- A_pert_S2yFF[1, 5] + dy
-lam_pert_S2yFF <- as.numeric(eigen(A_pert_S2yFF)$values[1])
-sens[1, 5] <- (lam_pert_S2yFF - lam_orig) / dy
-
-#Sensitivity of 2yF produce ChM
-A_pert_S2yFM <- A_pert
-A_pert_S2yFM[2, 5] <- A_pert_S2yFM[2, 5] + dy 
-lam_pert_S2yFM <- as.numeric(eigen(A_pert_S2yFM)$values[1])
-sens[2, 5] <- (lam_pert_S2yFM - lam_orig) / dy
-
-#Sensitivity of 2yF
-A_pert_S2yF <- A_pert
-A_pert_S2yF[7, 5] <- A_pert_S2yF[7, 5] + dy 
-lam_pert_S2yF <- as.numeric(eigen(A_pert_S2yF)$values[1])
-sens[7, 5] <- (lam_pert_S2yF - lam_orig) / dy 
-
-#Sensitivity of 2yM
-A_pert_S2yM <- A_pert
-A_pert_S2yM[8, 6] <- A_pert_S2yM[8, 6] + dy
-lam_pert_S2yM <- as.numeric(eigen(A_pert_S2yM)$values[1])
-sens[8, 6] <- (lam_pert_S2yM - lam_orig) / dy 
-
-#Sensitivity of 3yF produce ChF
-A_pert_S3yFF <- A_pert
-A_pert_S3yFF[1, 7] <- A_pert_S3yFF[1, 7] + dy
-lam_pert_S3yFF <- as.numeric(eigen(A_pert_S3yFF)$values[1])
-sens[1, 7] <- (lam_pert_S3yFF - lam_orig) / dy 
-
-#Sensitivity of 3yF produce ChM
-A_pert_S3yFM <- A_pert
-A_pert_S3yFM[2, 7] <- A_pert_S3yFM[2, 7] + dy
-lam_pert_S3yFM <- as.numeric(eigen(A_pert_S3yFM)$values[1])
-sens[2, 7] <- (lam_pert_S3yFM - lam_orig) / dy 
-
-#Sensitivity of 3yF
-A_pert_S3yF <- A_pert
-A_pert_S3yF[7, 7] <- A_pert_S3yF[7, 7] + dy
-lam_pert_S3yF <- as.numeric(eigen(A_pert_S3yF)$values[1])
-sens[7, 7] <- (lam_pert_S3yF - lam_orig) / dy 
-
-#Sensitivity of 3yM
-A_pert_S3yM <- A_pert
-A_pert_S3yM[8, 8] <- A_pert_S3yM[8, 8] + dy
-lam_pert_S3yM <- as.numeric(eigen(A_pert_S3yM)$values[1])
-sens[8, 8] <- (lam_pert_S3yM - lam_orig) / dy 
-
-
-sens
-
-row.names(sens) <- (c("ChF", "ChM","1yF", "1yM","2yF", "2yM","3yF", "3yM"))
-colnames(sens) <- (c("ChF", "ChM","1yF", "1yM","2yF", "2yM","3yF", "3yM"))
+for(j in 1:nrow(A_orig)){
+  for(k in 1:ncol(A_orig)){
+    
+    if(A_orig[j, k] != 0){ # Only continue if matrix element [j, k] != 0
+      
+      # Define perturbation matrix  
+      A_pert <- A_orig
+      
+      # Perturb target element in matrix
+      A_pert[j, k] <- A_pert_SChF[j, k] + dy
+      
+      # Calculate population growth rate for both matrices
+      lam_orig <- as.numeric(eigen(A_orig)$values[1])
+      lam_pert <- as.numeric(eigen(A_pert)$values[1])
+      
+      # Calculate sensitivity of population growth rate to target element
+      sens[j, k] <- (lam_pert - lam_orig) / dy 
+    }
+  }
+}
 
 sens
 
 
+## Visualize sensitivity matrix
+fields::image.plot(t(apply(sens, 2, rev)), axes = FALSE, col = plasma(20))
 
-# - Visualize sensitivity matrix (tip: start with fields::image.plot)
+image(t(apply(sens, 2, rev)), col = plasma(20), add = TRUE)
+axis(3, at = seq(0, 1, length = ncol(sens)), labels = colnames(sens), lwd = 0)
+axis(2, at = seq(1, 0, length = nrow(sens)), labels = rownames(sens), lwd = 0, las = 2)
 
-fields::image.plot(sens)
-
+# TODO 1: Turn the above for-loop (lines 156 to 175) into a function that takes A_orig and dy as input, and returns sens
+# TODO 2: Write equivalent code for elasticities below
 
 
 # 5. Calculate matrix element elasticities #
@@ -276,9 +213,6 @@ lam_pert_EChF <- as.numeric(eigen(A_pert_EChF)$values[1])
 elas <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
 elas[3, 1] <- (lam_pert_EChF - lam_orig) / (lam_orig * dy) 
 
-
-# TODO: 
-# - Generalize above code to calculate sensitivities for all (non-0) matrix elements
 
 # Elasticity of ChM
 A_pert_EChM <- A_pert
