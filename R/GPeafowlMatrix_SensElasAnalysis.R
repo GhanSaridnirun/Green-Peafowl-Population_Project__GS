@@ -153,7 +153,7 @@ dy <- 1e-5
 A_orig <- mat.ann$A
 sens <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig), dimnames = dimnames(A_orig))
 
-sensitivity <- function(A_orig, dy){
+calculate.sensitivity <- function(A_orig, dy){
 
                 for(j in 1:nrow(A_orig)){
                   for(k in 1:ncol(A_orig)){
@@ -179,7 +179,7 @@ sensitivity <- function(A_orig, dy){
     return(sens)
 } 
 
-sens <- sensitivity(A_orig, dy)
+sens <- calculate.sensitivity(A_orig, dy)
 
 library(fields)
 
@@ -189,9 +189,6 @@ fields::image.plot(t(apply(sens, 2, rev)), axes = FALSE, col = plasma(20))
 image(t(apply(sens, 2, rev)), col = plasma(20), add = TRUE)
 axis(3, at = seq(0, 1, length = ncol(sens)), labels = colnames(sens), lwd = 0)
 axis(2, at = seq(1, 0, length = nrow(sens)), labels = rownames(sens), lwd = 0, las = 2)
-
-# TODO 1: Turn the above for-loop (lines 156 to 175) into a function that takes A_orig and dy as input, and returns sens
-# TODO 2: Write equivalent code for elasticities below
 
 
 # 5. Calculate matrix element elasticities #
@@ -204,9 +201,9 @@ dy <- 1e-5
 
 # Set up original and perturbed matrix
 A_orig <- mat.ann$A
-elas <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig), dimnames = dimnames(A_orig))
+elas <- matrix(0, nrow = nrow(A_orig), ncol = ncol(A_orig), dimnames = dimnames(A_orig))
 
-elasticity <- function(A_orig, dy){
+calculate.elasticity <- function(A_orig, dy){
 
                for(m in 1:nrow(A_orig)){
                 for(n in 1:ncol(A_orig)){
@@ -232,7 +229,7 @@ elasticity <- function(A_orig, dy){
 }  
 
 
-elas <- elasticity(A_orig, dy)
+elas <- calculate.elasticity(A_orig, dy)
 
 
 # - Visualize elasticity matrix (tip: start with fields::image.plot)
