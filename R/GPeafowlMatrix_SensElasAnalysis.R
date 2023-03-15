@@ -246,222 +246,87 @@ axis(2, at = seq(1, 0, length = nrow(elas)), labels = rownames(elas), lwd = 0, l
 # 6. Calculate vital rate sensitivities #
 #---------------------------------------#
 
-# TODO: 
-# - Adapt the above code to calculate sensitivities with respect to vital rates (instead of matrix elements)
-#   NOTE: Keep in mind that unlike matrix elements, vital rates may appear several times in the matrix!
-# - Generalize your code to calculate sensitivities for all vital rates
-
 ## Using perturbation analysis
 
 # Set perturbation factor
 dy <- 1e-5
 
-# Setting the perturbation for sensitivity of target vital rates
-S.pRep <- pRep + dy # pertubate Breeding probability
-S.mean.CS <- mean.CS + dy # pertubate Mean clutch size
-S.S_C <- S_C + dy # pertubate Clutch survival
-S.sF_NB_Ch <- sF_NB + c(dy, 0, 0, 0) # pertubate Female chick Non-breeding survival
-S.sF_NB_1yr <- sF_NB + c(0, dy, 0, 0) # pertubate Female 1yr Non-breeding survival
-S.sF_NB_2yr <- sF_NB + c(0, 0, dy, 0) # pertubate Female 2yr Non-breeding survival
-S.sF_NB_3yr <- sF_NB + c(0, 0, 0, dy) # pertubate Female 3yr Non-breeding survival
-S.sF_BN_Ju <- sF_BN + c(dy, 0, 0, 0) # pertubate Female Juvenile Breeding survival
-S.sF_BN_1yr <- sF_BN + c(0, dy, 0, 0) # pertubate Female 1yr Breeding survival
-S.sF_BN_2yr <- sF_BN + c(0, 0, dy, 0) # pertubate Female 2yr Breeding survival
-S.sF_BN_3yr <- sF_BN + c(0, 0, 0, dy) # pertubate Female 3yr Breeding survival
-S.sM_NB_Ch <- sM_NB + c(dy, 0, 0, 0) # pertubate Male chick Non-breeding survival
-S.sM_NB_1yr <- sM_NB + c(0, dy, 0, 0) # pertubate Male 1yr Non-breeding survival
-S.sM_NB_2yr <- sM_NB + c(0, 0, dy, 0) # pertubate Male 2yr Non-breeding survival
-S.sM_NB_3yr <- sM_NB + c(0, 0, 0, dy) # pertubate Male 3yr Non-breeding survival
-S.sM_BN_Ju <- sM_BN + c(dy, 0, 0, 0) # pertubate Male juvenile Breeding survival
-S.sM_BN_1yr <- sM_BN + c(0, dy, 0, 0) # pertubate Male 1yr Breeding survival
-S.sM_BN_2yr <- sM_BN + c(0, 0, dy, 0) # pertubate Male 2yr Breeding survival
-S.sM_BN_3yr <- sM_BN + c(0, 0, 0, dy) # pertubate Male 3yr Breeding survival
+# List all vital rate names
+VR.names <- c("pRep", "mean.CS", "gamma", "S_C",
+              "sF_NB_Ch", paste0("sF_NB_", 1:3, "yr"),
+              "sF_BN_Ju", paste0("sF_BN_", 1:3, "yr"),
+              "sM_NB_Ch", paste0("sM_NB_", 1:3, "yr"),
+              "sM_BN_Ju", paste0("sM_BN_", 1:3, "yr"))
 
-# Origin Matrix
-Sen_orig <- mat.ann$A
+# List all original vital rate values
+VR.orig <- c(pRep, mean.CS, gamma, S_C,
+             sF_NB, sF_BN, sM_NB, sM_BN)
+names(VR.orig) <- VR.names
 
-# Build matrix with pertubated target vital rate for sensitivity
+# Make perturbation matrix
+# NOTE: Each row in this matrix corresponds to one "perturbation scenario", 
+# i.e. a situation in which the vital rate with the corresponding row name is 
+# perturbed. By having each scenario in a column, we can loop over all the 
+# possibilities instead of writing them out manually. 
+pert.mat <- diag(length(VR.names))*dy
+rownames(pert.mat) <- VR.names
 
-# Breeding probability
-mat.Sen.pRep <- make.GPprojMatrix(pRep = S.pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                  sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
-                                  seasonal = FALSE)
+# Make matrix of perturbed vital rates (per scenario, sensitivity = additive)
+VR.pert <- VR.orig + pert.mat
 
-# Mean clutch size
-mat.Sen.mean.CS <- make.GPprojMatrix(pRep = pRep, mean.CS = S.mean.CS, S_C = S_C, gamma = gamma, 
-                                     sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
-                                     seasonal = FALSE)
+# Build original matrix
+A_orig <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
+                            sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
+                            seasonal = FALSE)$A
 
-# Clutch survival
-mat.Sen.S_C <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S.S_C, gamma = gamma, 
-                                 sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
-                                 seasonal = FALSE)
+# Set up empty dataframe for storing results
+VR.sens.data <- data.frame()
 
-# Female chick Non-breeding survival
-mat.Sen.sF_NB_Ch <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                      sF_NB = S.sF_NB_Ch, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
-                                      seasonal = FALSE)
+for(i in 1:length(VR.names)){ # Loop over each perturbation scenario
+  
+  # Build perturbed matrix
+  A_pert <- make.GPprojMatrix(pRep = VR.pert["pRep", i], 
+                              mean.CS = VR.pert["mean.CS", i], 
+                              S_C = VR.pert["S_C", i], 
+                              gamma = VR.pert["gamma", i], 
+                              sF_NB = VR.pert[c("sF_NB_Ch", paste0("sF_NB_", 1:3, "yr")), i], 
+                              sF_BN = VR.pert[c("sF_BN_Ju", paste0("sF_BN_", 1:3, "yr")), i], 
+                              sM_NB = VR.pert[c("sM_NB_Ch", paste0("sM_NB_", 1:3, "yr")), i], 
+                              sM_BN = VR.pert[c("sM_BN_Ju", paste0("sM_BN_", 1:3, "yr")), i],
+                              seasonal = FALSE)$A
+  
+  # Calculate population growth rate for both matrices
+  lam_orig <- as.numeric(eigen(A_orig)$values[1])
+  lam_pert <- as.numeric(eigen(A_pert)$values[1])
+  
+  # Calculate sensitivity of population growth rate to target element
+  VR.sens <- (lam_pert - lam_orig) / dy
+  
+  # Assemble results in a dataframe
+  data.temp <- data.frame(VitalRate = VR.names[i],
+                          Sensitivity = VR.sens)
+  
+  VR.sens.data <- rbind(VR.sens.data, data.temp)
+}
 
-# Female 1yr Non-breeding survival
-mat.Sen.sF_NB_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = S.sF_NB_1yr, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
-                                       seasonal = FALSE)
+VR.sens.data
 
-# Female 2yr Non-breeding survival
-mat.Sen.sF_NB_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = S.sF_NB_2yr, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
-                                       seasonal = FALSE)
+# Visualize sensitivities for all vital rates 
+library(ggplot2)
+ggplot(VR.sens.data) + 
+  geom_bar(aes(x = VitalRate, y = Sensitivity), stat = "identity") + 
+  coord_flip() + 
+  theme_classic()
 
-# Female 3yr Non-breeding survival
-mat.Sen.sF_NB_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = S.sF_NB_3yr, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
-                                       seasonal = FALSE)
-
-# Female Juvenile Breeding survival
-mat.Sen.sF_BN_Ju <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                      sF_NB = sF_NB, sF_BN = S.sF_BN_Ju, sM_NB = sM_NB, sM_BN = sM_BN,
-                                      seasonal = FALSE)
-
-# Female 1yr Breeding survival
-mat.Sen.sF_BN_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = sF_NB, sF_BN = S.sF_BN_1yr, sM_NB = sM_NB, sM_BN = sM_BN,
-                                       seasonal = FALSE)
-
-# Female 2yr Breeding survival
-mat.Sen.sF_BN_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = sF_NB, sF_BN = S.sF_BN_2yr, sM_NB = sM_NB, sM_BN = sM_BN,
-                                       seasonal = FALSE)
-
-# Female 3yr Breeding survival
-mat.Sen.sF_BN_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = sF_NB, sF_BN = S.sF_BN_3yr, sM_NB = sM_NB, sM_BN = sM_BN,
-                                       seasonal = FALSE)
-
-# Male chick Non-breeding survival
-mat.Sen.sM_NB_Ch <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                      sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = S.sM_NB_Ch, sM_BN = sM_BN,
-                                      seasonal = FALSE)
-
-# Male 1yr Non-breeding survival
-mat.Sen.sM_NB_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = S.sM_NB_1yr, sM_BN = sM_BN,
-                                       seasonal = FALSE)
-
-# Male 2yr Non-breeding survival
-mat.Sen.sM_NB_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = S.sM_NB_2yr, sM_BN = sM_BN,
-                                       seasonal = FALSE)
-
-# Male 3yr Non-breeding survival
-mat.Sen.sM_NB_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = S.sM_NB_3yr, sM_BN = sM_BN,
-                                       seasonal = FALSE)
-
-# Male juvenile Breeding survival
-mat.Sen.sM_BN_Ju <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                      sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = S.sM_BN_Ju,
-                                      seasonal = FALSE)
-
-# Male 1yr Breeding survival
-mat.Sen.sM_BN_1yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = S.sM_BN_1yr,
-                                       seasonal = FALSE)
-
-# Male 2yr Breeding survival
-mat.Sen.sM_BN_2yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = S.sM_BN_2yr,
-                                       seasonal = FALSE)
-
-# Male 3yr Breeding survival
-mat.Sen.sM_BN_3yr <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = gamma, 
-                                       sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = S.sM_BN_3yr,
-                                       seasonal = FALSE)
+# TODO 1: Turn the above calculation of sensitivity (lines 266-312) into a 
+# function that takes dy, VR.names, and VR.orig as input and returns VR.sens.data
+# TODO 2: Write equivalent code for elasticities below
 
 
-# Select only numerical matrix for calculation
-Sen.pRep <- mat.Sen.pRep$A # Breeding probability
-Sen.mean.CS <- mat.Sen.mean.CS$A
-Sen.S_C <- mat.Sen.S_C$A
-Sen.sF_NB_Ch <- mat.Sen.sF_NB_Ch$A
-Sen.sF_NB_1yr <- mat.Sen.sF_NB_1yr$A 
-Sen.sF_NB_2yr <- mat.Sen.sF_NB_2yr$A
-Sen.sF_NB_3yr <- mat.Sen.sF_NB_3yr$A
-Sen.sF_BN_Ju <- mat.Sen.sF_BN_Ju$A
-Sen.sF_BN_1yr <- mat.Sen.sF_BN_1yr$A
-Sen.sF_BN_2yr <- mat.Sen.sF_BN_2yr$A
-Sen.sF_BN_3yr <- mat.Sen.sF_BN_3yr$A
-Sen.sM_NB_Ch <- mat.Sen.sM_NB_Ch$A
-Sen.sM_NB_1yr <- mat.Sen.sM_NB_1yr$A
-Sen.sM_NB_2yr <- mat.Sen.sM_NB_2yr$A
-Sen.sM_NB_3yr <- mat.Sen.sM_NB_3yr$A
-Sen.sM_BN_Ju <- mat.Sen.sM_BN_Ju$A
-Sen.sM_BN_1yr <- mat.Sen.sM_BN_1yr$A
-Sen.sM_BN_2yr <- mat.Sen.sM_BN_2yr$A
-Sen.sM_BN_3yr <- mat.Sen.sM_BN_3yr$A
-
-# Calculate population growth rate for Origin matrix
-lam_Sen_orig <- as.numeric(eigen(Sen_orig)$values[1])
-
-# Calculate population growth rate for Origin matrix
-lam_Sen.pRep <- as.numeric(eigen(Sen.pRep)$values[1])
-lam_Sen.mean.CS <- as.numeric(eigen(Sen.mean.CS)$values[1])
-lam_Sen.S_C <- as.numeric(eigen(Sen.S_C)$values[1])
-lam_Sen.sF_NB_Ch <- as.numeric(eigen(Sen.sF_NB_Ch)$values[1])
-lam_Sen.sF_NB_1yr <- as.numeric(eigen(Sen.sF_NB_1yr)$values[1])
-lam_Sen.sF_NB_2yr <- as.numeric(eigen(Sen.sF_NB_2yr)$values[1])
-lam_Sen.sF_NB_3yr <- as.numeric(eigen(Sen.sF_NB_3yr)$values[1])
-lam_Sen.sF_BN_Ju <- as.numeric(eigen(Sen.sF_BN_Ju)$values[1])
-lam_Sen.sF_BN_1yr <- as.numeric(eigen(Sen.sF_BN_1yr)$values[1])
-lam_Sen.sF_BN_2yr <- as.numeric(eigen(Sen.sF_BN_2yr)$values[1])
-lam_Sen.sF_BN_3yr <- as.numeric(eigen(Sen.sF_BN_3yr)$values[1])
-lam_Sen.sM_NB_Ch <- as.numeric(eigen(Sen.sM_NB_Ch)$values[1])
-lam_Sen.sM_NB_1yr <- as.numeric(eigen(Sen.sM_NB_1yr)$values[1])
-lam_Sen.sM_NB_2yr <- as.numeric(eigen(Sen.sM_NB_2yr)$values[1])
-lam_Sen.sM_NB_3yr <- as.numeric(eigen(Sen.sM_NB_3yr)$values[1])
-lam_Sen.sM_BN_Ju <- as.numeric(eigen(Sen.sM_BN_Ju)$values[1])
-lam_Sen.sM_BN_1yr <- as.numeric(eigen(Sen.sM_BN_1yr)$values[1])
-lam_Sen.sM_BN_2yr <- as.numeric(eigen(Sen.sM_BN_2yr)$values[1])
-lam_Sen.sM_BN_3yr <- as.numeric(eigen(Sen.sM_BN_3yr)$values[1])
-
-# Calculate sensitivity of population growth rate to target element
-Sen_pRep <- (lam_Sen.pRep - lam_Sen_orig) / dy
-Sen_mean.CS  <- (lam_Sen.mean.CS - lam_Sen_orig) / dy
-Sen_S_C <- (lam_Sen.S_C - lam_Sen_orig) / dy
-Sen_sF_NB_Ch <- (lam_Sen.sF_NB_Ch - lam_Sen_orig) / dy
-Sen_sF_NB_1yr <- (lam_Sen.sF_NB_1yr - lam_Sen_orig) / dy
-Sen_sF_NB_2yr <- (lam_Sen.sF_NB_2yr - lam_Sen_orig) / dy
-Sen_sF_NB_3yr <- (lam_Sen.sF_NB_3yr - lam_Sen_orig) / dy
-Sen_sF_BN_Ju <- (lam_Sen.sF_BN_Ju - lam_Sen_orig) / dy
-Sen_sF_BN_1yr <- (lam_Sen.sF_BN_1yr - lam_Sen_orig) / dy
-Sen_sF_BN_2yr <- (lam_Sen.sF_BN_2yr - lam_Sen_orig) / dy
-Sen_sF_BN_3yr <- (lam_Sen.sF_BN_3yr - lam_Sen_orig) / dy
-Sen_sM_NB_Ch <- (lam_Sen.sM_NB_Ch - lam_Sen_orig) / dy
-Sen_sM_NB_1yr <- (lam_Sen.sM_NB_1yr - lam_Sen_orig) / dy
-Sen_sM_NB_2yr <- (lam_Sen.sM_NB_2yr - lam_Sen_orig) / dy
-Sen_sM_NB_3yr <- (lam_Sen.sM_NB_3yr - lam_Sen_orig) / dy
-Sen_sM_BN_Ju <- (lam_Sen.sM_BN_Ju - lam_Sen_orig) / dy
-Sen_sM_BN_1yr <- (lam_Sen.sM_BN_1yr - lam_Sen_orig) / dy
-Sen_sM_BN_2yr <- (lam_Sen.sM_BN_2yr - lam_Sen_orig) / dy
-Sen_sM_BN_3yr <- (lam_Sen.sM_BN_3yr - lam_Sen_orig) / dy
-
-#Gather the results
-Sensitivities <- list(c(Sen_pRep, Sen_mean.CS, Sen_S_C, 
-                        Sen_sF_NB_Ch, Sen_sF_NB_1yr, Sen_sF_NB_2yr, Sen_sF_NB_3yr,
-                        Sen_sF_BN_Ju, Sen_sF_BN_1yr, Sen_sF_BN_2yr, Sen_sF_BN_3yr,
-                        Sen_sM_NB_Ch, Sen_sM_NB_1yr, Sen_sM_NB_2yr, Sen_sM_NB_3yr,
-                        Sen_sM_BN_Ju, Sen_sM_BN_1yr, Sen_sM_BN_2yr, Sen_sM_BN_3yr))
-
-
-
-# - Visualize sensitivities for all vital rates 
-
-
-
-# 7. Calculate vital rate elasticieites #
+# 7. Calculate vital rate elasticiites #
 #---------------------------------------#
 
 ## Using perturbation analysis
-# TODO: 
 # - Analogous to 6., but using formulas for elasticity (see 5.)
 
 # Set perturbation factor
