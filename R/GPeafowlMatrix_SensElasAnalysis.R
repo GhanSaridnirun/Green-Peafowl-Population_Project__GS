@@ -153,29 +153,35 @@ dy <- 1e-5
 A_orig <- mat.ann$A
 sens <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig), dimnames = dimnames(A_orig))
 
-for(j in 1:nrow(A_orig)){
-  for(k in 1:ncol(A_orig)){
+sensitivity <- function(A_orig, dy){
+
+                for(j in 1:nrow(A_orig)){
+                  for(k in 1:ncol(A_orig)){
     
-    if(A_orig[j, k] != 0){ # Only continue if matrix element [j, k] != 0
+                      if(A_orig[j, k] != 0){ # Only continue if matrix element [j, k] != 0
       
-      # Define perturbation matrix  
-      A_pert <- A_orig
+                        # Define perturbation matrix  
+                        A_pert <- A_orig
       
-      # Perturb target element in matrix
-      A_pert[j, k] <- A_pert_SChF[j, k] + dy
+                        # Perturb target element in matrix
+                        A_pert[j, k] <- A_pert[j, k] + dy
       
-      # Calculate population growth rate for both matrices
-      lam_orig <- as.numeric(eigen(A_orig)$values[1])
-      lam_pert <- as.numeric(eigen(A_pert)$values[1])
+                        # Calculate population growth rate for both matrices
+                        lam_orig <- as.numeric(eigen(A_orig)$values[1])
+                        lam_pert <- as.numeric(eigen(A_pert)$values[1])
       
-      # Calculate sensitivity of population growth rate to target element
-      sens[j, k] <- (lam_pert - lam_orig) / dy 
-    }
-  }
-}
+                        # Calculate sensitivity of population growth rate to target element
+                        sens[j, k] <- (lam_pert - lam_orig) / dy 
+                      }
+                    }
+                  }
 
-sens
+    return(sens)
+} 
 
+sens <- sensitivity(A_orig, dy)
+
+library(fields)
 
 ## Visualize sensitivity matrix
 fields::image.plot(t(apply(sens, 2, rev)), axes = FALSE, col = plasma(20))
@@ -198,100 +204,45 @@ dy <- 1e-5
 
 # Set up original and perturbed matrix
 A_orig <- mat.ann$A
-A_pert <- A_orig
+elas <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig), dimnames = dimnames(A_orig))
 
-# Perturb target element in matrix
-A_pert_EChF <- A_pert
-A_pert_EChF[3, 1] <- A_pert_EChF[3, 1] * (1 + dy) 
+elasticity <- function(A_orig, dy){
 
-
-# Calculate population growth rate for both matrices
-lam_orig <- as.numeric(eigen(A_orig)$values[1])
-lam_pert_EChF <- as.numeric(eigen(A_pert_EChF)$values[1])
-
-# Calculate sensitivity of population growth rate to target element
-elas <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig))
-elas[3, 1] <- (lam_pert_EChF - lam_orig) / (lam_orig * dy) 
-
-
-# Elasticity of ChM
-A_pert_EChM <- A_pert
-A_pert_EChM[4, 2] <- A_pert_EChM[4, 2] * (1 + dy)  
-lam_pert_EChM <- as.numeric(eigen(A_pert_EChM)$values[1])
-elas[4, 2] <- (lam_pert_EChM - lam_orig) / (lam_orig * dy) 
-
-# Elasticity of 1yF
-A_pert_E1yF <- A_pert
-A_pert_E1yF[5, 3] <- A_pert_E1yF[5, 3] * (1 + dy) 
-lam_pert_E1yF <- as.numeric(eigen(A_pert_E1yF)$values[1])
-elas[5, 3] <- (lam_pert_E1yF - lam_orig) / (lam_orig * dy) 
-
-# Elasticity of 1yM
-A_pert_E1yM <- A_pert
-A_pert_E1yM[6, 4] <- A_pert_E1yM[6, 4] * (1 + dy)  
-lam_pert_E1yM <- as.numeric(eigen(A_pert_E1yM)$values[1])
-elas[6, 4] <- (lam_pert_E1yM - lam_orig) / (lam_orig * dy) 
-
-# Elasticity of 2yF produce ChF
-A_pert_E2yFF <- A_pert
-A_pert_E2yFF[1, 5] <- A_pert_E2yFF[1, 5] * (1 + dy) 
-lam_pert_E2yFF <- as.numeric(eigen(A_pert_E2yFF)$values[1])
-elas[1, 5] <- (lam_pert_E2yFF - lam_orig) / (lam_orig * dy) 
-
-# Elasticity of 2yF produce ChM
-A_pert_E2yFM <- A_pert
-A_pert_E2yFM[2, 5] <- A_pert_E2yFM[2, 5] * (1 + dy)  
-lam_pert_E2yFM <- as.numeric(eigen(A_pert_E2yFM)$values[1])
-elas[2, 5] <- (lam_pert_E2yFM - lam_orig) / (lam_orig * dy) 
-
-# Elasticity of 2yF
-A_pert_E2yF <- A_pert
-A_pert_E2yF[7, 5] <- A_pert_E2yF[7, 5] * (1 + dy)   
-lam_pert_E2yF <- as.numeric(eigen(A_pert_E2yF)$values[1])
-elas[7, 5] <- (lam_pert_E2yF - lam_orig) / (lam_orig * dy) 
-
-# Elasticity of 2yM
-A_pert_E2yM <- A_pert
-A_pert_E2yM[8, 6] <- A_pert_E2yM[8, 6] * (1 + dy)  
-lam_pert_E2yM <- as.numeric(eigen(A_pert_E2yM)$values[1])
-elas[8, 6] <- (lam_pert_E2yM - lam_orig) / (lam_orig * dy) 
-
-# Elasticity of 3yF produce ChF
-A_pert_E3yFF <- A_pert
-A_pert_E3yFF[1, 7] <- A_pert_E3yFF[1, 7] * (1 + dy) 
-lam_pert_E3yFF <- as.numeric(eigen(A_pert_E3yFF)$values[1])
-elas[1, 7] <- (lam_pert_E3yFF - lam_orig) / (lam_orig * dy) 
-
-# Elasticity of 3yF produce ChM
-A_pert_E3yFM <- A_pert
-A_pert_E3yFM[2, 7] <- A_pert_E3yFM[2, 7] * (1 + dy) 
-lam_pert_E3yFM <- as.numeric(eigen(A_pert_E3yFM)$values[1])
-elas[2, 7] <- (lam_pert_E3yFM - lam_orig) / (lam_orig * dy) 
-
-# Elasticity of 3yF
-A_pert_E3yF <- A_pert
-A_pert_E3yF[7, 7] <- A_pert_E3yF[7, 7] * (1 + dy)  
-lam_pert_E3yF <- as.numeric(eigen(A_pert_E3yF)$values[1])
-elas[7, 7] <- (lam_pert_E3yF - lam_orig) / (lam_orig * dy) 
-
-# Elasticity of 3yM
-A_pert_E3yM <- A_pert
-A_pert_E3yM[8, 8] <- A_pert_E3yM[8, 8] * (1 + dy) 
-lam_pert_E3yM <- as.numeric(eigen(A_pert_E3yM)$values[1])
-elas[8, 8] <- (lam_pert_E3yM - lam_orig) / (lam_orig * dy) 
+               for(m in 1:nrow(A_orig)){
+                for(n in 1:ncol(A_orig)){
+    
+                    if(A_orig[m, n] != 0){ # Only continue if matrix element [m, n] != 0
+      
+                      # Define perturbation matrix  
+                      A_pert <- A_orig
+      
+                      # Perturb target element in matrix
+                      A_pert[m, n] <- A_pert[m, n] * (1 + dy) 
+      
+                      # Calculate population growth rate for both matrices
+                      lam_orig <- as.numeric(eigen(A_orig)$values[1])
+                      lam_pert <- as.numeric(eigen(A_pert)$values[1])
+      
+                      # Calculate sensitivity of population growth rate to target element
+                      elas[m, n] <- (lam_pert - lam_orig) / (lam_orig * dy)
+                    }
+                  }
+                }
+  return(elas)
+}  
 
 
-elas
-
-row.names(elas) <- (c("ChF", "ChM","1yF", "1yM","2yF", "2yM","3yF", "3yM"))
-colnames(elas) <- (c("ChF", "ChM","1yF", "1yM","2yF", "2yM","3yF", "3yM"))
-
-elas
+elas <- elasticity(A_orig, dy)
 
 
 # - Visualize elasticity matrix (tip: start with fields::image.plot)
 
-fields::image.plot(elas)
+## Visualize elasticity matrix
+fields::image.plot(t(apply(elas, 2, rev)), axes = FALSE, col = plasma(20))
+
+image(t(apply(elas, 2, rev)), col = plasma(20), add = TRUE)
+axis(3, at = seq(0, 1, length = ncol(elas)), labels = colnames(elas), lwd = 0)
+axis(2, at = seq(1, 0, length = nrow(elas)), labels = rownames(elas), lwd = 0, las = 2)
 
 
 
