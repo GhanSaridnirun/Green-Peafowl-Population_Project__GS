@@ -19,7 +19,6 @@ mat.ipm <- as.matrix(IPM.rhoDeriv)
 # MCMCvis::MCMCpstr(mat.ipm)
 
 
-
 # 1. Set parameter values #
 #-------------------------#
 
@@ -72,20 +71,20 @@ mat.season <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma
 ChF_NB <- mat.ipm[1, "NNonF[1, 1]"] # Female Chick Non-breeding 
 F1y_NB <- mat.ipm[1, "NNonF[2, 1]"] # Female 1 year Non-breeding 
 F2y_NB <- mat.ipm[1, "NNonF[3, 1]"] # Female 2 year Non-breeding
-F3y_NB <- mat.ipm[1, "NNonF[3, 1]"] # Female 3 year Non-breeding
+F3y_NB <- mat.ipm[1, "NNonF[4, 1]"] # Female 3 year Non-breeding
 ChM_NB <- mat.ipm[1, "NNonM[1, 1]"] # Male Chick Non-breeding 
 M1y_NB <- mat.ipm[1, "NNonM[2, 1]"] # Male 1 year Non-breeding 
 M2y_NB <- mat.ipm[1, "NNonM[3, 1]"] # Male 2 year Non-breeding 
-M3y_NB <- mat.ipm[1, "NNonM[3, 1]"] # Male 3 year Non-breeding 
+M3y_NB <- mat.ipm[1, "NNonM[4, 1]"] # Male 3 year Non-breeding 
 
 JuF_BN <- mat.ipm[1, "NBreedF[1, 1]"] # Female Juvenile Breeding 
 F1y_BN <- mat.ipm[1, "NBreedF[2, 1]"] # Female 1 year Breeding 
 F2y_BN <- mat.ipm[1, "NBreedF[3, 1]"] # Female 2 year Breeding 
-F3y_BN <- mat.ipm[1, "NBreedF[3, 1]"] # Female 3 year Breeding 
+F3y_BN <- mat.ipm[1, "NBreedF[4, 1]"] # Female 3 year Breeding 
 JuM_BN <- mat.ipm[1, "NBreedM[1, 1]"] # Male Juvenile Breeding 
 M1y_BN <- mat.ipm[1, "NBreedM[2, 1]"] # Male 1 year Breeding 
 M2y_BN <- mat.ipm[1, "NBreedM[3, 1]"] # Male 2 year Breeding 
-M3y_BN <- mat.ipm[1, "NBreedM[3, 1]"] # Male 3 year Breeding 
+M3y_BN <- mat.ipm[1, "NBreedM[4, 1]"] # Male 3 year Breeding 
 
 
 ## Set initial population to use in simulations
