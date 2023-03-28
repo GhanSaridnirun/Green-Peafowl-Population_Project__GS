@@ -146,39 +146,14 @@ popbio::eigen.analysis(mat.ann$A)
 #       calculating sensitivities/elasticities with respect to vital rates (below).
 #       Additionally, you can use it not just for sensitivities/elasticities of asymptotic population growth rate, but for any metric of your choice.
 
+# Function to make calculate sensitivity
+source("R/calculate.sensitivity.R")
+
 # Set perturbation factor
 dy <- 1e-5
 
 # Set up original and sensitivity matrices
 A_orig <- mat.ann$A
-sens <- matrix(NA, nrow = nrow(A_orig), ncol = ncol(A_orig), dimnames = dimnames(A_orig))
-
-calculate.sensitivity <- function(A_orig, dy){
-
-                for(j in 1:nrow(A_orig)){
-                  for(k in 1:ncol(A_orig)){
-    
-                      if(A_orig[j, k] != 0){ # Only continue if matrix element [j, k] != 0
-      
-                        # Define perturbation matrix  
-                        A_pert <- A_orig
-      
-                        # Perturb target element in matrix
-                        A_pert[j, k] <- A_pert[j, k] + dy
-      
-                        # Calculate population growth rate for both matrices
-                        lam_orig <- as.numeric(eigen(A_orig)$values[1])
-                        lam_pert <- as.numeric(eigen(A_pert)$values[1])
-      
-                        # Calculate sensitivity of population growth rate to target element
-                        sens[j, k] <- (lam_pert - lam_orig) / dy 
-                      }
-                    }
-                  }
-
-    return(sens)
-} 
-
 sens <- calculate.sensitivity(A_orig, dy)
 
 library(fields)
@@ -196,39 +171,14 @@ axis(2, at = seq(1, 0, length = nrow(sens)), labels = rownames(sens), lwd = 0, l
 
 ## Using perturbation analysis
 
+# Function to make calculate elasticity
+source("R/calculate.elasticity.R")
+
 # Set perturbation factor
 dy <- 1e-5
 
 # Set up original and perturbed matrix
 A_orig <- mat.ann$A
-elas <- matrix(0, nrow = nrow(A_orig), ncol = ncol(A_orig), dimnames = dimnames(A_orig))
-
-calculate.elasticity <- function(A_orig, dy){
-
-               for(m in 1:nrow(A_orig)){
-                for(n in 1:ncol(A_orig)){
-    
-                    if(A_orig[m, n] != 0){ # Only continue if matrix element [m, n] != 0
-      
-                      # Define perturbation matrix  
-                      A_pert <- A_orig
-      
-                      # Perturb target element in matrix
-                      A_pert[m, n] <- A_pert[m, n] * (1 + dy) 
-      
-                      # Calculate population growth rate for both matrices
-                      lam_orig <- as.numeric(eigen(A_orig)$values[1])
-                      lam_pert <- as.numeric(eigen(A_pert)$values[1])
-      
-                      # Calculate sensitivity of population growth rate to target element
-                      elas[m, n] <- (lam_pert - lam_orig) / (lam_orig * dy)
-                    }
-                  }
-                }
-  return(elas)
-}  
-
-
 elas <- calculate.elasticity(A_orig, dy)
 
 
@@ -279,40 +229,10 @@ A_orig <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = g
                             sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
                             seasonal = FALSE)$A
 
-# Set up empty dataframe for storing results
-VR.sens.data <- data.frame()
+# Function to calculate vital rate sensitivities
+source("R/calculate.VR.sens.R")
 
-calculate.VR.Sens <- function(dy, VR.names, VR.orig){
-
-                      for(i in 1:length(VR.names)){ # Loop over each perturbation scenario
-  
-                        # Build perturbed matrix
-                        A_pert <- make.GPprojMatrix(pRep = VR.pert["pRep", i], 
-                                                    mean.CS = VR.pert["mean.CS", i], 
-                                                    S_C = VR.pert["S_C", i], 
-                                                    gamma = VR.pert["gamma", i], 
-                                                    sF_NB = VR.pert[c("sF_NB_Ch", paste0("sF_NB_", 1:3, "yr")), i], 
-                                                    sF_BN = VR.pert[c("sF_BN_Ju", paste0("sF_BN_", 1:3, "yr")), i], 
-                                                    sM_NB = VR.pert[c("sM_NB_Ch", paste0("sM_NB_", 1:3, "yr")), i], 
-                                                    sM_BN = VR.pert[c("sM_BN_Ju", paste0("sM_BN_", 1:3, "yr")), i],
-                                                    seasonal = FALSE)$A
-  
-                        # Calculate population growth rate for both matrices
-                        lam_orig <- as.numeric(eigen(A_orig)$values[1])
-                        lam_pert <- as.numeric(eigen(A_pert)$values[1])
-  
-                        # Calculate sensitivity of population growth rate to target element
-                        VR.sens <- (lam_pert - lam_orig) / dy
-  
-                        # Assemble results in a dataframe
-                        data.temp <- data.frame(VitalRate = VR.names[i],
-                                                Sensitivity = VR.sens)
-  
-                        VR.sens.data <- rbind(VR.sens.data, data.temp)
-                      }
-  return(VR.sens.data)
-}
-
+# Calculate vital rate sensitivities
 VR.sens.data <- calculate.VR.Sens(dy, VR.names, VR.orig)
 
 # Visualize sensitivities for all vital rates 
@@ -321,10 +241,6 @@ ggplot(VR.sens.data) +
   geom_bar(aes(x = VitalRate, y = Sensitivity), stat = "identity") + 
   coord_flip() + 
   theme_classic()
-
-# TODO 1: Turn the above calculation of sensitivity (lines 266-312) into a 
-# function that takes dy, VR.names, and VR.orig as input and returns VR.sens.data
-# TODO 2: Write equivalent code for elasticities below
 
 
 # 7. Calculate vital rate elasticiites #
@@ -361,40 +277,10 @@ A_orig <- make.GPprojMatrix(pRep = pRep, mean.CS = mean.CS, S_C = S_C, gamma = g
                             sF_NB = sF_NB, sF_BN = sF_BN, sM_NB = sM_NB, sM_BN = sM_BN,
                             seasonal = FALSE)$A
 
-# Set up empty dataframe for storing results
-VR.elas.data <- data.frame()
+# Function for calculating vital rate elasticities
+source("R/calculate.VR.Elas.R")
 
-calculate.VR.Elas <- function(dy, VR.names, VR.orig){
-  
-                       for(i in 1:length(VR.names)){ # Loop over each perturbation scenario
-    
-                         # Build perturbed matrix
-                         A_pert <- make.GPprojMatrix(pRep = VR.pert["pRep", i], 
-                                                     mean.CS = VR.pert["mean.CS", i], 
-                                                     S_C = VR.pert["S_C", i], 
-                                                     gamma = VR.pert["gamma", i], 
-                                                     sF_NB = VR.pert[c("sF_NB_Ch", paste0("sF_NB_", 1:3, "yr")), i], 
-                                                     sF_BN = VR.pert[c("sF_BN_Ju", paste0("sF_BN_", 1:3, "yr")), i], 
-                                                     sM_NB = VR.pert[c("sM_NB_Ch", paste0("sM_NB_", 1:3, "yr")), i], 
-                                                     sM_BN = VR.pert[c("sM_BN_Ju", paste0("sM_BN_", 1:3, "yr")), i],
-                                                     seasonal = FALSE)$A
-    
-                        # Calculate population growth rate for both matrices
-                        lam_orig <- as.numeric(eigen(A_orig)$values[1])
-                        lam_pert <- as.numeric(eigen(A_pert)$values[1])
-    
-                        # Calculate sensitivity of population growth rate to target element
-                        VR.elas <- (lam_pert - lam_orig) / (lam_orig * dy)
-    
-                        # Assemble results in a dataframe
-                        data.temp <- data.frame(VitalRate = VR.names[i],
-                                                Elasticity = VR.elas)
-    
-                        VR.elas.data <- rbind(VR.elas.data, data.temp)
-                      }
-  return(VR.elas.data)
-}
-
+# Calculate vital rate elasticities
 VR.elas.data <- calculate.VR.Elas(dy, VR.names, VR.orig)
 
 # Visualize sensitivities for all vital rates 

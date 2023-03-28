@@ -5,8 +5,11 @@
 
 library(coda)
 
-# Load Function for sensitivity and elasticity calculation
-source("R/GPeafowlMatrix_SensElasAnalysis.R")
+# Load functions for sensitivity and elasticity calculations
+source("R/calculate.sensitivity.R")
+source("R/calculate.elasticity.R")
+source("R/calculate.VR.Sens.R")
+source("R/calculate.VR.Elas.R")
 
 # Read data from rds
 IPM.rhoDeriv <- readRDS("GPIPM_TwoSex_Matrix_Clutch_BreedProb_rhoDeriv.rds")
