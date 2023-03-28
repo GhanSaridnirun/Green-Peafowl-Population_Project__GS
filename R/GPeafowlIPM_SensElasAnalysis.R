@@ -14,12 +14,8 @@ source("R/calculate.VR.Elas.R")
 # Read data from rds
 IPM.rhoDeriv <- readRDS("GPIPM_TwoSex_Matrix_Clutch_BreedProb_rhoDeriv.rds")
 
-
 # Set as matrix
 mat.ipm <- as.matrix(IPM.rhoDeriv)
-
-# MCMCvis::MCMCsummary(mat.ipm)
-# MCMCvis::MCMCpstr(mat.ipm)
 
 
 # 1. Set parameter values #
@@ -27,10 +23,10 @@ mat.ipm <- as.matrix(IPM.rhoDeriv)
 
 ## Productivity 
 
-pRep <- 0.5   
+pRep <- mat.ipm[1, "pRep"]   
 mean.CS <- mat.ipm[1, "mean.CS"]
 gamma <- 0.5 
-S_C <- mat.ipm[1, "S_C[1]"]
+S_C <- mat.ipm[1, "mean.S_C"]
 
 
 ## Survival
