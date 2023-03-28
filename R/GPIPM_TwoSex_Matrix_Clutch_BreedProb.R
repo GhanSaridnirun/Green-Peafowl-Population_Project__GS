@@ -349,7 +349,7 @@ Inits
 parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", 
                 "NBreedF", "NBreedM", "NNonF", "NNonM", 
                 "mean.rho", "rho", "mean.S_C", "S_C", "mean.CS",
-                "Fec")
+                "Fec", "pRep")
 
 
 # MCMC settings
