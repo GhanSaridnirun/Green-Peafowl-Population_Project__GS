@@ -10,32 +10,13 @@ estimate.rho <- FALSE
 
 # Data Bundle
 
-#Month order and season for data
-
-# month <- factor(c("Nov19","Dec19",
-#                   "Jan20","Feb20","Mar20","Apr20","May20","Jun20","Jul20","Aug20",
-#                   "Sep20","Oct20","Nov20","Dec20","Jan21","Feb21","Mar21","Apr21",
-#                   "May21","Jun21","Jul21","Aug21","Sep21","Oct21","Nov21","Dec21"
-# ),ordered = TRUE)
-# 
-# season <- factor(c("Breeding","Breeding","Breeding","Breeding","Breeding",
-#                    "Breeding","Non","Non","Non","Non","Non","Non","Breeding","Breeding",
-#                    "Breeding","Breeding","Breeding","Breeding","Non","Non","Non","Non",
-#                    "Non","Non","Breeding","Breeding"
-# ),ordered = TRUE)
-
-
-
 # Count in Non-Breeding Season
 
 # Year Label
 NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2) + 1 
 
-#ChF_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2) + 1        #Season Label for chicks count
 ChF_NB <- c(16,26,69,80,60,20,25,24,48,59,11,12)    #Female Chicks Count
 
-#AF_NB_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2) + 1              #Season Label for breeder count
-#Br_NB <- c(35,34,83,78,56,25,29,28,47,57,14,8)      #Breeder {Female with chicks} count in Non-Breeding 
 AF_NB <- c(71,69,134,108,86,33,101,68,71,90,34,13)  #All Female 
 
 # Count in Breeding Season
@@ -44,31 +25,13 @@ AF_NB <- c(71,69,134,108,86,33,101,68,71,90,34,13)  #All Female
 
 BN_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2,3,3)
 
-#JuF_BN_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2,3,3)          #Season Label for juvenile count
 JuF_BN <- c(9,18,33,33,10,13,6,9,13,27,14,25,11,0)   #Female Juvenile count
 
-#AF_BN_yr <- c(1,1,1,1,1,1,2,2,2,2,2,2,3,3)           #Season Label for breeder count
-#Br_BN <- c(9,23,32,25,12,10,14,9,11,20,13,27,0,0)    #Breeder {Female with juveniles} count in Breeding
 AF_BN <- c(18,49,79,71,47,44,30,25,38,54,48,97,17,1) #All Female
 
-# # Single Female count data
-# SF_BN <- c(9,26,48,46,35,34,16,16,27,34,35,70,9,1)   #Single Female count in Breeding 
-# SF_NB <- c(36,35,51,30,30,8,72,40,24,33,20,5)        #Single Female count in Non-Breeding         
 
-# Brood Data
+#  Male count Data
 
-# 1ch <- c(3,15,19,4,8,7,19,12,47,39,34,18,8,6,6,8,8,17,11,15,27,25,11,3,1,0)
-# 2ch <- c(2,9,13,13,3,3,15,22,33,26,15,7,4,3,5,7,4,8,15,10,14,20,2,2,3,0)
-# 3ch <- c(2,2,2,7,0,0,8,5,13,16,7,2,2,1,3,11,1,3,4,3,5,13,2,3,2,0)
-# 4ch <- c(2,2,5,3,1,1,2,2,5,5,7,1,0,1,1,4,1,2,5,1,2,3,0,0,2,0)
-# 5ch <- c(0,0,0,1,0,1,1,0,0,1,2,1,1,0,0,2,1,0,0,1,2,1,1,0,0,0)
-# 6ch <- c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0)
-# 7ch <- c(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0)
-# brood <- c(9,28,39,28,12,12,45,41,98,87,65,29,15,11,15,33,15,30,36,31,50,62,16,8,8,0)
-
-
-# # Male count Data
-# 
 ChM_NB <- c(20,39,78,72,52,21,25,26,33,54,13,4)      #Male Chicks Count
 JuM_BN <- c(13,17,28,29,8,8,20,9,10,36,11,19,11,0)   #Male juvenile count
 
@@ -198,17 +161,17 @@ GP.IPMcode <- nimbleCode({
     
     rho[1:Tmax] <- mean.rho
     S_C[1:Tmax] <- (rho[1:Tmax]/mean.CS) 
-
+    
   }else{
     
     rho[1:Tmax] <- mean.CS*S_C[1:Tmax]
     S_C[1:Tmax] <- mean.S_C
   }
   
-
+  
   mean.rho ~ dunif(1, 5)
   mean.S_C ~ dunif(0, 1)
-
+  
   
   # Clutch Size
   
@@ -359,16 +322,6 @@ parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN",
 # nt <- 1
 # nc <- 3
 
-# ni <- 200000     # Run Time around 15 minutes
-# nb <- 50000      # Using initial values
-# nt <- 30
-# nc <- 4
-
-# ni <- 500000     # Run Time around 30 minutes
-# nb <- 1000      # Using initial values
-# nt <- 30
-# nc <- 4
-
 ni <- 10000
 nb <- 5000
 nt <- 1
@@ -394,44 +347,3 @@ if(estimate.rho){
 }else{
   saveRDS(out, file = "GPIPM_TwoSex_Matrix_Clutch_BreedProb_rhoDeriv.rds")
 }
-
-plot(out, ask = T)
-
-print(out,2)
-summary(out)
-
-# MCMC summaries
-print(out,2)
-
-library(MCMCvis)
-
-MCMCsummary(out, params = 'NBreedF', round = 2)
-MCMCsummary(out, params = 'NBreedM', round = 2)
-
-MCMCsummary(out, params = 'NNonF', round = 2)
-MCMCsummary(out, params = 'NNonM', round = 2)
-
-MCMCsummary(out, params = 'Fec', round = 2)
-
-MCMCsummary(out, params = 'rho', round = 2)
-
-MCMCsummary(out, params = 'p', round = 2)
-
-MCMCsummary(out, 
-            params = c('s_NB','s_BN',
-                      
-                       'mean.rho', 'sigma.rho'#,
-                       #'mean.p','sigma.p'
-            ), round = 2)
-
-# Trace Plot
-
-MCMCtrace(out, params = 'NBreed',
-          pdf = FALSE,
-          Rhat = TRUE,
-          n.eff = TRUE)
-
-MCMCtrace(out, params = 'NNon',
-          pdf = FALSE,
-          Rhat = TRUE,
-          n.eff = TRUE)
