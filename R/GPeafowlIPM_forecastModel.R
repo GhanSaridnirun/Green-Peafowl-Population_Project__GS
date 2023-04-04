@@ -5,10 +5,10 @@ mySeed <- 0
 set.seed(mySeed)
 
 # Switch for estimation of rho / use of clutch size data in process model
-#estimate.rho <- TRUE
 estimate.rho <- FALSE
+# NOTE: The code as it is now only works with estimate.rho = FALSE
 
-# Data Bundle
+## Data Bundle
 
 # Count in Non-Breeding Season
 
@@ -48,14 +48,48 @@ M_BN <- rbind(JuM_BN, M1y_BN, M2y_BN, M3y_BN)
 M_NB <- rbind(ChM_NB, M1y_NB, M2y_NB, M3y_NB)
 
 ny.data <- 3 # Number of years for which the data collected
-ny.sim <- 51 # Number of years to simulate after the data collection
+ny.sim <- 20 # Number of years to simulate after the data collection
 
 # Reproduction data
 
 source("R/ReproductionDataPrep.R")
 
-## Arrange constants
+## Set up forecasts
 
+# Define perturbation factor
+pert.fac <- 0.1 # Defined as "proportion increase/decrease"
+
+# Set change year (year in which we start a "treatment")
+t.change <- ny.data + 8
+
+# List names of vital rates that may be perturbed
+VR.names <- c("sF_NB", # Female chick survival
+              "sF_BN", # Female juvenile survival
+              "sM_NB", # Male chick survival (= female chick survival)
+              "sM_BN", # Male juvenile survival (= female juvenile survival)
+              "s_yr_saF", # Female subadult annual survival
+              "s_yr_saM", # Male subadult annual survival
+              "s_yr_adF", # Female adult annual survival
+              "s_yr_adM", # Male adult annual survival
+              "pRep", # Breeding probability
+              "CS", # Clutch size
+              "S_C" # Clutch survival
+              )
+
+# Set up perturbation matrix
+# This matrix has one entry per vital rate per year. 
+VR.pert <- matrix(1, nrow = length(VR.names), ncol = ny.data + ny.sim,
+                  dimnames = list(VR.names, NULL))
+
+# Apply perturbations as desired
+list.VRs_to_perturb <- c("sF_BN", "sM_BN", "s_yr_saF", "s_yr_saM", "s_yr_adF", "s_yr_adM")
+# --> In this example, we will apply the perturbation to survival of all juveniles and older birds
+for(i in list.VRs_to_perturb){
+  VR.pert[which(VR.names == i), t.change:ncol(VR.pert)] <- 1 + pert.fac
+}
+
+
+## Arrange constants
 GP.IPMconstants <- list(Tmax = ny.data + ny.sim, 
                         Amax = 4,
                         ny.sim = ny.sim,
@@ -65,9 +99,8 @@ GP.IPMconstants <- list(Tmax = ny.data + ny.sim,
                         xmax = xmax,
                         ymax = ymax,
                         Year_BS = Year_BS,
-                        cmax = cmax
-                        
-)
+                        cmax = cmax,
+                        VR.pert = VR.pert)
 
 ## Arrange data
 GP.IPMdata <- list(ChF_NB = ChF_NB,
@@ -78,8 +111,7 @@ GP.IPMdata <- list(ChF_NB = ChF_NB,
                    M_NB = M_NB,
                    Rep = Rep,
                    BroodSize = BroodSize,
-                   ClutchSize = ClutchSize
-) 
+                   ClutchSize = ClutchSize) 
 
 
 GPIPM <- list(GP.IPMconstants, GP.IPMdata)  
@@ -100,54 +132,50 @@ GP.IPMcode <- nimbleCode({
   
   ## Chicks and juveniles
   
-  sF_NB[1] ~ dunif(0.50, 0.60) 
-  sF_BN[1] ~ dunif(0.50, 0.60) 
+  Mu.sChick ~ dunif(0.50, 0.60) 
+  Mu.sJuv ~ dunif(0.50, 0.60) 
   
-  sM_NB[1] <- sF_NB[1] 
-  sM_BN[1] <- sF_BN[1]  
+  sF_NB[1, 1:Tmax] <- Mu.sChick * VR.pert[1, 1:Tmax]
+  sF_BN[1, 1:Tmax] <- Mu.sJuv * VR.pert[2, 1:Tmax] 
+  
+  sM_NB[1, 1:Tmax] <- Mu.sChick * VR.pert[3, 1:Tmax] 
+  sM_BN[1, 1:Tmax] <- Mu.sJuv * VR.pert[4, 1:Tmax]  
   
   ## Adults (no sex difference)
   
   s_yr_sa ~ dunif(0.80, 0.90) 
   s_yr_ad ~ dunif(0.80, 0.90)  
   
-  s_yr_saF <- s_yr_sa
-  s_yr_saM <- s_yr_sa 
+  s_yr_saF[1:Tmax] <- s_yr_sa * VR.pert[5,1:Tmax]
+  s_yr_saM[1:Tmax] <- s_yr_sa * VR.pert[6,1:Tmax] 
   
-  s_yr_adF <- s_yr_ad
-  s_yr_adM <- s_yr_ad 
+  s_yr_adF[1:Tmax] <- s_yr_ad * VR.pert[7,1:Tmax]
+  s_yr_adM[1:Tmax] <- s_yr_ad * VR.pert[8,1:Tmax]
   
-  ## Adults (with sex difference)
-  
-  # s_yr_saF ~ dunif(0.50, 0.70) 
-  # s_yr_adF ~ dunif(0.60, 0.80)  
-  # s_yr_saM ~ dunif(0.50, 0.70) 
-  # s_yr_adM ~ dunif(0.60, 0.80)  
-  
-  
-  sF_NB[2:3] <- sqrt(s_yr_saF) 
-  sF_BN[2:3] <- sqrt(s_yr_saF) 
-  
-  sF_NB[4] <- sqrt(s_yr_adF) 
-  sF_BN[4] <- sqrt(s_yr_adF) 
-  
-  sM_NB[2:3] <- sqrt(s_yr_saM) 
-  sM_BN[2:3] <- sqrt(s_yr_saM) 
-  
-  sM_NB[4] <- sqrt(s_yr_adM) 
-  sM_BN[4] <- sqrt(s_yr_adM) 
-  
+  for(t in 1:Tmax){
+    sF_NB[2:3, t] <- sqrt(s_yr_saF[t]) 
+    sF_BN[2:3, t] <- sqrt(s_yr_saF[t]) 
+    
+    sF_NB[4, t] <- sqrt(s_yr_adF[t]) 
+    sF_BN[4, t] <- sqrt(s_yr_adF[t]) 
+    
+    sM_NB[2:3, t] <- sqrt(s_yr_saM[t]) 
+    sM_BN[2:3, t] <- sqrt(s_yr_saM[t]) 
+    
+    sM_NB[4, t] <- sqrt(s_yr_adM[t]) 
+    sM_BN[4, t] <- sqrt(s_yr_adM[t]) 
+  }
   
   # Breeding Probability
   
   for (y in 1:ymax) {
     
-    Rep[y] ~ dbern(pRep) 
+    Rep[y] ~ dbern(Mu.pRep) 
     
   }
   
-  pRep ~ dunif(0, 1)
-  
+  Mu.pRep ~ dunif(0, 1)
+  pRep[1:Tmax] <- Mu.pRep * VR.pert[9, 1:Tmax]
   
   # Brood Size and clutch survival [egg to chick]
   
@@ -164,8 +192,8 @@ GP.IPMcode <- nimbleCode({
     
   }else{
     
-    rho[1:Tmax] <- mean.CS*S_C[1:Tmax]
-    S_C[1:Tmax] <- mean.S_C
+    rho[1:Tmax] <- CS[1:Tmax] * S_C[1:Tmax]
+    S_C[1:Tmax] <- mean.S_C *VR.pert[11, 1:Tmax] 
   }
   
   
@@ -181,7 +209,8 @@ GP.IPMcode <- nimbleCode({
     
   }
   
-  mean.CS ~ dunif(3, 11) 
+  mean.CS ~ dunif(3, 11)
+  CS[1:Tmax] <- mean.CS * VR.pert[10, 1:Tmax]
   
   
   # Sex ratio of the chicks
@@ -226,7 +255,7 @@ GP.IPMcode <- nimbleCode({
     
     # Total number of chicks
     
-    Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep * rho[t])
+    Fec[t] ~ dpois(sum(NBreedF[3:4,t]) * pRep[t] * rho[t])
     
     
     # Allocate chicks to a sex
@@ -238,28 +267,28 @@ GP.IPMcode <- nimbleCode({
     # Survival
     
     for(a in 2:3){
-      NNonF[a,t+1] ~ dbin(sF_BN[a-1], NBreedF[a-1,t]) # Female
-      NNonM[a,t+1] ~ dbin(sM_BN[a-1], NBreedM[a-1,t]) # Male
+      NNonF[a,t+1] ~ dbin(sF_BN[a-1,t], NBreedF[a-1,t]) # Female
+      NNonM[a,t+1] ~ dbin(sM_BN[a-1,t], NBreedM[a-1,t]) # Male
     }
     
     # Female
     
     NNonF[4,t+1] <- surv_NBreedF3[t+1] + surv_NBreedF4[t+1] 
-    surv_NBreedF3[t+1] ~ dbin(sF_BN[3], NBreedF[3,t])
-    surv_NBreedF4[t+1] ~ dbin(sF_BN[4], NBreedF[4,t])
+    surv_NBreedF3[t+1] ~ dbin(sF_BN[3,t], NBreedF[3,t])
+    surv_NBreedF4[t+1] ~ dbin(sF_BN[4,t], NBreedF[4,t])
     
     # Male
     
     NNonM[4,t+1] <- surv_NBreedM3[t+1] + surv_NBreedM4[t+1]
-    surv_NBreedM3[t+1] ~ dbin(sM_BN[3], NBreedM[3,t])
-    surv_NBreedM4[t+1] ~ dbin(sM_BN[4], NBreedM[4,t])
+    surv_NBreedM3[t+1] ~ dbin(sM_BN[3,t], NBreedM[3,t])
+    surv_NBreedM4[t+1] ~ dbin(sM_BN[4,t], NBreedM[4,t])
     
     
     # Process model: Non-Breeding -> Breeding season transition
     
     for(a in 1:4){
-      NBreedF[a,t+1] ~ dbin(sF_NB[a], NNonF[a,t+1])  # Female
-      NBreedM[a,t+1] ~ dbin(sM_NB[a], NNonM[a,t+1])  # Male
+      NBreedF[a,t+1] ~ dbin(sF_NB[a,t], NNonF[a,t+1])  # Female
+      NBreedM[a,t+1] ~ dbin(sM_NB[a,t], NNonM[a,t+1])  # Male
       
     }
   }   
@@ -299,7 +328,7 @@ GP.IPMcode <- nimbleCode({
 )
 
 # Initial values
-
+# TODO: Make a copy of initial value function and update so that it works with this new model structure
 source("R/GPeafowlIPM_InitialSim_TwoSex_Matrix_BreedProb.R")
 
 
@@ -309,6 +338,7 @@ Inits
 
 
 # Parameters monitored
+# TODO: Update parameters to monitor
 parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", 
                 "NBreedF", "NBreedM", "NNonF", "NNonM", 
                 "mean.rho", "rho", "mean.S_C", "S_C", "mean.CS",
@@ -343,7 +373,7 @@ out <- nimbleMCMC(code = GP.IPMcode,
 
 # Save output
 if(estimate.rho){
-  saveRDS(out, file = "GPIPM_TwoSex_Matrix_Clutch_BreedProb_rhoEst.rds")
+  saveRDS(out, file = "GPeafowlIPM_forecastModel_rhoEst.rds")
 }else{
-  saveRDS(out, file = "GPIPM_TwoSex_Matrix_Clutch_BreedProb_rhoDeriv.rds")
+  saveRDS(out, file = "GPeafowlIPM_forecastModel_rhoDeriv.rds")
 }
