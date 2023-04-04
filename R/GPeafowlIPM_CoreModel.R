@@ -57,10 +57,10 @@ AF_BN <- c(18,49,79,71,47,44,30,25,38,54,48,97,17,1) #All Female
 # M2y_NB <- c(5,1,8,4,0,2,2,1,0,0,0,1)                 #Male 2 years count in Non-Breeding
 # 
 # M3y_BN <- c(27,118,164,119,49,57,54,60,76,91,111,83) #Male 3 years count in Breeding
-# M3y_NB <- c(75,57,143,139,85,34,71,63,83,82,56,37)   #Male 3 years count in Non-Breeding
+# M3y_NB <- c(75,57,143,139,85,34,71,63,83,82,56,37,26,1)   #Male 3 years count in Non-Breeding
 
 ny.data <- 3 # Number of years for which the data collected
-ny.sim <- 0 # Number of years to simulate after the data collection
+ny.sim <- 20 # Number of years to simulate after the data collection
 
 ## Arrange constants
 
@@ -110,7 +110,7 @@ GP.IPMcode <- nimbleCode({
   
   # Productivity
   
-  for (t in 1:ny.data){
+  for (t in 1:Tmax){
     log.rho[t] ~ dnorm(log(mean.rho), sd = sigma.rho)
     rho[t] <- exp(log.rho[t])
   }
@@ -133,7 +133,7 @@ GP.IPMcode <- nimbleCode({
   # lmean.p <- logit(mean.p)
   # sigma.p ~ dunif(0, 5)
   
-  for (t in 1:ny.data){
+  for (t in 1:Tmax){
     p[t] <- 0.9
   }
   
@@ -153,7 +153,7 @@ GP.IPMcode <- nimbleCode({
   
   # Process model: Breeding -> Non-Breeding season transition
   
-  for (t in 1:ny.data){
+  for (t in 1:Tmax){
     
     # Total number of chicks
     
@@ -219,10 +219,10 @@ parameters <- c("s_NB", "s_BN", "mean.rho", "gamma", "sigma.rho", "rho", "p",
 
 # MCMC settings
 
-ni <- 10
-nb <- 0
-nt <- 1
-nc <- 3
+#ni <- 10
+#nb <- 0
+#nt <- 1
+#nc <- 3
 
 # ni <- 200000     # Run Time around 15 minutes
 # nb <- 50000      # Using initial values
@@ -234,10 +234,10 @@ nc <- 3
 # nt <- 30
 # nc <- 4
 
-#ni <- 1000
-#nb <- 0
-#nt <- 30
-#nc <- 4
+ni <- 10000
+nb <- 5000
+nt <- 1
+nc <- 3
 
 
 
@@ -255,6 +255,8 @@ out <- nimbleMCMC(code = GP.IPMcode,
 
 # Save output
 saveRDS(out, file = "PeafowlIPM_TestRun.rds")
+
+
 
 
 # MCMC summaries
