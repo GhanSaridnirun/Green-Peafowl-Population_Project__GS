@@ -249,14 +249,14 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
   ## Set up vectors and matrices
   NBreedF <- NNonF <- matrix(NA, nrow = Amax, ncol = Tmax+1)
   NBreedM <- NNonM <- matrix(NA, nrow = Amax, ncol = Tmax+1)
-  sM_NB <- sM_BN <- sF_NB <- sF_BN <- matrix(NA, nrow = Amax, ncol = Tmax+1)
+  sM_NB <- sM_BN <- sF_NB <- sF_BN <- matrix(NA, nrow = Amax, ncol = Tmax)
   pinit <- rep(NA, Amax)
-  Fec <- rep(NA, Tmax+1)
-  pRep <- rep(NA, Tmax+1)
-  CS <- rep(NA, Tmax+1)
-  p <- logit.p <- rep(NA, Tmax+1) 
-  rho <- rep(NA, Tmax+1)
-  S_C <- rep(NA, Tmax+1)
+  Fec <- rep(NA, Tmax)
+  pRep <- rep(NA, Tmax)
+  CS <- rep(NA, Tmax)
+  p <- logit.p <- rep(NA, Tmax) 
+  rho <- rep(NA, Tmax)
+  S_C <- rep(NA, Tmax)
   
   surv_NBreedF3 <- surv_NBreedF4 <- rep(NA, Tmax+1)
   surv_NBreedM3 <- surv_NBreedM4 <- rep(NA, Tmax+1)
@@ -355,11 +355,11 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
     
   }
   
-  s_yr_saF[1:Tmax] <- s_yr_sa * VR.pert[5,1:Tmax]
-  s_yr_saM[1:Tmax] <- s_yr_sa * VR.pert[6,1:Tmax] 
+  s_yr_saF[1:Tmax+1] <- s_yr_sa * VR.pert[5,1:Tmax]
+  s_yr_saM[1:Tmax+1] <- s_yr_sa * VR.pert[6,1:Tmax] 
   
-  s_yr_adF[1:Tmax] <- s_yr_ad * VR.pert[7,1:Tmax]
-  s_yr_adM[1:Tmax] <- s_yr_ad * VR.pert[8,1:Tmax]
+  s_yr_adF[1:Tmax+1] <- s_yr_ad * VR.pert[7,1:Tmax]
+  s_yr_adM[1:Tmax+1] <- s_yr_ad * VR.pert[8,1:Tmax]
   
   for(t in 1:Tmax){
     sF_NB[2:3, t] <- sqrt(s_yr_saF[t]) 
