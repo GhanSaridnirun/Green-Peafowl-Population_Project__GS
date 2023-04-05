@@ -331,16 +331,19 @@ GP.IPMcode <- nimbleCode({
 # TODO: Make a copy of initial value function and update so that it works with this new model structure
 source("R/GPeafowlIPM_InitialSim_TwoSex_Matrix_BreedProb.R")
 
-Inits <- GP_IPM_Init_Pert(Tmax = ny.data + ny.sim, mean.p = 0.9, constant_p = TRUE,
+Inits <- GP_IPM_Init_Pert(Tmax = ny.data + ny.sim, VR.pert = VR.pert, mean.p = 0.9, constant_p = TRUE,
                      survSexDiff = FALSE)
 Inits
 
 
 # Parameters monitored
 # TODO: Update parameters to monitor
-parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", 
+parameters <- c("s_yr_sa", "s_yr_ad", "Mu.sChick", "Mu.sJuv",
+                "sF_NB", "sF_BN","sM_NB", "sM_BN", 
                 "NBreedF", "NBreedM", "NNonF", "NNonM", 
-                "mean.rho", "rho", "mean.S_C", "S_C", "mean.CS",
+                "mean.rho", "rho", 
+                "mean.S_C", "S_C", 
+                "mean.CS",
                 "Fec", "Mu.pRep")
 
 
