@@ -54,6 +54,14 @@ ny.sim <- 51 # Number of years to simulate after the data collection
 
 source("R/ReproductionDataPrep.R")
 
+# Prior information from survival meta-analysis
+metaSurv.mean <- 0.729
+metaSurv.se <- 0.0945
+metaSurv.n <- 11
+
+# Survival difference between subadult and life-stages
+saSurv.diff <- 0.1 # Survial of subadults = 10% lower than adult
+
 ## Arrange constants
 
 GP.IPMconstants <- list(Tmax = ny.data + ny.sim, 
@@ -65,7 +73,10 @@ GP.IPMconstants <- list(Tmax = ny.data + ny.sim,
                         xmax = xmax,
                         ymax = ymax,
                         Year_BS = Year_BS,
-                        cmax = cmax
+                        cmax = cmax,
+                        metaSurv.mean = metaSurv.mean,
+                        metaSurv.se = metaSurv.se,
+                        saSurv.diff = saSurv.diff,
                         
 )
 
@@ -100,16 +111,16 @@ GP.IPMcode <- nimbleCode({
   
   ## Chicks and juveniles
   
-  sF_NB[1] ~ dunif(0.50, 0.60) 
-  sF_BN[1] ~ dunif(0.50, 0.60) 
+  sF_NB[1] ~ dunif(0.50, 0.60)
+  sF_BN[1] ~ dunif(0.50, 0.60)
   
   sM_NB[1] <- sF_NB[1] 
   sM_BN[1] <- sF_BN[1]  
   
   ## Adults (no sex difference)
   
-  s_yr_sa ~ dunif(0.80, 0.90) 
-  s_yr_ad ~ dunif(0.80, 0.90)  
+  s_yr_sa ~ T(dnorm(mean = metaSurv.mean - saSurv.diff, sd = metaSurv.se), 0, 1)
+  s_yr_ad ~ T(dnorm(mean = metaSurv.mean, sd = metaSurv.se), 0, 1)  
   
   s_yr_saF <- s_yr_sa
   s_yr_saM <- s_yr_sa 
