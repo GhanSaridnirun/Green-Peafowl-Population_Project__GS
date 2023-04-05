@@ -242,7 +242,7 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
 
 
 
-GP_IPM_Init_Pert <- function(Tmax, mean.p, constant_p, survSexDiff){
+GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
   
   Amax <- 4                      # set Tmax and Amax as constants
   
@@ -324,11 +324,11 @@ GP_IPM_Init_Pert <- function(Tmax, mean.p, constant_p, survSexDiff){
   Mu.sChick <- runif(1, 0.50, 0.60) 
   Mu.sJuv <- runif(1, 0.50, 0.60) 
   
-  sF_NB[1, 1:Tmax] <- Mu.sChick
-  sF_BN[1, 1:Tmax] <- Mu.sJuv
+  sF_NB[1, 1:Tmax] <- Mu.sChick * VR.pert[1, 1:Tmax]
+  sF_BN[1, 1:Tmax] <- Mu.sJuv * VR.pert[2, 1:Tmax] 
   
-  sM_NB[1, 1:Tmax] <- Mu.sChick 
-  sM_BN[1, 1:Tmax] <- Mu.sJuv 
+  sM_NB[1, 1:Tmax] <- Mu.sChick * VR.pert[3, 1:Tmax] 
+  sM_BN[1, 1:Tmax] <- Mu.sJuv* VR.pert[4, 1:Tmax] 
   
   ## Sub-adult and Adult
   
@@ -355,11 +355,11 @@ GP_IPM_Init_Pert <- function(Tmax, mean.p, constant_p, survSexDiff){
     
   }
   
-  s_yr_saF[1:Tmax] <- s_yr_sa
-  s_yr_saM[1:Tmax] <- s_yr_sa
+  s_yr_saF[1:Tmax] <- s_yr_sa * VR.pert[5,1:Tmax]
+  s_yr_saM[1:Tmax] <- s_yr_sa * VR.pert[6,1:Tmax] 
   
-  s_yr_adF[1:Tmax] <- s_yr_ad
-  s_yr_adM[1:Tmax] <- s_yr_ad
+  s_yr_adF[1:Tmax] <- s_yr_ad * VR.pert[7,1:Tmax]
+  s_yr_adM[1:Tmax] <- s_yr_ad * VR.pert[8,1:Tmax]
   
   for(t in 1:Tmax){
     sF_NB[2:3, t] <- sqrt(s_yr_saF[t]) 
@@ -378,12 +378,12 @@ GP_IPM_Init_Pert <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   # Breeding Probability
   
-  pRep[1:Tmax] <- Mu.pRep
+  pRep[1:Tmax] <- Mu.pRep * VR.pert[9, 1:Tmax]
   
   
   # Clutch Size
   
-  CS[1:Tmax] <- mean.CS
+  CS[1:Tmax] <- mean.CS * VR.pert[10, 1:Tmax]
   
   
   # Clutch Survival [from egg to chick]
@@ -391,7 +391,7 @@ GP_IPM_Init_Pert <- function(Tmax, mean.p, constant_p, survSexDiff){
   # S_C[1:Tmax] <- rho[1:Tmax]/mean.CS 
   # mean.S_C <- mean.rho/mean.CS
   
-  S_C[1:Tmax] <- mean.S_C 
+  S_C[1:Tmax] <- mean.S_C * VR.pert[11, 1:Tmax] 
   rho[1:Tmax] <- CS[1:Tmax] * S_C[1:Tmax]
   
   
