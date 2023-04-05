@@ -56,8 +56,17 @@ source("R/ReproductionDataPrep.R")
 
 ## Set up forecasts
 
-# Define perturbation factor
-pert.fac <- 0.1 # Defined as "proportion increase/decrease"
+# Define perturbation factor ("proportion increase/decrease")
+
+# Baseline
+#pert.fac <- 0
+
+# 10% increase
+pert.fac <- 0.1 
+
+# 20 % increase
+#pert.fac <- 0.2
+
 
 # Set change year (year in which we start a "treatment")
 t.change <- ny.data + 8
@@ -82,8 +91,13 @@ VR.pert <- matrix(1, nrow = length(VR.names), ncol = ny.data + ny.sim,
                   dimnames = list(VR.names, NULL))
 
 # Apply perturbations as desired
-list.VRs_to_perturb <- c("sF_BN", "sM_BN", "s_yr_saF", "s_yr_saM", "s_yr_adF", "s_yr_adM")
-# --> In this example, we will apply the perturbation to survival of all juveniles and older birds
+
+# Option 1: All survival rates affected
+list.VRs_to_perturb <- VR.names[c(1:8, 11)]
+
+# Option 2: All survival rates + breeding probability affected
+#list.VRs_to_perturb <- VR.names[c(1:9, 11)]
+
 for(i in list.VRs_to_perturb){
   VR.pert[which(VR.names == i), t.change:ncol(VR.pert)] <- 1 + pert.fac
 }
