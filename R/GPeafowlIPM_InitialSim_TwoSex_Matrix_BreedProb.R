@@ -251,12 +251,12 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
   NBreedM <- NNonM <- matrix(NA, nrow = Amax, ncol = Tmax+1)
   sM_NB <- sM_BN <- sF_NB <- sF_BN <- matrix(NA, nrow = Amax, ncol = Tmax+1)
   pinit <- rep(NA, Amax)
-  Fec <- rep(NA, Tmax)
-  pRep <- rep(NA, Tmax)
-  CS <- rep(NA, Tmax)
-  p <- logit.p <- rep(NA, Tmax) 
-  rho <- rep(NA, Tmax)
-  S_C <- rep(NA, Tmax)
+  Fec <- rep(NA, Tmax+1)
+  pRep <- rep(NA, Tmax+1)
+  CS <- rep(NA, Tmax+1)
+  p <- logit.p <- rep(NA, Tmax+1) 
+  rho <- rep(NA, Tmax+1)
+  S_C <- rep(NA, Tmax+1)
   
   surv_NBreedF3 <- surv_NBreedF4 <- rep(NA, Tmax+1)
   surv_NBreedM3 <- surv_NBreedM4 <- rep(NA, Tmax+1)
@@ -415,7 +415,7 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
     # Process model: Breeding -> Non-Breeding season transition    
     
     # Total number of chicks
-    Fec[t] <- rpois(1, sum(NBreedF[3:4,t]) * pRep * mean.CS * S_C[t])
+    Fec[t] <- rpois(1, sum(NBreedF[3:4,t]) * pRep[t] * rho[t])
     
     # Allocate chicks to a sex
     NNonF[1,t+1] <- rbinom(1, Fec[t], gamma) # Female chicks 
@@ -479,10 +479,10 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
     pRep = pRep,
     pinit = pinit,
     Fec = Fec,
-    p = p,
-    logit.p = logit.p,
-    mean.p = mean.p,
-    sigma.p = sigma.p,
+    # p = p,
+    # logit.p = logit.p,
+    # mean.p = mean.p,
+    # sigma.p = sigma.p,
     rho = rho,
     mean.rho = mean.rho,
     # gamma = gamma,
