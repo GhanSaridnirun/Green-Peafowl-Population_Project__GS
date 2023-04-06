@@ -6,19 +6,21 @@ library(tidyr)
 library(plyr)
 
 
-IPM.rhoEst <- readRDS("GPIPM_TwoSex_Matrix_Clutch_BreedProb_rhoEst.rds")
-IPM.rhoDeriv <- readRDS("GPIPM_TwoSex_Matrix_Clutch_BreedProb_rhoDeriv.rds")
+IPM.Baseline <- readRDS("GPeafowlIPM_forecastModel_Baseline.rds")
+IPM.OP1_0.1 <- readRDS("GPeafowlIPM_forecastModel_OP1_in0.1.rds")
+IPM.OP2_0.1 <- readRDS("GPeafowlIPM_forecastModel_OP2_in0.1.rds")
 
-
-out.mat <- list(rhoEst = as.matrix(IPM.rhoEst),
-                rhoDeriv = as.matrix(IPM.rhoDeriv)
+out.mat <- list(Base = as.matrix(IPM.Baseline),
+                Option1.0.1 = as.matrix(IPM.OP1_0.1),
+                Option2.0.1 = as.matrix(IPM.OP2_0.1)
+                
 )
 
 
 
 ## Set the range of study years
 
-StudyYears <- 2019:2072
+StudyYears <- 2019:2119
 
 
 
@@ -30,8 +32,9 @@ ModelTmax <- length(StudyYears)
 ## Make an empty list for storing estimates for each model
 
 sum.data <- list(
-  rhoEst = NA,
-  rhoDeriv = NA
+  Base = NA,
+  Option1.0.1 = NA,
+  Option2.0.1 = NA
 )
 
 
@@ -45,7 +48,7 @@ sam.summary <- function(x){
 
 ## For each model, extract relevant measures
 
-ModelIDs <- c("rho estimated", "rho derived from CS")
+ModelIDs <- c("Baseline", "Option1", "Option2")
 
 sum.list <- list()
 

@@ -355,11 +355,11 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
     
   }
   
-  s_yr_saF[1:Tmax+1] <- s_yr_sa * VR.pert[5,1:Tmax]
-  s_yr_saM[1:Tmax+1] <- s_yr_sa * VR.pert[6,1:Tmax] 
+  s_yr_saF[1:Tmax] <- s_yr_sa * VR.pert[5,1:Tmax]
+  s_yr_saM[1:Tmax] <- s_yr_sa * VR.pert[6,1:Tmax] 
   
-  s_yr_adF[1:Tmax+1] <- s_yr_ad * VR.pert[7,1:Tmax]
-  s_yr_adM[1:Tmax+1] <- s_yr_ad * VR.pert[8,1:Tmax]
+  s_yr_adF[1:Tmax] <- s_yr_ad * VR.pert[7,1:Tmax]
+  s_yr_adM[1:Tmax] <- s_yr_ad * VR.pert[8,1:Tmax]
   
   for(t in 1:Tmax){
     sF_NB[2:3, t] <- sqrt(s_yr_saF[t]) 

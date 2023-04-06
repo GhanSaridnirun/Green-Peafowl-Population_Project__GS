@@ -48,7 +48,7 @@ M_BN <- rbind(JuM_BN, M1y_BN, M2y_BN, M3y_BN)
 M_NB <- rbind(ChM_NB, M1y_NB, M2y_NB, M3y_NB)
 
 ny.data <- 3 # Number of years for which the data collected
-ny.sim <- 20 # Number of years to simulate after the data collection
+ny.sim <- 50 # Number of years to simulate after the data collection
 
 # Reproduction data
 
@@ -56,8 +56,17 @@ source("R/ReproductionDataPrep.R")
 
 ## Set up forecasts
 
-# Define perturbation factor
-pert.fac <- 0.1 # Defined as "proportion increase/decrease"
+# Define perturbation factor ("proportion increase/decrease")
+
+# Baseline
+pert.fac <- 0
+
+# 10% increase
+# pert.fac <- 0.1
+
+# 20 % increase
+# pert.fac <- 0.2
+
 
 # Set change year (year in which we start a "treatment")
 t.change <- ny.data + 8
@@ -82,8 +91,13 @@ VR.pert <- matrix(1, nrow = length(VR.names), ncol = ny.data + ny.sim,
                   dimnames = list(VR.names, NULL))
 
 # Apply perturbations as desired
-list.VRs_to_perturb <- c("sF_BN", "sM_BN", "s_yr_saF", "s_yr_saM", "s_yr_adF", "s_yr_adM")
-# --> In this example, we will apply the perturbation to survival of all juveniles and older birds
+
+# Option 1: All survival rates affected
+list.VRs_to_perturb <- VR.names[c(1:8, 11)]
+
+# Option 2: All survival rates + breeding probability affected
+# list.VRs_to_perturb <- VR.names[c(1:9, 11)]
+
 for(i in list.VRs_to_perturb){
   VR.pert[which(VR.names == i), t.change:ncol(VR.pert)] <- 1 + pert.fac
 }
@@ -193,7 +207,7 @@ GP.IPMcode <- nimbleCode({
   }else{
     
     rho[1:Tmax] <- CS[1:Tmax] * S_C[1:Tmax]
-    S_C[1:Tmax] <- mean.S_C * VR.pert[11, 1:Tmax] 
+    S_C[1:Tmax] <- mean.S_C *VR.pert[11, 1:Tmax] 
   }
   
   
@@ -331,30 +345,33 @@ GP.IPMcode <- nimbleCode({
 # TODO: Make a copy of initial value function and update so that it works with this new model structure
 source("R/GPeafowlIPM_InitialSim_TwoSex_Matrix_BreedProb.R")
 
-Inits <- GP_IPM_Init_Pert(Tmax = ny.data + ny.sim, VR.pert, mean.p = 0.9, constant_p = TRUE,
+Inits <- GP_IPM_Init_Pert(Tmax = ny.data + ny.sim, VR.pert = VR.pert, mean.p = 0.9, constant_p = TRUE,
                      survSexDiff = FALSE)
 Inits
 
 
 # Parameters monitored
 # TODO: Update parameters to monitor
-parameters <- c("sF_NB", "sF_BN","sM_NB", "sM_BN", 
+parameters <- c("s_yr_sa", "s_yr_ad", "Mu.sChick", "Mu.sJuv",
+                "sF_NB", "sF_BN","sM_NB", "sM_BN", 
                 "NBreedF", "NBreedM", "NNonF", "NNonM", 
-                "mean.rho", "rho", "mean.S_C", "S_C", "mean.CS",
-                "CS", "Fec","pRep","Mu.pRep")
+                "mean.rho", "rho", 
+                "mean.S_C", "S_C", 
+                "mean.CS",
+                "Fec", "Mu.pRep")
 
 
 # MCMC settings
 
-ni <- 10
-nb <- 0
-nt <- 1
-nc <- 3
-
-# ni <- 10000
-# nb <- 5000
+# ni <- 10
+# nb <- 0
 # nt <- 1
 # nc <- 3
+
+ni <- 10000
+nb <- 5000
+nt <- 1
+nc <- 3
 
 
 
