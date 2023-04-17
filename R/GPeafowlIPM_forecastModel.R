@@ -48,28 +48,36 @@ M_BN <- rbind(JuM_BN, M1y_BN, M2y_BN, M3y_BN)
 M_NB <- rbind(ChM_NB, M1y_NB, M2y_NB, M3y_NB)
 
 ny.data <- 3 # Number of years for which the data collected
-ny.sim <- 50 # Number of years to simulate after the data collection
+ny.sim <- 10 # Number of years to simulate after the data collection
 
 # Reproduction data
 
 source("R/ReproductionDataPrep.R")
+
+# Prior information from survival meta-analysis
+metaSurv.mean <- 0.729
+metaSurv.se <- 0.0945
+metaSurv.n <- 11
+
+# Survival difference between subadult and life-stages
+saSurv.diff <- 0.1 # Survial of subadults = 10% lower than adult
 
 ## Set up forecasts
 
 # Define perturbation factor ("proportion increase/decrease")
 
 # Baseline
-pert.fac <- 0
+# pert.fac <- 0
 
 # 10% increase
-# pert.fac <- 0.1
+pert.fac <- 0.1
 
 # 20 % increase
 # pert.fac <- 0.2
 
 
 # Set change year (year in which we start a "treatment")
-t.change <- ny.data + 8
+t.change <- ny.data + 5
 
 # List names of vital rates that may be perturbed
 VR.names <- c("sF_NB", # Female chick survival
@@ -114,6 +122,9 @@ GP.IPMconstants <- list(Tmax = ny.data + ny.sim,
                         ymax = ymax,
                         Year_BS = Year_BS,
                         cmax = cmax,
+                        metaSurv.mean = metaSurv.mean,
+                        metaSurv.se = metaSurv.se,
+                        saSurv.diff = saSurv.diff,
                         VR.pert = VR.pert)
 
 ## Arrange data
@@ -157,8 +168,11 @@ GP.IPMcode <- nimbleCode({
   
   ## Adults (no sex difference)
   
-  s_yr_sa ~ dunif(0.80, 0.90) 
-  s_yr_ad ~ dunif(0.80, 0.90)  
+  s_yr_sa ~ T(dnorm(mean = metaSurv.mean - saSurv.diff, sd = metaSurv.se), 0, 1)
+  s_yr_ad ~ T(dnorm(mean = metaSurv.mean, sd = metaSurv.se), 0, 1)
+  
+  # s_yr_sa ~ dunif(0.80, 0.90) 
+  # s_yr_ad ~ dunif(0.80, 0.90)  
   
   s_yr_saF[1:Tmax] <- s_yr_sa * VR.pert[5,1:Tmax]
   s_yr_saM[1:Tmax] <- s_yr_sa * VR.pert[6,1:Tmax] 
@@ -363,15 +377,15 @@ parameters <- c("s_yr_sa", "s_yr_ad", "Mu.sChick", "Mu.sJuv",
 
 # MCMC settings
 
-# ni <- 10
-# nb <- 0
-# nt <- 1
-# nc <- 3
-
-ni <- 10000
-nb <- 5000
+ni <- 10
+nb <- 0
 nt <- 1
 nc <- 3
+
+# ni <- 10000
+# nb <- 5000
+# nt <- 1
+# nc <- 3
 
 
 
@@ -386,6 +400,7 @@ out <- nimbleMCMC(code = GP.IPMcode,
                   niter = ni,
                   thin = nt,
                   nchains = nc)
+
 
 # Save output
 if(estimate.rho){

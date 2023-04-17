@@ -209,9 +209,9 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     pinit = pinit,
     Fec = Fec,
     p = p,
-    logit.p = logit.p,
-    mean.p = mean.p,
-    sigma.p = sigma.p,
+    # logit.p = logit.p,
+    # mean.p = mean.p,
+    # sigma.p = sigma.p,
     rho = rho,
     mean.rho = mean.rho,
     # gamma = gamma,
@@ -331,7 +331,6 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
   sM_BN[1, 1:Tmax] <- Mu.sJuv* VR.pert[4, 1:Tmax] 
   
   ## Sub-adult and Adult
-  
   if(survSexDiff) {
     
     # ## Adults (with sex difference)------------(TRUE)
