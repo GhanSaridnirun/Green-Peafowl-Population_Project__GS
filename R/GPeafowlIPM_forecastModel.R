@@ -377,15 +377,15 @@ parameters <- c("s_yr_sa", "s_yr_ad", "Mu.sChick", "Mu.sJuv",
 
 # MCMC settings
 
-ni <- 10
-nb <- 0
-nt <- 1
-nc <- 3
-
-# ni <- 10000
-# nb <- 5000
+# ni <- 10
+# nb <- 0
 # nt <- 1
 # nc <- 3
+
+ni <- 10000
+nb <- 5000
+nt <- 1
+nc <- 3
 
 
 
