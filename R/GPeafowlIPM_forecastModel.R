@@ -64,16 +64,16 @@ saSurv.diff <- 0.1 # Survial of subadults = 10% lower than adult
 
 ## Set up forecasts
 
-# Define perturbation factor ("proportion increase/decrease")
+# Define perturbation factor ("percentage increase/decrease")
 
 # Baseline
 # pert.fac <- 0
 
 # 10% increase
-pert.fac <- 0.1
+# pert.fac <- 0.1
 
 # 20 % increase
-# pert.fac <- 0.2
+ pert.fac <- 0.2
 
 
 # Set change year (year in which we start a "treatment")
@@ -144,7 +144,9 @@ str(GPIPM)
 
 
 
-
+## Nimble function for perturbing survival rates
+# (This function prevents perturbations from generating survival values > 1 and < 0)
+source("R/pertSurv.nimble.R")
 
 ## Nimble code for run the whole model
 
@@ -160,25 +162,23 @@ GP.IPMcode <- nimbleCode({
   Mu.sChick ~ dunif(0.50, 0.60) 
   Mu.sJuv ~ dunif(0.50, 0.60) 
   
-  sF_NB[1, 1:Tmax] <- Mu.sChick * VR.pert[1, 1:Tmax]
-  sF_BN[1, 1:Tmax] <- Mu.sJuv * VR.pert[2, 1:Tmax] 
+  sF_NB[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sChick, pertFac_t = VR.pert[1, 1:Tmax])
+  sF_BN[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sJuv, pertFac_t = VR.pert[2, 1:Tmax]) 
   
-  sM_NB[1, 1:Tmax] <- Mu.sChick * VR.pert[3, 1:Tmax] 
-  sM_BN[1, 1:Tmax] <- Mu.sJuv * VR.pert[4, 1:Tmax]  
+  sM_NB[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sChick, pertFac_t = VR.pert[3, 1:Tmax])
+  sM_BN[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sJuv, pertFac_t = VR.pert[4, 1:Tmax])  
   
   ## Adults (no sex difference)
   
   s_yr_sa ~ T(dnorm(mean = metaSurv.mean - saSurv.diff, sd = metaSurv.se), 0, 1)
   s_yr_ad ~ T(dnorm(mean = metaSurv.mean, sd = metaSurv.se), 0, 1)
   
-  # s_yr_sa ~ dunif(0.80, 0.90) 
-  # s_yr_ad ~ dunif(0.80, 0.90)  
+  s_yr_saF[1:Tmax] <- pertSurv.nimble(Surv = s_yr_ad, pertFac_t = VR.pert[5,1:Tmax])
+  s_yr_saM[1:Tmax] <- pertSurv.nimble(Surv = s_yr_ad, pertFac_t = VR.pert[6,1:Tmax])
   
-  s_yr_saF[1:Tmax] <- s_yr_sa * VR.pert[5,1:Tmax]
-  s_yr_saM[1:Tmax] <- s_yr_sa * VR.pert[6,1:Tmax] 
+  s_yr_adF[1:Tmax] <- pertSurv.nimble(Surv = s_yr_ad, pertFac_t = VR.pert[7,1:Tmax])
+  s_yr_adM[1:Tmax] <- pertSurv.nimble(Surv = s_yr_ad, pertFac_t = VR.pert[8,1:Tmax])
   
-  s_yr_adF[1:Tmax] <- s_yr_ad * VR.pert[7,1:Tmax]
-  s_yr_adM[1:Tmax] <- s_yr_ad * VR.pert[8,1:Tmax]
   
   for(t in 1:Tmax){
     sF_NB[2:3, t] <- sqrt(s_yr_saF[t]) 
@@ -359,9 +359,13 @@ GP.IPMcode <- nimbleCode({
 # TODO: Make a copy of initial value function and update so that it works with this new model structure
 source("R/GPeafowlIPM_InitialSim_TwoSex_Matrix_BreedProb.R")
 
-Inits <- GP_IPM_Init_Pert(Tmax = ny.data + ny.sim, VR.pert = VR.pert, mean.p = 0.9, constant_p = TRUE,
-                     survSexDiff = FALSE)
-Inits
+Inits <- list(
+  GP_IPM_Init_Pert(Tmax = ny.data + ny.sim, VR.pert = VR.pert, mean.p = 0.9, constant_p = TRUE, survSexDiff = FALSE),
+  GP_IPM_Init_Pert(Tmax = ny.data + ny.sim, VR.pert = VR.pert, mean.p = 0.9, constant_p = TRUE, survSexDiff = FALSE),
+  GP_IPM_Init_Pert(Tmax = ny.data + ny.sim, VR.pert = VR.pert, mean.p = 0.9, constant_p = TRUE, survSexDiff = FALSE)
+)
+
+#Inits
 
 
 # Parameters monitored
