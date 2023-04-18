@@ -324,11 +324,11 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
   Mu.sChick <- runif(1, 0.50, 0.60) 
   Mu.sJuv <- runif(1, 0.50, 0.60) 
   
-  sF_NB[1, 1:Tmax] <- Mu.sChick * VR.pert[1, 1:Tmax]
-  sF_BN[1, 1:Tmax] <- Mu.sJuv * VR.pert[2, 1:Tmax] 
+  sF_NB[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sChick, pertFac_t = VR.pert[1, 1:Tmax])
+  sF_BN[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sJuv, pertFac_t = VR.pert[2, 1:Tmax]) 
   
-  sM_NB[1, 1:Tmax] <- Mu.sChick * VR.pert[3, 1:Tmax] 
-  sM_BN[1, 1:Tmax] <- Mu.sJuv* VR.pert[4, 1:Tmax] 
+  sM_NB[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sChick, pertFac_t = VR.pert[3, 1:Tmax])
+  sM_BN[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sJuv, pertFac_t = VR.pert[4, 1:Tmax])  
   
   ## Sub-adult and Adult
   if(survSexDiff) {
@@ -354,11 +354,11 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
     
   }
   
-  s_yr_saF[1:Tmax] <- s_yr_sa * VR.pert[5,1:Tmax]
-  s_yr_saM[1:Tmax] <- s_yr_sa * VR.pert[6,1:Tmax] 
+  s_yr_saF[1:Tmax] <- pertSurv.nimble(Surv = s_yr_ad, pertFac_t = VR.pert[5,1:Tmax])
+  s_yr_saM[1:Tmax] <- pertSurv.nimble(Surv = s_yr_ad, pertFac_t = VR.pert[6,1:Tmax])
   
-  s_yr_adF[1:Tmax] <- s_yr_ad * VR.pert[7,1:Tmax]
-  s_yr_adM[1:Tmax] <- s_yr_ad * VR.pert[8,1:Tmax]
+  s_yr_adF[1:Tmax] <- pertSurv.nimble(Surv = s_yr_ad, pertFac_t = VR.pert[7,1:Tmax])
+  s_yr_adM[1:Tmax] <- pertSurv.nimble(Surv = s_yr_ad, pertFac_t = VR.pert[8,1:Tmax])
   
   for(t in 1:Tmax){
     sF_NB[2:3, t] <- sqrt(s_yr_saF[t]) 
