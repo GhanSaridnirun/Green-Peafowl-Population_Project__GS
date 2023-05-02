@@ -140,10 +140,10 @@ for(i in 1:length(ModelIDs)){
   
   model.sum.data <- cbind(
     model.sum.data,
-    rbind(NFemale_1_Breed, NFemale_2_Breed, NFemale_3_Breed, NFemale_4_Breed,
-          NFemale_1_Non, NFemale_2_Non, NFemale_3_Non, NFemale_4_Non,
-          NMale_1_Breed, NMale_2_Breed, NMale_3_Breed, NMale_4_Breed, 
-          NMale_1_Non, NMale_2_Non, NMale_3_Non, NMale_4_Non))
+    rbind(NFemale_1_Breed, NFemale_1_Non, NFemale_2_Breed, NFemale_2_Non, 
+          NFemale_3_Breed, NFemale_3_Non, NFemale_4_Breed, NFemale_4_Non,
+          NMale_1_Breed, NMale_1_Non, NMale_2_Breed, NMale_2_Non,
+          NMale_3_Breed, NMale_3_Non, NMale_4_Breed, NMale_4_Non))
   
   
   
@@ -167,11 +167,6 @@ CropYear$ModelID <- factor(CropYear$ModelID, levels = c("Baseline",
                                                         "Increase all Survival 20%",
                                                         "Increase all Survival + Reproduction 10%",
                                                         "Increase all Survival + Reproduction 20%"))
-
-# Select posterior data from each seasons
-CropYearBreeding <- subset(CropYear, Season %in% c('Breeding'))
-CropYearNonBreeding <- subset(CropYear, Season %in% c('Non-breeding'))
-
 
 
 # Plot area: Breeding
