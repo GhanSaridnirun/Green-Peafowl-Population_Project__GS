@@ -76,7 +76,7 @@ GP.IPMconstants <- list(Tmax = ny.data + ny.sim,
                         cmax = cmax,
                         metaSurv.mean = metaSurv.mean,
                         metaSurv.se = metaSurv.se,
-                        saSurv.diff = saSurv.diff,
+                        saSurv.diff = saSurv.diff
                         
 )
 

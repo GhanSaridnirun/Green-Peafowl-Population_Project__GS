@@ -4,6 +4,7 @@
 ########################
 
 library(coda)
+library(viridis)
 
 # Load functions for sensitivity and elasticity calculations
 source("R/make.GPprojMatrix.R")
@@ -188,11 +189,53 @@ for(i in 1:nSamples){
 }
 
 
-# Summarise sensitivity/elasticity arrays
-# -> Median
-# -> Mean
-# -> Standard deviation
+## Summarise sensitivity/elasticity arrays
 
-?apply()
+# Median
+sens.median <- apply(sens, MARGIN = c(1, 2), FUN = median)
+elas.median <- apply(elas, MARGIN = c(1, 2), FUN = median)
+
+# Mean
+sens.mean <- apply(sens, MARGIN = c(1, 2), FUN = mean)
+elas.mean <- apply(elas, MARGIN = c(1, 2), FUN = mean)
+
+# Standard deviation
+sens.sd <- apply(sens, MARGIN = c(1, 2), FUN = sd)
+elas.sd <- apply(elas, MARGIN = c(1, 2), FUN = sd)
+ 
+## Heat plots of summaries
+
+# Sensitivities - median
+fields::image.plot(t(apply(sens.median, 2, rev)), axes = FALSE, col = plasma(20))
+axis(3, at = seq(0, 1, length = ncol(A_orig)), labels = colnames(A_orig), lwd = 0)
+axis(2, at = seq(1, 0, length = nrow(A_orig)), labels = rownames(A_orig), lwd = 0, las = 2)
+
+# Sensitivities - mean
+fields::image.plot(t(apply(sens.mean, 2, rev)), axes = FALSE, col = plasma(20))
+axis(3, at = seq(0, 1, length = ncol(A_orig)), labels = colnames(A_orig), lwd = 0)
+axis(2, at = seq(1, 0, length = nrow(A_orig)), labels = rownames(A_orig), lwd = 0, las = 2)
+
+# Sensitivities - standard deviation (= uncertainty)
+fields::image.plot(t(apply(sens.sd, 2, rev)), axes = FALSE, col = rev(grey.colors(20)))
+axis(3, at = seq(0, 1, length = ncol(A_orig)), labels = colnames(A_orig), lwd = 0)
+axis(2, at = seq(1, 0, length = nrow(A_orig)), labels = rownames(A_orig), lwd = 0, las = 2)
+
+
+# Elasticities - median
+fields::image.plot(t(apply(elas.median, 2, rev)), axes = FALSE, col = plasma(20))
+axis(3, at = seq(0, 1, length = ncol(A_orig)), labels = colnames(A_orig), lwd = 0)
+axis(2, at = seq(1, 0, length = nrow(A_orig)), labels = rownames(A_orig), lwd = 0, las = 2)
+
+# Elasticities - mean
+fields::image.plot(t(apply(elas.mean, 2, rev)), axes = FALSE, col = plasma(20))
+axis(3, at = seq(0, 1, length = ncol(A_orig)), labels = colnames(A_orig), lwd = 0)
+axis(2, at = seq(1, 0, length = nrow(A_orig)), labels = rownames(A_orig), lwd = 0, las = 2)
+
+# Elasticities - standard deviation (= uncertainty)
+fields::image.plot(t(apply(elas.sd, 2, rev)), axes = FALSE, col = rev(grey.colors(20)))
+axis(3, at = seq(0, 1, length = ncol(A_orig)), labels = colnames(A_orig), lwd = 0)
+axis(2, at = seq(1, 0, length = nrow(A_orig)), labels = rownames(A_orig), lwd = 0, las = 2)
+
+
 
 
