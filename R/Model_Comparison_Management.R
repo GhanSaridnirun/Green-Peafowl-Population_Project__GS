@@ -76,6 +76,7 @@ for(i in 1:length(ModelIDs)){
     NFemale_1_Non <- NFemale_2_Non <- NFemale_3_Non <- NFemale_4_Non <-
     NMale_1_Breed <- NMale_2_Breed <- NMale_3_Breed <- NMale_4_Breed <- 
     NMale_1_Non <- NMale_2_Non <- NMale_3_Non <- NMale_4_Non <- 
+    NTot_Breed <- NTot_Non <- 
     matrix(NA, nrow = ModelTmax, ncol = 3, dimnames = list(NULL, c('lCI', 'Median', 'uCI')))
   
   
@@ -120,6 +121,11 @@ for(i in 1:length(ModelIDs)){
     NMale_3_Non[t,] <- sam.summary(NM3_Non)
     NMale_4_Non[t,] <- sam.summary(NM4_Non)
     
+    NTot_Breed[t,] <- sam.summary(NF1_Breed + NF2_Breed + NF3_Breed + NF4_Breed + 
+                                  NM1_Breed + NM2_Breed + NM3_Breed + NM4_Breed)
+    
+    NTot_Non[t,] <- sam.summary(NF1_Non + NF2_Non + NF3_Non + NF4_Non + 
+                                    NM1_Non + NM2_Non + NM3_Non + NM4_Non)
     
     
   }
@@ -130,11 +136,13 @@ for(i in 1:length(ModelIDs)){
     AgeClass = rep(c('Female1_BN', 'Female1_NB','Female2_BN', 'Female2_NB',
                      'Female3_BN', 'Female3_NB','Female4_BN', 'Female4_NB',
                      'Male1_BN', 'Male1_NB','Male2_BN', 'Male2_NB',
-                     'Male3_BN', 'Male3_NB','Male4_BN', 'Male4_NB'), each = ModelTmax),
+                     'Male3_BN', 'Male3_NB','Male4_BN', 'Male4_NB',
+                     'Total_BN', 'Total_NB'), each = ModelTmax),
     Season = rep(c('Breeding','Non-breeding', 'Breeding','Non-breeding',
                    'Breeding','Non-breeding', 'Breeding','Non-breeding',
                    'Breeding','Non-breeding', 'Breeding','Non-breeding',
-                   'Breeding','Non-breeding', 'Breeding','Non-breeding'),each = ModelTmax)
+                   'Breeding','Non-breeding', 'Breeding','Non-breeding',
+                   'Breeding', 'Non-breeding'),each = ModelTmax)
   )
   
   
@@ -143,7 +151,8 @@ for(i in 1:length(ModelIDs)){
     rbind(NFemale_1_Breed, NFemale_1_Non, NFemale_2_Breed, NFemale_2_Non, 
           NFemale_3_Breed, NFemale_3_Non, NFemale_4_Breed, NFemale_4_Non,
           NMale_1_Breed, NMale_1_Non, NMale_2_Breed, NMale_2_Non,
-          NMale_3_Breed, NMale_3_Non, NMale_4_Breed, NMale_4_Non))
+          NMale_3_Breed, NMale_3_Non, NMale_4_Breed, NMale_4_Non,
+          NTot_Breed, NTot_Non))
   
   
   
@@ -158,8 +167,130 @@ sum.list_BN_NB
 ## Make a combined data frame with all populations
 allModel.data_BN_NB <- dplyr::bind_rows(sum.list_BN_NB, .id = "column_label")
 
+# PLOT TOTAL #
+#------------#
+
+# Take subset of data (relevant years, total numbers)
+TotalData <- subset(allModel.data_BN_NB, Year %in% c(2019:2032) & AgeClass %in% c('Total_BN', 'Total_NB'))
+
+# Drop first year non-breeding season (not estimated)
+TotalData <- subset(TotalData, !(Season == "Non-breeding" & Year == 2019))
+
+# Add additional labels for separating scenarios
+TotalData$Effect <- dplyr::case_when(TotalData$ModelID == "Baseline" ~ "Baseline",
+                                      TotalData$ModelID %in% c("Increase all Survival 10%", "Increase all Survival 20%") ~ "Survival",
+                                      TRUE ~ "Survival & Reproduction")
+
+TotalData$Increase <- dplyr::case_when(TotalData$ModelID == "Baseline" ~ "None",
+                                       TotalData$ModelID %in% c("Increase all Survival 10%", "Increase all Survival + Reproduction 10%") ~ "10%",
+                                       TRUE ~ "20%")
+TotalData$Increase <- factor(TotalData$Increase, levels = c("None", "10%", "20%"))
+
+# Plot scenarios - Natural scale
+ggplot(TotalData, aes(x = Year, y = Median)) + 
+  geom_line(aes(color = Increase, linetype = Effect)) + 
+  geom_ribbon(aes(ymin = lCI, ymax = uCI, fill = Increase, linetype = Effect), alpha = 0.1) + 
+  geom_vline(xintercept = 2026, linetype = "dashed",
+             color = "black", size = 0.5) +  # After Pertubation
+  geom_vline(xintercept = 2022, linetype = "dotted",
+             color = "black", size = 0.5) +  # After data collecting
+  geom_text(aes(x=2020, label = "Data Collection Period", y= 450),
+            colour="black", size = 2.5, alpha = 0.5) +
+  geom_text(aes(x=2028, label = "Management Period", y= 450),
+            colour="black", size = 2.5,  alpha = 0.5) +
+  facet_wrap(~ Season, ncol = 1) +
+  ylab("Total Population Size") + 
+  scale_color_manual(values = magma(4)[1:3]) + 
+  scale_fill_manual(values = magma(4)[1:3]) + 
+  scale_x_continuous(breaks = scales::breaks_width(1)) +
+  scale_y_continuous(breaks = scales::breaks_width(100)) +
+  theme_classic() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5),
+                          plot.title = element_text(face = 'bold'))
+
+
+# Plot scenarios - Log scale
+ggplot(TotalData, aes(x = Year, y = log(Median))) + 
+  geom_line(aes(color = Increase, linetype = Effect)) + 
+  geom_ribbon(aes(ymin = log(lCI), ymax = log(uCI), fill = Increase, linetype = Effect), alpha = 0.1) + 
+  geom_vline(xintercept = 2026, linetype = "dashed",
+             color = "black", size = 0.5) +  # After Pertubation
+  geom_vline(xintercept = 2022, linetype = "dotted",
+             color = "black", size = 0.5) +  # After data collecting
+  geom_text(aes(x=2020, label = "Data Collection Period", y = log(450)),
+            colour="black", size = 2.5, alpha = 0.5) +
+  geom_text(aes(x=2028, label = "Management Period", y = log(450)),
+            colour="black", size = 2.5,  alpha = 0.5) +
+  facet_wrap(~ Season, ncol = 1) +
+  ylab("log(Total Population Size") + 
+  scale_color_manual(values = magma(4)[1:3]) + 
+  scale_fill_manual(values = magma(4)[1:3]) + 
+  scale_x_continuous(breaks = scales::breaks_width(1)) +
+  scale_y_continuous(breaks = scales::breaks_width(100)) +
+  theme_classic() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5),
+                          plot.title = element_text(face = 'bold'))
+
+
+
+
+# Data sets for seasons separately
+CropYearBreeding <- subset(CropYear, Season == "Breeding")
+CropYearNonBreeding <- subset(CropYear, Season != "Breeding")
+
+# Plot area: Breeding
+ggplot(CropYearBreeding, aes(x = Year, y = Median)) +
+  geom_area(aes(fill = AgeClass), alpha = 0.9) +
+  scale_fill_viridis(labels=c('Female[1]', 'Female[2]','Female[3]', 'Female[4]',
+                              'Male[1]', 'Male[2]','Male[3]', 'Male[4]'), discrete = T) +
+  facet_wrap(~ModelID, scales = "free_y", ncol = 1) + 
+  scale_x_continuous(breaks = scales::breaks_width(1)) +
+  scale_y_continuous(breaks = scales::breaks_width(100)) +
+  # guides(col = guide_legend(ncol = 2)) +
+  theme_classic() + theme(legend.position = "bottom",
+                          axis.text.x = element_text(angle = 45, vjust = 0.5),
+                          plot.title = element_text(face = 'bold'),) +
+  ggtitle('Population Size in Breeding Season') + 
+  ylab('Estimate Population Size') +
+  geom_vline(xintercept = 2026, linetype="dashed",
+             color = "black", size =1) +  # After Pertubation
+  geom_vline(xintercept = 2022, linetype="dotted",
+             color = "black", size=1) +  # After data collecting
+  geom_text(aes(x=2020, label="Data Collection Period", y= 340),
+            colour="black", size = 2.5, angle=0, alpha = 0.5) +
+  geom_text(aes(x=2028, label="Management Period", y= 340),
+            colour="black", size = 2.5,  angle=0, alpha = 0.5)
+
+
+# Plot area: Non-Breeding
+ggplot(CropYearNonBreeding, aes(x = Year, y = Median)) +
+  geom_area(aes(fill = AgeClass), alpha = 0.9) +
+  scale_fill_viridis(labels=c('Female[1]', 'Female[2]','Female[3]', 'Female[4]',
+                              'Male[1]', 'Male[2]','Male[3]', 'Male[4]'), discrete = T) +
+  facet_wrap(~ModelID, scales = "free_y", ncol = 1) +
+  scale_x_continuous(breaks = scales::breaks_width(1)) +
+  scale_y_continuous(breaks = scales::breaks_width(100)) + 
+  # guides(col = guide_legend(ncol = 8)) +
+  theme_classic() + theme(legend.position = "bottom",
+                          axis.text.x = element_text(angle = 45, vjust = 0.5),
+                          plot.title = element_text(face = 'bold'),) +
+  ggtitle('Population Size in Non-breeding Season') + 
+  ylab('Estimate Population Size') +
+  geom_vline(xintercept = 2026, linetype="dashed",
+             color = "black", size=1) +  # After Pertubation
+  geom_vline(xintercept = 2022, linetype="dotted",
+             color = "black", size=1) +  # After data collecting
+  geom_text(aes(x=2020, label="Data Collection Period", y= 450),
+            colour="black", size = 2.5, angle=0, alpha = 0.5) +
+  geom_text(aes(x=2029, label="Management Period", y= 450),
+            colour="black", size = 2.5,  angle=0, alpha = 0.5)
+
+#-------------------------------------------------------------------------------
+
+
+# PLOTS BY AGE CLASS #
+#--------------------#
+
 # Selected years period to plot
-CropYear <- subset(allModel.data_BN_NB, Year %in% c(2019:2032))
+CropYear <- subset(allModel.data_BN_NB, Year %in% c(2019:2032) & !(AgeClass %in% c('Total_BN', 'Total_NB')))
 
 
 CropYear$ModelID <- factor(CropYear$ModelID, levels = c("Baseline", 
@@ -218,8 +349,5 @@ ggplot(CropYearNonBreeding, aes(x = Year, y = Median)) +
             colour="black", size = 2.5, angle=0, alpha = 0.5) +
   geom_text(aes(x=2029, label="Management Period", y= 450),
             colour="black", size = 2.5,  angle=0, alpha = 0.5)
-
-
-
 
 #-------------------------------------------------------------------------------
