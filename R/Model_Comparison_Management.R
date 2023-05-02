@@ -168,6 +168,9 @@ CropYear$ModelID <- factor(CropYear$ModelID, levels = c("Baseline",
                                                         "Increase all Survival + Reproduction 10%",
                                                         "Increase all Survival + Reproduction 20%"))
 
+# Data sets for seasons separately
+CropYearBreeding <- subset(CropYear, Season == "Breeding")
+CropYearNonBreeding <- subset(CropYear, Season != "Breeding")
 
 # Plot area: Breeding
 ggplot(CropYearBreeding, aes(x = Year, y = Median)) +
