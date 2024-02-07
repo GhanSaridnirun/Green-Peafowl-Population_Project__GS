@@ -16,31 +16,32 @@ AnnualSurvival<-readRDS("data/AnnualSurvivalRate.RDS")
 
 # Prepare the data
 AnnualSurvival$var<-AnnualSurvival$SD^2
-
-
+AnnualSurvival<-AnnualSurvival |> 
+  janitor::clean_names()
+names(AnnualSurvival)
 ```
 
-## Data 
+## Data
 
 ```{r}
 AnnualSurvival |> 
-  mutate(N=Quality,
-         Mean_Survival=Avg,
-         Species=Sp.,
-         Harvested_population = `Harvest?`) |> 
-  select(Species, Mean_Survival, SD, N, Harvested_population) |> 
+  mutate(N=numbers_of_birds,
+         Mean_Survival=avg,
+         Species=species,
+         Harvested_population = harvest) |> 
+  select(Species, Mean_Survival, sd, N, Harvested_population) |> 
 kableExtra::kable() |> 
   kableExtra::kable_styling()
 ```
 
-## Weighted regression model 
+## Weighted regression model
 
 Survival estimates combined and weighted by sample size
 
 ```{r}
 # Weighted regression
 
-mod1<-rma(Avg, var, weights = Quality, data=AnnualSurvival)
+mod1<-rma(avg, var, weights =numbers_of_birds, data=AnnualSurvival)
 
 ```
 
@@ -48,10 +49,10 @@ mod1<-rma(Avg, var, weights = Quality, data=AnnualSurvival)
 theme_set(theme_bw(base_size=10))
 forrest_data<-rbind(data.frame(ES=mod1$yi,SE=sqrt(mod1$vi),
                                Type="Study",
-                               Study=c(paste0("Study", 1:11))),
+                               Study=c(paste0("Study", 1:22))),
                     data.frame(ES=mod1$b,SE=mod1$se,Type="Summary",Study="Summary"))
 
-forrest_data$order=c(1:12)
+forrest_data$order=c(1:23)
 forrest_data
 plot1<-ggplot(data=forrest_data,aes(x=reorder(Study, -order),y=ES,ymax=ES+(1.96*SE),ymin=ES-(1.96*SE),size=factor(Type),colour=factor(Type)))+
   geom_pointrange()
@@ -76,12 +77,22 @@ From the weighted regression model we get an mean annual survival of `r round(co
 ## Is there a difference with harvested and non-harvested populations?
 
 ```{r}
-mod2<-rma(Avg, var, weights = Quality, data=AnnualSurvival, subset= AnnualSurvival$`Harvest?`=="1")
-mod3<-rma(Avg, var, weights = Quality, data=AnnualSurvival, subset= AnnualSurvival$`Harvest?`=="0")
+mod2<-rma(avg, var, weights = numbers_of_birds, data=AnnualSurvival, subset= AnnualSurvival$harvest=="Yes")
+mod3<-rma(avg, var, weights = numbers_of_birds, data=AnnualSurvival, subset= AnnualSurvival$harvest=="No")
 
 dat.comp <- data.frame(estimate = c(coef(mod2), coef(mod3)), stderror = c(mod2$se, mod3$se),
                        meta = c("Harvest","No harvest"), tau2 = round(c(mod2$tau2, mod3$tau2),3))
 
 (comp_mod<-rma(estimate, sei=stderror, mods = ~ meta, method="FE", data=dat.comp, digits=3))
 
+```
+
+## Is there a difference with the new data?
+
+```{r}
+mod4<-rma(avg, var, weights = numbers_of_birds, data=AnnualSurvival[1:11,]) 
+mod5<-rma(avg, var, weights = numbers_of_birds, data=AnnualSurvival[12:22,])  
+dat.comp <- data.frame(estimate = c(coef(mod4), coef(mod5)), stderror = c(mod4$se, mod5$se),                        meta = c("Old","New"), tau2 = round(c(mod4$tau2, mod5$tau2),3))  
+
+(comp_mod<-rma(estimate, sei=stderror, mods = ~ meta, method="FE", data=dat.comp, digits=3)) 
 ```
