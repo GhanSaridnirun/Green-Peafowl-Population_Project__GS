@@ -48,7 +48,7 @@ M_BN <- rbind(JuM_BN, M1y_BN, M2y_BN, M3y_BN)
 M_NB <- rbind(ChM_NB, M1y_NB, M2y_NB, M3y_NB)
 
 ny.data <- 3 # Number of years for which the data collected
-ny.sim <- 51 # Number of years to simulate after the data collection
+ny.sim <- 0 # Number of years to simulate after the data collection
 
 # Reproduction data
 
@@ -363,3 +363,18 @@ if(estimate.rho){
 }else{
   saveRDS(out, file = "GPIPM_TwoSex_Matrix_Clutch_BreedProb_rhoDeriv.rds")
 }
+
+
+# Plot basic IPM outputs
+library(tidyverse)
+library(ggplot2)
+library(viridis)
+
+plot_basicIPMoutputs(mcmc.out = out, 
+                     GP.IPMconstants = GP.IPMconstants, 
+                     GP.IPMdata = GP.IPMdata, 
+                     estimate.rho = estimate.rho)
+  
+  
+
+
