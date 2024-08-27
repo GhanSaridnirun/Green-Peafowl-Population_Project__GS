@@ -111,8 +111,11 @@ GP.IPMcode <- nimbleCode({
   
   ## Chicks and juveniles
   
-  sF_NB[1] ~ dunif(0.50, 0.60)
-  sF_BN[1] ~ dunif(0.50, 0.60)
+  #sF_NB[1] ~ dunif(0.50, 0.60)
+  #sF_BN[1] ~ dunif(0.50, 0.60)
+  
+  sF_NB[1] ~ dunif(0, 1)
+  sF_BN[1] ~ dunif(0, 1)
   
   sM_NB[1] <- sF_NB[1] 
   sM_BN[1] <- sF_BN[1]  
