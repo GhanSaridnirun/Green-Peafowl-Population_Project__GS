@@ -370,6 +370,7 @@ library(tidyverse)
 library(ggplot2)
 library(viridis)
 
+source("R/plot_basicIPMoutputs.R")
 plot_basicIPMoutputs(mcmc.out = out, 
                      GP.IPMconstants = GP.IPMconstants, 
                      GP.IPMdata = GP.IPMdata, 
