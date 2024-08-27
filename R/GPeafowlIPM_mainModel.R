@@ -171,17 +171,19 @@ GP.IPMcode <- nimbleCode({
   if(estimate.rho){
     
     rho[1:Tmax] <- mean.rho
-    S_C[1:Tmax] <- (rho[1:Tmax]/mean.CS) 
+    S_C[1:Tmax] <- (rho[1:Tmax]/mean.CS)
+    mean.S_C <- mean(S_C[1:Tmax])
+    
+    mean.rho ~ dunif(0, 10)
     
   }else{
     
     rho[1:Tmax] <- mean.CS*S_C[1:Tmax]
     S_C[1:Tmax] <- mean.S_C
+    mean.rho <- mean(rho[1:Tmax])
+    
+    mean.S_C ~ dunif(0, 1)
   }
-  
-  
-  mean.rho ~ dunif(1, 5)
-  mean.S_C ~ dunif(0, 1)
   
   
   # Clutch Size
