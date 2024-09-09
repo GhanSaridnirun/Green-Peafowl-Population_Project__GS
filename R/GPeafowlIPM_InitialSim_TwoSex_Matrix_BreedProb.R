@@ -76,8 +76,8 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
   
   ## Chicks and juveniles
   
-  sF_NB[1] <- runif(1, 0.50, 0.60) 
-  sF_BN[1] <- runif(1, 0.50, 0.60) 
+  sF_NB[1] <- runif(1, 0, 1) 
+  sF_BN[1] <- runif(1, 0, 1)  
   
   sM_NB[1] <- sF_NB[1] 
   sM_BN[1] <- sF_BN[1]
@@ -97,8 +97,8 @@ GP_IPM_Init <- function(Tmax, mean.p, constant_p, survSexDiff){
     
     #   ## Adults (no sex difference)--------------(FALSE)
     
-    s_yr_sa <- runif(1, 0.80, 0.90)
-    s_yr_ad <- runif(1, 0.80, 0.90)
+    s_yr_sa <- runif(1, 0, 1)
+    s_yr_ad <- runif(1, 0, 1)
     
     s_yr_saF <- s_yr_sa
     s_yr_saM <- s_yr_sa
@@ -321,8 +321,8 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
   
   ## Chicks and juveniles
   
-  Mu.sChick <- runif(1, 0.50, 0.60) 
-  Mu.sJuv <- runif(1, 0.50, 0.60) 
+  Mu.sChick <- runif(1, 0, 1) 
+  Mu.sJuv <- runif(1, 0, 1) 
   
   sF_NB[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sChick, pertFac_t = VR.pert[1, 1:Tmax])
   sF_BN[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sJuv, pertFac_t = VR.pert[2, 1:Tmax]) 
@@ -344,8 +344,8 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
     
     #   ## Adults (no sex difference)--------------(FALSE)
     
-    s_yr_sa <- runif(1, 0.80, 0.90)
-    s_yr_ad <- runif(1, 0.80, 0.90)
+    s_yr_sa <- runif(1, 0, 1)
+    s_yr_ad <- runif(1, 0, 1)
     
     s_yr_saF <- s_yr_sa
     s_yr_saM <- s_yr_sa
