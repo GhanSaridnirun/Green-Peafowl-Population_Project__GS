@@ -418,7 +418,8 @@ out <- nimbleMCMC(code = GP.IPMcode,
 
 
 saveRDS(out, file = "GPIPM_PVA_Baseline.rds")
-# saveRDS(out, file = "GPIPM_10.30yOP01.2.rds")
+#saveRDS(out, file = "GPIPM_PVA_SurvOnly_10perc.rds")
+#saveRDS(out, file = "GPIPM_PVA_SurvOnly_20perc.rds")
 
 
 # Plot basic IPM outputs
