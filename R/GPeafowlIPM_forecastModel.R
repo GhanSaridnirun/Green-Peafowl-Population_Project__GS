@@ -70,14 +70,10 @@ saSurv.diff <- 0.1 # Survial of subadults = 10% lower than adult
 # pert.fac <- 0
 
 # 10% increase
-<<<<<<< Updated upstream
 # pert.fac <- 0.1
-=======
-pert.fac <- 0.1 
->>>>>>> Stashed changes
 
 # 20 % increase
- pert.fac <- 0.2
+pert.fac <- 0.2
 
 
 # Set change year (year in which we start a "treatment")
@@ -105,10 +101,10 @@ VR.pert <- matrix(1, nrow = length(VR.names), ncol = ny.data + ny.sim,
 # Apply perturbations as desired
 
 # Option 1: All survival rates affected
-# list.VRs_to_perturb <- VR.names[c(1:8, 11)]
+list.VRs_to_perturb <- VR.names[c(1:8, 11)]
 
 # Option 2: All survival rates + breeding probability affected
-#list.VRs_to_perturb <- VR.names[c(1:9, 11)]
+# list.VRs_to_perturb <- VR.names[c(1:9, 11)]
 
 for(i in list.VRs_to_perturb){
   VR.pert[which(VR.names == i), t.change:ncol(VR.pert)] <- 1 + pert.fac
@@ -163,8 +159,12 @@ GP.IPMcode <- nimbleCode({
   
   ## Chicks and juveniles
   
-  Mu.sChick ~ dunif(0.50, 0.60) 
-  Mu.sJuv ~ dunif(0.50, 0.60) 
+  # Mu.sChick ~ dunif(0.50, 0.60) 
+  # Mu.sJuv ~ dunif(0.50, 0.60) 
+  
+  Mu.sChick ~ dunif(0, 1)
+  Mu.sJuv ~ dunif(0, 1)
+  
   
   sF_NB[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sChick, pertFac_t = VR.pert[1, 1:Tmax])
   sF_BN[1, 1:Tmax] <- pertSurv.nimble(Surv = Mu.sJuv, pertFac_t = VR.pert[2, 1:Tmax]) 
@@ -411,8 +411,30 @@ out <- nimbleMCMC(code = GP.IPMcode,
 
 
 # Save output
-if(estimate.rho){
-  saveRDS(out, file = "GPeafowlIPM_forecastModel_rhoEst.rds")
-}else{
-  saveRDS(out, file = "GPeafowlIPM_forecastModel_rhoDeriv.rds")
-}
+# if(estimate.rho){
+#   saveRDS(out, file = "GPeafowlIPM_forecastModel_rhoEst.rds")
+# }else{
+#   saveRDS(out, file = "GPeafowlIPM_forecastModel_rhoDeriv.rds")
+# }
+
+
+saveRDS(out, file = "GPIPM_5.30yBaseline.rds")
+# saveRDS(out, file = "GPIPM_10.30yOP01.2.rds")
+
+
+# Plot basic IPM outputs
+library(tidyverse)
+library(ggplot2)
+library(viridis)
+
+source("R/plot_basicIPMoutputs.R")
+plot_basicIPMoutputs(mcmc.out = out, 
+                     GP.IPMconstants = GP.IPMconstants, 
+                     GP.IPMdata = GP.IPMdata, 
+                     estimate.rho = estimate.rho)
+
+
+MCMCvis::MCMCsummary(out)
+
+MCMCvis::MCMCpstr(out)
+
