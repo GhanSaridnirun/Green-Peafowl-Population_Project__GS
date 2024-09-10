@@ -1,4 +1,4 @@
-plot_basicIPMoutputs <- function(mcmc.out, GP.IPMconstants, GP.IPMdata, estimate.rho){
+plot_basicIPMoutputs <- function(mcmc.out, GP.IPMconstants, GP.IPMdata, estimate.rho, PVA = FALSE){
   
   Tmax <- GP.IPMconstants$ny.data
   
@@ -29,10 +29,15 @@ plot_basicIPMoutputs <- function(mcmc.out, GP.IPMconstants, GP.IPMdata, estimate
   ## List relevant parameters
   
   # Survival probabilities
-  survParams <- c(paste0("sF_NB[", 1:4, "]"), paste0("sF_BN[", 1, "]"))
+  if(!PVA){
+    survParams <- c(paste0("sF_NB[", 1:4, "]"), paste0("sF_BN[", 1, "]"))
+    repParams <- c("pRep", "mean.CS", "mean.rho", "mean.S_C")
+  }else{
+    survParams <- c(paste0("sF_NB[", 1:4, ", 1]"), paste0("sF_BN[", 1, ", 1]"))
+    repParams <- c("pRep[1]", "mean.CS", "mean.rho", "mean.S_C")
+  }
   
   # Reproduction parameters
-  repParams <- c("pRep", "mean.CS", "mean.rho", "mean.S_C")
   
   # Total population size
   NtotParams <- c(paste0("Ntot_Breed[", 1:Tmax, "]"), paste0("Ntot_NonBreed[", 2:Tmax, "]"))
@@ -46,11 +51,11 @@ plot_basicIPMoutputs <- function(mcmc.out, GP.IPMconstants, GP.IPMdata, estimate
   # Vital rates
   VR_results <- reshape2::melt(out.mat[, c(survParams, repParams)]) %>%
     dplyr::mutate(Parameter = dplyr::case_when(stringr::str_detect(Var2, "sF") ~ "Seasonal survival",
-                                               Var2 == "pRep" ~ "Breeding probability",
+                                               stringr::str_detect(Var2, "pRep") ~ "Breeding probability",
                                                Var2 == "mean.CS" ~ "Clutch size",
                                                Var2 == "mean.rho" ~ "Brood size",
                                                Var2 == "mean.S_C" ~ "Survival to fledging"),
-                  AgeClassIdx = stringr::str_extract_all(Var2, pattern = "\\d+", simplify = TRUE),
+                  AgeClassIdx = stringr::str_extract(Var2, pattern = "\\d+"),
                   Season = dplyr::case_when(stringr::str_detect(Var2, "NB") ~ "NonBreed",
                                             stringr::str_detect(Var2, "BN") ~ "Breed")) %>%
     dplyr::mutate(AgeClass = dplyr::case_when(AgeClassIdx == 1 & Season == "NonBreed" ~ "Chick",

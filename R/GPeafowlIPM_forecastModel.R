@@ -373,15 +373,14 @@ Inits <- list(
 
 
 # Parameters monitored
-# TODO: Update parameters to monitor
 parameters <- c("s_yr_sa", "s_yr_ad", "Mu.sChick", "Mu.sJuv",
                 "sF_NB", "sF_BN","sM_NB", "sM_BN", 
                 "NBreedF", "NBreedM", "NNonF", "NNonM", 
+                "pRep",
                 "mean.rho", "rho", 
                 "mean.S_C", "S_C", 
                 "mean.CS",
                 "Fec", "Mu.pRep")
-
 
 # MCMC settings
 
@@ -418,7 +417,7 @@ out <- nimbleMCMC(code = GP.IPMcode,
 # }
 
 
-saveRDS(out, file = "GPIPM_5.30yBaseline.rds")
+saveRDS(out, file = "GPIPM_PVA_Baseline.rds")
 # saveRDS(out, file = "GPIPM_10.30yOP01.2.rds")
 
 
@@ -431,7 +430,8 @@ source("R/plot_basicIPMoutputs.R")
 plot_basicIPMoutputs(mcmc.out = out, 
                      GP.IPMconstants = GP.IPMconstants, 
                      GP.IPMdata = GP.IPMdata, 
-                     estimate.rho = estimate.rho)
+                     estimate.rho = estimate.rho,
+                     PVA = TRUE)
 
 
 MCMCvis::MCMCsummary(out)
