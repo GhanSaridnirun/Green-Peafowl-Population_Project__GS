@@ -267,12 +267,12 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
   
   # Breeding Probability
   
-  Mu.pRep <- runif(1, 0, 1)
+  Mu.pRep <- runif(1, 0.5, 1)
   
   # Productivity
   # Brood Size
   
-  mean.rho <- runif(1, 1, 5)
+  mean.rho <- runif(1, 2, 5)
   gamma <- 0.5
   
   
@@ -301,7 +301,7 @@ GP_IPM_Init_Pert <- function(Tmax, VR.pert, mean.p, constant_p, survSexDiff){
   
   # pinit[1:Amax] <- runif(Amax, 30, 200)
   for(a in 1:Amax){
-    pinit[a] <- runif(1, 0, 200)
+    pinit[a] <- runif(1, 30, 200)
     
     NBreedF[a,1] <- rpois(1, pinit[a])  # Female
     NBreedM[a,1] <- rpois(1, pinit[a])  # Male
