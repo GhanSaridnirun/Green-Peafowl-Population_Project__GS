@@ -67,13 +67,13 @@ saSurv.diff <- 0.1 # Survial of subadults = 10% lower than adult
 # Define perturbation factor ("percentage increase/decrease")
 
 # Baseline
-# pert.fac <- 0
+pert.fac <- 0
 
 # 10% increase
-# pert.fac <- 0.1
+#pert.fac <- 0.1
 
 # 20 % increase
-pert.fac <- 0.2
+#pert.fac <- 0.2
 
 
 # Set change year (year in which we start a "treatment")
@@ -104,7 +104,7 @@ VR.pert <- matrix(1, nrow = length(VR.names), ncol = ny.data + ny.sim,
 list.VRs_to_perturb <- VR.names[c(1:8, 11)]
 
 # Option 2: All survival rates + breeding probability affected
-# list.VRs_to_perturb <- VR.names[c(1:9, 11)]
+#list.VRs_to_perturb <- VR.names[c(1:9, 11)]
 
 for(i in list.VRs_to_perturb){
   VR.pert[which(VR.names == i), t.change:ncol(VR.pert)] <- 1 + pert.fac
@@ -361,7 +361,6 @@ GP.IPMcode <- nimbleCode({
 )
 
 # Initial values
-# TODO: Make a copy of initial value function and update so that it works with this new model structure
 source("R/GPeafowlIPM_InitialSim_TwoSex_Matrix_BreedProb.R")
 
 Inits <- list(
