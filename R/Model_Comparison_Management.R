@@ -9,11 +9,11 @@ library(plyr)
 # Model Comparison
 # Age Classes in difference season
 
-IPM.Baseline <- readRDS("GPeafowlIPM_forecastModel_30Ys_Baseline.rds")
-IPM.OP1_0.1 <- readRDS("GPeafowlIPM_forecastModel_30Ys_OP01_0.1.rds")
-IPM.OP1_0.2 <- readRDS("GPeafowlIPM_forecastModel_30Ys_OP01_0.2.rds")
-IPM.OP2_0.1 <- readRDS("GPeafowlIPM_forecastModel_30Ys_OP02_0.1.rds")
-IPM.OP2_0.2 <- readRDS("GPeafowlIPM_forecastModel_30Ys_OP02_0.2.rds")
+IPM.Baseline <- readRDS("GPIPM_PVA_Baseline.rds")
+IPM.OP1_0.1 <- readRDS("GPIPM_PVA_SurvOnly_10perc.rds")
+IPM.OP1_0.2 <- readRDS("GPIPM_PVA_SurvOnly_20perc.rds")
+IPM.OP2_0.1 <- readRDS("GPIPM_PVA_SurvRep_10perc.rds")
+IPM.OP2_0.2 <- readRDS("GPIPM_PVA_SurvRep_20perc.rds")
 
 
 out.mat <- list(Base = as.matrix(IPM.Baseline),
@@ -25,8 +25,10 @@ out.mat <- list(Base = as.matrix(IPM.Baseline),
 
 
 ## Set the range of study years
+ny.data <- 3 # Number of years for which the data collected
+ny.sim <- 20 # Number of years to simulate after the data collection
 
-StudyYears <- 2019:2049
+StudyYears <- 2019:(2019 + ny.data + ny.sim)
 
 
 
@@ -231,59 +233,6 @@ ggplot(TotalData, aes(x = Year, y = log(Median))) +
 
 
 
-
-# Data sets for seasons separately
-CropYearBreeding <- subset(CropYear, Season == "Breeding")
-CropYearNonBreeding <- subset(CropYear, Season != "Breeding")
-
-# Plot area: Breeding
-ggplot(CropYearBreeding, aes(x = Year, y = Median)) +
-  geom_area(aes(fill = AgeClass), alpha = 0.9) +
-  scale_fill_viridis(labels=c('Female[1]', 'Female[2]','Female[3]', 'Female[4]',
-                              'Male[1]', 'Male[2]','Male[3]', 'Male[4]'), discrete = T) +
-  facet_wrap(~ModelID, scales = "free_y", ncol = 1) + 
-  scale_x_continuous(breaks = scales::breaks_width(1)) +
-  scale_y_continuous(breaks = scales::breaks_width(100)) +
-  # guides(col = guide_legend(ncol = 2)) +
-  theme_classic() + theme(legend.position = "bottom",
-                          axis.text.x = element_text(angle = 45, vjust = 0.5),
-                          plot.title = element_text(face = 'bold'),) +
-  ggtitle('Population Size in Breeding Season') + 
-  ylab('Estimate Population Size') +
-  geom_vline(xintercept = 2026, linetype="dashed",
-             color = "black", size =1) +  # After Pertubation
-  geom_vline(xintercept = 2022, linetype="dotted",
-             color = "black", size=1) +  # After data collecting
-  geom_text(aes(x=2020, label="Data Collection Period", y= 340),
-            colour="black", size = 2.5, angle=0, alpha = 0.5) +
-  geom_text(aes(x=2028, label="Management Period", y= 340),
-            colour="black", size = 2.5,  angle=0, alpha = 0.5)
-
-
-# Plot area: Non-Breeding
-ggplot(CropYearNonBreeding, aes(x = Year, y = Median)) +
-  geom_area(aes(fill = AgeClass), alpha = 0.9) +
-  scale_fill_viridis(labels=c('Female[1]', 'Female[2]','Female[3]', 'Female[4]',
-                              'Male[1]', 'Male[2]','Male[3]', 'Male[4]'), discrete = T) +
-  facet_wrap(~ModelID, scales = "free_y", ncol = 1) +
-  scale_x_continuous(breaks = scales::breaks_width(1)) +
-  scale_y_continuous(breaks = scales::breaks_width(100)) + 
-  # guides(col = guide_legend(ncol = 8)) +
-  theme_classic() + theme(legend.position = "bottom",
-                          axis.text.x = element_text(angle = 45, vjust = 0.5),
-                          plot.title = element_text(face = 'bold'),) +
-  ggtitle('Population Size in Non-breeding Season') + 
-  ylab('Estimate Population Size') +
-  geom_vline(xintercept = 2026, linetype="dashed",
-             color = "black", size=1) +  # After Pertubation
-  geom_vline(xintercept = 2022, linetype="dotted",
-             color = "black", size=1) +  # After data collecting
-  geom_text(aes(x=2020, label="Data Collection Period", y= 450),
-            colour="black", size = 2.5, angle=0, alpha = 0.5) +
-  geom_text(aes(x=2029, label="Management Period", y= 450),
-            colour="black", size = 2.5,  angle=0, alpha = 0.5)
-
-#-------------------------------------------------------------------------------
 
 
 # PLOTS BY AGE CLASS #
