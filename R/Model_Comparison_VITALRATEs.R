@@ -9,13 +9,11 @@ library(plyr)
 # Model Comparison
 # Age Classes in difference season
 
-
-IPM.Baseline <- readRDS("GPIPM_ChJu5060.rds")
-IPM.OP1_0.1 <- readRDS("GPIPM_30yOp1.1.rds")
-IPM.OP1_0.2 <- readRDS("GPIPM_30yOp1.2.rds")
-IPM.OP2_0.1 <- readRDS("GPIPM_30yOp2.1.rds")
-IPM.OP2_0.2 <- readRDS("GPIPM_30yOp2.2.rds")
-
+IPM.Baseline <- readRDS("GPIPM_PVA_Baseline.rds")
+IPM.OP1_0.1 <- readRDS("GPIPM_PVA_SurvOnly_10perc.rds")
+IPM.OP1_0.2 <- readRDS("GPIPM_PVA_SurvOnly_20perc.rds")
+IPM.OP2_0.1 <- readRDS("GPIPM_PVA_SurvRep_10perc.rds")
+IPM.OP2_0.2 <- readRDS("GPIPM_PVA_SurvRep_20perc.rds")
 
 str(IPM.Baseline)
 out.mat <- list(Base = as.matrix(IPM.Baseline),
@@ -27,9 +25,10 @@ out.mat <- list(Base = as.matrix(IPM.Baseline),
 
 
 ## Set the range of study years
+ny.data <- 3 # Number of years for which the data collected
+ny.sim <- 20 # Number of years to simulate after the data collection
 
-StudyYears <- 2019:2051
-
+StudyYears <- 2019:(2019 + ny.data + ny.sim)
 
 
 ## Extract Tmax 

@@ -379,7 +379,7 @@ parameters <- c("s_yr_sa", "s_yr_ad", "Mu.sChick", "Mu.sJuv",
                 "pRep",
                 "mean.rho", "rho", 
                 "mean.S_C", "S_C", 
-                "mean.CS",
+                "mean.CS", "CS",
                 "Fec", "Mu.pRep")
 
 # MCMC settings
